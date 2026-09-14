@@ -676,21 +676,49 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
     };
 
     // Text Selection Event Listener for Floating Action Bar
-    const handleMouseUp = () => {
+    const handleSelectionUpdate = useCallback(() => {
         const selection = window.getSelection();
-        if (selection && selection.toString().trim().length > 1) {
+        if (selection && selection.rangeCount > 0 && !selection.isCollapsed && selection.toString().trim().length > 1) {
             const range = selection.getRangeAt(0);
             const rect = range.getBoundingClientRect();
-            setSelectedText(selection.toString());
-            setFloatingMenuPos({
-                x: rect.left + rect.width / 2,
-                y: rect.top,
-            });
-        } else {
-            setFloatingMenuPos(null);
-            setSelectedText('');
+            if (rect.width > 0 || rect.height > 0) {
+                setSelectedText(selection.toString());
+                setFloatingMenuPos({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top,
+                });
+                return;
+            }
         }
-    };
+        setFloatingMenuPos(null);
+        setSelectedText('');
+    }, []);
+
+    // Automatic dismissal when text is deselected or selection collapses
+    useEffect(() => {
+        const handleSelectionChange = () => {
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+                setFloatingMenuPos(null);
+                setSelectedText('');
+            }
+        };
+
+        const handleGlobalMouseUp = (e: MouseEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target && target.closest('.pdf-selection-menu')) {
+                return;
+            }
+            setTimeout(handleSelectionUpdate, 10);
+        };
+
+        document.addEventListener('selectionchange', handleSelectionChange);
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => {
+            document.removeEventListener('selectionchange', handleSelectionChange);
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [handleSelectionUpdate]);
 
     // Fullscreen Toggle
     const toggleFullscreen = () => {
@@ -703,8 +731,9 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
         }
     };
 
-    // Scroll Handler for Toolbar Autohide
+    // Scroll Handler for Toolbar Autohide and Menu Dismissal
     const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+        setFloatingMenuPos(null);
         const currentScrollY = e.currentTarget.scrollTop;
         if (currentScrollY > lastScrollYRef.current + 35 && currentScrollY > 100) {
             setShowToolbar(false);
@@ -791,6 +820,13 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
             if (e.key === 'Escape') {
+                const selection = window.getSelection();
+                if (selection && (!selection.isCollapsed && selection.toString().trim())) {
+                    selection.removeAllRanges();
+                    setFloatingMenuPos(null);
+                    setSelectedText('');
+                    return;
+                }
                 if (isShortcutsOpen) setIsShortcutsOpen(false);
                 else if (isSidebarOpen) setIsSidebarOpen(false);
                 else handleClose();
@@ -882,7 +918,6 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
             className={`fixed inset-0 z-[9999] flex flex-col overflow-hidden pdf-viewer-overlay transition-colors duration-200 ${getViewerBg()} ${
                 active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-[0.99] pointer-events-none'
             }`}
-            onMouseUp={handleMouseUp}
         >
             {/* Top Toolbar */}
             <ModernPDFToolbar
@@ -942,13 +977,10 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
             <ModernPDFSelectionMenu
                 position={floatingMenuPos}
                 selectedText={selectedText}
-                currentPage={currentPage}
-                fileName={displayFileName}
                 onClose={() => {
                     setFloatingMenuPos(null);
                     setSelectedText('');
                 }}
-                onAddBookmark={(text) => handleToggleBookmark(currentPage, text)}
             />
 
             {/* Keyboard Shortcuts Dialog */}
