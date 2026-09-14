@@ -9,7 +9,7 @@ import {
   Languages, Bell, BellOff, MoreHorizontal, Cpu, Monitor, Sigma, ChevronDown, ChevronRight, Compass, Landmark,
   Link, Image, Smile, Bold, Italic, Strikethrough, List, ListOrdered, AlertTriangle, Quote, BarChart2,
   Share2, ArrowBigUp, ArrowBigDown, Pencil, Trash2, Info,
-  UploadCloud, Archive, LayoutGrid
+  UploadCloud, Archive, LayoutGrid, X
 } from 'lucide-react';
 import { Folder as FolderType, LibraryFile, UserProfile } from '../types';
 import {
@@ -3887,103 +3887,142 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     <div className="space-y-6">
       {mainContent ? mainContent : (
         <>
-          {/* 1. Header (matching Image 1) */}
-          <div className="flex items-center justify-between gap-4 flex-wrap pb-1">
-            {/* Breadcrumb matching Image 1: ← Library / Semester / Subject (/ Category) */}
-            <div className="flex items-center gap-2 text-sm sm:text-base min-w-0">
-              <button
-                onClick={() => {
-                  if (activeCategoryFolder) {
-                    setActiveCategoryFolder(null);
-                  } else {
-                    onBack();
-                  }
-                }}
-                className="p-1 -ml-1 text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white bg-transparent border-none cursor-pointer transition-colors shrink-0"
-                title="Back"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={onBack}
-                className="font-bold text-zinc-900 dark:text-white bg-transparent border-none cursor-pointer hover:underline p-0 shrink-0"
-              >
-                Library
-              </button>
-              {activeSemester && (
-                <>
-                  <span className="text-zinc-400 font-light shrink-0">/</span>
-                  <button
-                    onClick={onBack}
-                    className="text-zinc-500 dark:text-zinc-400 font-medium bg-transparent border-none cursor-pointer hover:underline p-0 shrink-0"
-                  >
-                    {activeSemester.name}
-                  </button>
-                </>
-              )}
-              <span className="text-zinc-400 font-light shrink-0">/</span>
+          {/* 1. Header (Breadcrumb with inline 3-dots button) */}
+          <div className="flex items-center gap-2 text-sm sm:text-base flex-wrap pb-1">
+            <button
+              onClick={() => {
+                if (activeCategoryFolder) {
+                  setActiveCategoryFolder(null);
+                } else {
+                  onBack();
+                }
+              }}
+              className="p-1 -ml-1 text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white bg-transparent border-none cursor-pointer transition-colors shrink-0"
+              title="Back"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onBack}
+              className="font-bold text-zinc-900 dark:text-white bg-transparent border-none cursor-pointer hover:underline p-0 shrink-0"
+            >
+              Library
+            </button>
+            {activeSemester && (
+              <>
+                <span className="text-zinc-400 font-light shrink-0">/</span>
+                <button
+                  onClick={onBack}
+                  className="text-zinc-500 dark:text-zinc-400 font-medium bg-transparent border-none cursor-pointer hover:underline p-0 shrink-0"
+                >
+                  {activeSemester.name}
+                </button>
+              </>
+            )}
+            <span className="text-zinc-400 font-light shrink-0">/</span>
+            <div className="inline-flex items-center gap-1.5 min-w-0 flex-wrap">
               <button
                 onClick={() => setActiveCategoryFolder(null)}
-                className={`font-medium truncate bg-transparent border-none cursor-pointer p-0 ${!activeCategoryFolder ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400 hover:underline'}`}
+                className={`font-semibold bg-transparent border-none cursor-pointer p-0 text-left ${!activeCategoryFolder ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400 hover:underline'}`}
               >
                 {subjectName}
               </button>
-              {activeCategoryFolder && (
-                <>
-                  <span className="text-zinc-400 font-light shrink-0">/</span>
-                  <span className="text-zinc-900 dark:text-white font-medium truncate shrink-0">
-                    {activeCategoryFolder.name}
-                  </span>
-                </>
-              )}
-            </div>
 
-            {/* Right Side: Options & Compact Tabs */}
-            <div className="flex items-center gap-2 shrink-0">
-              {/* Options Button */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowSubjectOptions(!showSubjectOptions)}
-                  title="Subject Options"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-white/5 outline-none text-zinc-500 dark:text-zinc-400 shadow-xs"
-                >
-                  <MoreHorizontal className="w-3.5 h-3.5" />
-                </button>
-                {showSubjectOptions && (
-                  <>
-                    <div className="fixed inset-0 z-20" onClick={() => setShowSubjectOptions(false)} />
-                    <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-xl p-1 shadow-lg z-30 text-xs">
-                      <button
-                        onClick={() => {
-                          setShowSubjectOptions(false);
-                          handleOpenAboutSubject();
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer transition-colors"
-                      >
-                        <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
-                        About Subject
-                      </button>
-                      {(userProfile?.is_admin || isAdmin) && (
+              {/* Options Button beside Subject Name */}
+              {!activeCategoryFolder && (
+                <div className="relative inline-flex items-center shrink-0">
+                  <button
+                    onClick={() => setShowSubjectOptions(!showSubjectOptions)}
+                    title="Subject Options"
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors cursor-pointer border-none outline-none ${showSubjectOptions ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white' : 'bg-transparent text-zinc-400 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5'}`}
+                  >
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                  </button>
+                  {showSubjectOptions && (
+                    <>
+                      <div className="fixed inset-0 z-20" onClick={() => setShowSubjectOptions(false)} />
+                      <div className="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-xl p-1 shadow-lg z-30 text-xs">
                         <button
                           onClick={() => {
                             setShowSubjectOptions(false);
-                            setShowEditSubjectModal(true);
+                            handleOpenAboutSubject();
                           }}
                           className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer transition-colors"
                         >
-                          <Edit className="w-3.5 h-3.5 text-zinc-400" />
-                          Edit Subject Details
+                          <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
+                          About Subject
                         </button>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+                        {(userProfile?.is_admin || isAdmin) && (
+                          <button
+                            onClick={() => {
+                              setShowSubjectOptions(false);
+                              setShowEditSubjectModal(true);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5 text-zinc-400" />
+                            Edit Subject Details
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
+
+            {activeCategoryFolder && (
+              <>
+                <span className="text-zinc-400 font-light shrink-0">/</span>
+                <span className="text-zinc-900 dark:text-white font-medium shrink-0">
+                  {activeCategoryFolder.name}
+                </span>
+
+                {/* Options Button beside Folder Name */}
+                <div className="relative inline-flex items-center shrink-0">
+                  <button
+                    onClick={() => setShowSubjectOptions(!showSubjectOptions)}
+                    title="Subject Options"
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors cursor-pointer border-none outline-none ${showSubjectOptions ? 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white' : 'bg-transparent text-zinc-400 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5'}`}
+                  >
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                  </button>
+                  {showSubjectOptions && (
+                    <>
+                      <div className="fixed inset-0 z-20" onClick={() => setShowSubjectOptions(false)} />
+                      <div className="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 rounded-xl p-1 shadow-lg z-30 text-xs">
+                        <button
+                          onClick={() => {
+                            setShowSubjectOptions(false);
+                            handleOpenAboutSubject();
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer transition-colors"
+                        >
+                          <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
+                          About Subject
+                        </button>
+                        {(userProfile?.is_admin || isAdmin) && (
+                          <button
+                            onClick={() => {
+                              setShowSubjectOptions(false);
+                              setShowEditSubjectModal(true);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-white/5 rounded-lg border-none bg-transparent cursor-pointer transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5 text-zinc-400" />
+                            Edit Subject Details
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* 2. Action Bar Strip (matching Image 2) */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
+          {/* 2. Action Bar Strip: Desktop (single-line, original layout) */}
+          <div className="hidden md:flex md:items-center justify-between gap-3 pt-1">
             {/* Left: Filter Dropdown (All files ▾) */}
             <div className="flex items-center gap-2 shrink-0">
               <div className="relative">
@@ -4111,6 +4150,152 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               </button>
 
               {/* List / Grid toggle */}
+              <div className="flex items-center h-8 bg-zinc-100/60 dark:bg-white/[0.02] border border-zinc-200/50 dark:border-white/[0.03] rounded-lg p-0.5 shrink-0">
+                <button
+                  onClick={() => setLayoutMode('list')}
+                  className={`h-6.5 w-6.5 rounded flex items-center justify-center border-none cursor-pointer transition-colors ${layoutMode === 'list' ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-xs' : 'bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}
+                  title="List view"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setLayoutMode('grid')}
+                  className={`h-6.5 w-6.5 rounded flex items-center justify-center border-none cursor-pointer transition-colors ${layoutMode === 'grid' ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white' : 'bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}`}
+                  title="Grid view"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Action Bar Strip: Mobile Only (compact 2-row layout) */}
+          <div className="flex flex-col gap-2 pt-1 md:hidden">
+            {/* Row 1: All files ▾ on left, Action buttons (Vault, Shield, +, Upload) on right */}
+            <div className="flex items-center justify-between gap-2">
+              {/* Filter Dropdown */}
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                  className="h-8 px-2.5 rounded-lg bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/50 dark:border-white/[0.03] text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 hover:bg-zinc-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                >
+                  <span>
+                    {fileFilterType === 'all'
+                      ? 'All files'
+                      : fileFilterType === 'pdf'
+                        ? 'PDFs'
+                        : fileFilterType === 'docs'
+                          ? 'Documents'
+                          : fileFilterType === 'sheets'
+                            ? 'Spreadsheets'
+                            : 'Presentations'}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                </button>
+
+                {showFilterDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setShowFilterDropdown(false)} />
+                    <div className="absolute left-0 mt-1 w-36 rounded-xl bg-white dark:bg-[#121214] border border-zinc-200/60 dark:border-white/[0.06] py-1 shadow-xl z-40 text-xs font-medium">
+                      {[
+                        { id: 'all', label: 'All files' },
+                        { id: 'pdf', label: 'PDFs' },
+                        { id: 'docs', label: 'Documents' },
+                        { id: 'sheets', label: 'Spreadsheets' },
+                        { id: 'slides', label: 'Presentations' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setFileFilterType(item.id);
+                            setShowFilterDropdown(false);
+                          }}
+                          className={`w-full px-3 py-1.5 text-left border-none bg-transparent cursor-pointer transition-colors flex items-center justify-between ${fileFilterType === item.id ? 'font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
+                        >
+                          <span>{item.label}</span>
+                          {fileFilterType === item.id && <span className="text-zinc-900 dark:text-white">✓</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Action Buttons (Vault, Shield, +, Upload) */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => {
+                    if (onVaultClick) {
+                      onVaultClick();
+                    } else if (!userProfile) {
+                      showToast("Please login to access your personal vault.", "info");
+                    }
+                  }}
+                  className="h-8 px-2 rounded-lg text-xs font-medium border bg-zinc-100/70 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.03] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:text-zinc-900 dark:hover:text-zinc-200 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                  title="Personal Vault"
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  <span>Vault</span>
+                </button>
+
+                {(userProfile?.is_admin || isAdmin) && (
+                  <button
+                    onClick={() => {
+                      if (onAdminReviewClick) {
+                        onAdminReviewClick();
+                      }
+                    }}
+                    className="h-8 w-8 rounded-lg text-xs font-medium border transition-all flex items-center justify-center cursor-pointer shrink-0 relative bg-zinc-100/70 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.03] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:text-zinc-900 dark:hover:text-zinc-200"
+                    title="Admin Review Hub"
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    {allFiles.filter(f => f.status === 'pending').length > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 bg-red-500 text-white rounded-full text-[8px] font-bold flex items-center justify-center">
+                        {allFiles.filter(f => f.status === 'pending').length}
+                      </span>
+                    )}
+                  </button>
+                )}
+
+                {(userProfile?.is_admin || isAdmin) && onAddFolder && (
+                  <button
+                    onClick={onAddFolder}
+                    className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-500/20 transition-colors cursor-pointer shrink-0 active:scale-95"
+                    title="Create Folder"
+                  >
+                    <Plus className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    if (!userProfile) {
+                      showToast("Please sign in to contribute materials.", "info");
+                      return;
+                    }
+                    onUploadClick?.(activeCategoryFolder?.name);
+                  }}
+                  className="h-8 px-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors cursor-pointer border-none shadow-xs active:scale-95 shrink-0"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Upload</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Row 2: Search input on left, List/Grid toggle on right */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1 min-w-0">
+                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search Document"
+                  value={localSearchQuery}
+                  onChange={e => setLocalSearchQuery(e.target.value)}
+                  className="w-full h-8 pl-8 pr-3 rounded-full border border-zinc-200/50 dark:border-white/[0.03] bg-zinc-100/50 dark:bg-white/[0.03] text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 focus:bg-white dark:focus:bg-white/[0.05] transition-all"
+                />
+              </div>
+
               <div className="flex items-center h-8 bg-zinc-100/60 dark:bg-white/[0.02] border border-zinc-200/50 dark:border-white/[0.03] rounded-lg p-0.5 shrink-0">
                 <button
                   onClick={() => setLayoutMode('list')}
@@ -4909,129 +5094,139 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
       {/* 4.5 About Subject & Curriculum Modal */}
       {showAboutSubjectModal && createPortal(
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
           onClick={() => setShowAboutSubjectModal(false)}
         >
-          {/* Backdrop */}
+          {/* Apple-style Frosted Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-md"
-            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xl"
+            style={{ backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
           />
 
           {/* Modal Container */}
           <div 
-            className="relative w-full max-w-2xl bg-white dark:bg-[#0d0d10] border border-zinc-200/80 dark:border-white/10 rounded-[32px] p-6 sm:p-7 shadow-2xl space-y-4 z-10 my-6 overflow-hidden max-h-[85vh] flex flex-col animate-fade-in"
+            className="relative w-full max-w-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-white/[0.08] rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-[0_32px_64px_rgba(0,0,0,0.36)] space-y-5 z-10 my-auto overflow-hidden max-h-[88vh] flex flex-col animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex justify-between items-start border-b border-zinc-100 dark:border-white/5 pb-3.5 shrink-0 gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-xs" style={{ backgroundColor: theme.rawColor }}>
-                  <BookOpen className="w-5 h-5" />
+            {/* Header with integrated Year Switcher */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-100 dark:border-white/[0.06] pb-4 shrink-0 gap-3">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div 
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border shadow-xs"
+                  style={{ 
+                    backgroundColor: `${theme.rawColor}15`, 
+                    color: theme.rawColor,
+                    borderColor: `${theme.rawColor}30`
+                  }}
+                >
+                  <BookOpen className="w-5 h-5" strokeWidth={1.8} />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white truncate">
+                  <h3 className="text-lg sm:text-xl font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
                     {subjectName}
                   </h3>
-                  <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 dark:text-zinc-500 mt-0.5 flex-wrap">
-                    <span className="font-bold text-zinc-700 dark:text-zinc-300">{subjectCode}</span>
-                    <span>•</span>
+                  <div className="flex items-center gap-1.5 text-[12px] font-normal text-zinc-500 dark:text-zinc-400 mt-0.5 flex-wrap">
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-white/[0.06] px-2 py-0.5 rounded-md text-[11px]">{subjectCode}</span>
+                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
                     <span>{creditsText}</span>
-                    <span>•</span>
+                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
                     <span>{ltpText}</span>
-                    <span>•</span>
-                    <span>{activeCurriculum?.category || 'Core'}</span>
+                    <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                    <span className="text-zinc-700 dark:text-zinc-300 font-medium">{activeCurriculum?.category || 'Core'}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
+
+              {/* Right: Year toggle & Actions */}
+              <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                {reappearCurriculum && (
+                  <div className="inline-flex p-0.5 bg-zinc-100 dark:bg-white/[0.06] rounded-xl border border-zinc-200/60 dark:border-white/5 text-xs shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setCurriculumTerm('current')}
+                      className={`px-3 py-1 rounded-lg transition-all border-none cursor-pointer text-xs font-medium ${
+                        curriculumTerm === 'current'
+                          ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
+                          : 'bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      2026 Batch
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurriculumTerm('reappear')}
+                      className={`px-3 py-1 rounded-lg transition-all border-none cursor-pointer text-xs font-medium ${
+                        curriculumTerm === 'reappear'
+                          ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
+                          : 'bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+                      }`}
+                    >
+                      Prev Year
+                    </button>
+                  </div>
+                )}
+
                 {activeCurriculum?.syllabusPdf && (
                   <a
                     href={activeCurriculum.syllabusPdf}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="h-8 px-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-colors no-underline shrink-0"
+                    className="h-8 px-3 rounded-full bg-zinc-100 dark:bg-white/[0.06] hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-colors no-underline shrink-0"
                     title="View Official Syllabus PDF"
                   >
-                    <Download className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Syllabus</span>
+                    <Download className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                    <span className="hidden sm:inline">Syllabus</span>
                   </a>
                 )}
+
                 <button 
                   onClick={() => setShowAboutSubjectModal(false)} 
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 bg-transparent border-none text-lg cursor-pointer font-semibold transition-colors outline-none"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-white bg-zinc-100 dark:bg-white/[0.06] hover:bg-zinc-200 dark:hover:bg-white/10 transition-colors border-none cursor-pointer outline-none shrink-0"
+                  aria-label="Close"
                 >
-                  ×
+                  <X className="w-4 h-4" strokeWidth={2} />
                 </button>
               </div>
             </div>
 
-            {/* Batch Switcher (Only shown if curriculum differs across batches) */}
-            {reappearCurriculum && (
-              <div className="inline-flex p-1 bg-zinc-100 dark:bg-white/5 rounded-xl self-start border border-zinc-200/60 dark:border-white/5 text-xs shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setCurriculumTerm('current')}
-                  className={`px-3 py-1 rounded-lg transition-all border-none cursor-pointer font-semibold ${
-                    curriculumTerm === 'current'
-                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
-                      : 'bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
-                  }`}
-                >
-                  2026 Batch
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurriculumTerm('reappear')}
-                  className={`px-3 py-1 rounded-lg transition-all border-none cursor-pointer font-semibold ${
-                    curriculumTerm === 'reappear'
-                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
-                      : 'bg-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
-                  }`}
-                >
-                  Prev Year
-                </button>
-              </div>
-            )}
-
-            {/* Scrollable Content Body */}
-            <div className="flex-1 overflow-y-auto no-scrollbar pr-1 text-left space-y-4">
+            {/* Clean, Box-Free Scrollable Body */}
+            <div className="flex-1 overflow-y-auto no-scrollbar pr-0.5 text-left space-y-5">
               {/* Course Description */}
               {activeCurriculum?.courseDescription && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Course Overview</h4>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed bg-zinc-50 dark:bg-white/[0.02] p-3.5 rounded-2xl border border-zinc-100 dark:border-white/5">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Course Overview</h4>
+                  <p className="text-[13.5px] text-zinc-650 dark:text-zinc-300 leading-relaxed font-normal">
                     {activeCurriculum.courseDescription}
                   </p>
                 </div>
               )}
 
-              {/* Grading Scheme */}
+              {/* Grading Scheme - Clean strip */}
               {activeCurriculum?.gradingScheme && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Grading Scheme</h4>
-                  <div className="grid grid-cols-4 gap-2 bg-zinc-50 dark:bg-white/[0.02] p-3 rounded-2xl border border-zinc-100 dark:border-white/5 text-center">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Grading Scheme</h4>
+                  <div className="grid grid-cols-4 gap-2 text-center py-2.5 border-y border-zinc-100 dark:border-white/[0.06]">
                     <div>
-                      <div className="text-[10px] text-zinc-400 uppercase font-medium">Attendance</div>
-                      <div className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
+                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-medium">Attendance</div>
+                      <div className="text-base sm:text-lg font-semibold tracking-tight text-zinc-900 dark:text-white mt-0.5">
                         {activeCurriculum.gradingScheme.attendance === 'NA' ? 'N/A' : `${activeCurriculum.gradingScheme.attendance}%`}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-zinc-400 uppercase font-medium">CA</div>
-                      <div className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
+                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-medium">CA</div>
+                      <div className="text-base sm:text-lg font-semibold tracking-tight text-zinc-900 dark:text-white mt-0.5">
                         {activeCurriculum.gradingScheme.continuous_assessment === 'NA' ? 'N/A' : `${activeCurriculum.gradingScheme.continuous_assessment}%`}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-zinc-400 uppercase font-medium">Mid Term</div>
-                      <div className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
+                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-medium">Mid Term</div>
+                      <div className="text-base sm:text-lg font-semibold tracking-tight text-zinc-900 dark:text-white mt-0.5">
                         {activeCurriculum.gradingScheme.mid_term_examination === 'NA' ? 'N/A' : `${activeCurriculum.gradingScheme.mid_term_examination}%`}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-zinc-400 uppercase font-medium">End Term</div>
-                      <div className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
+                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-medium">End Term</div>
+                      <div className="text-base sm:text-lg font-semibold tracking-tight text-zinc-900 dark:text-white mt-0.5">
                         {activeCurriculum.gradingScheme.end_term === 'NA' ? 'N/A' : `${activeCurriculum.gradingScheme.end_term}%`}
                       </div>
                     </div>
@@ -5039,50 +5234,47 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 </div>
               )}
 
-              {/* Continuous Assessment (CA) Components */}
+              {/* Continuous Assessment (CA) Components - Clean List */}
               {activeCurriculum?.continuousAssessment && (
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                       Continuous Assessment (CA)
                     </h4>
                     {activeCurriculum.continuousAssessment.evaluationRule && (
-                      <span className="text-[10px] text-zinc-400 italic">
+                      <span className="text-[11px] text-zinc-400 font-normal">
                         {activeCurriculum.continuousAssessment.evaluationRule}
                       </span>
                     )}
                   </div>
 
                   {activeCurriculum.continuousAssessment.components && activeCurriculum.continuousAssessment.components.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="divide-y divide-zinc-100 dark:divide-white/[0.06] border-y border-zinc-100 dark:border-white/[0.06]">
                       {activeCurriculum.continuousAssessment.components.map((comp, idx) => {
                         const isOpen = expandedCAIndices.includes(idx);
                         const timingClean = comp.timing && comp.timing !== 'Wk' && comp.timing !== 'Wk NA' ? comp.timing : null;
                         const rubricText = comp.format ? comp.format.replace(/^Rubric\s*/i, '').trim() : null;
 
                         return (
-                          <div
-                            key={idx}
-                            className="rounded-xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02] overflow-hidden transition-colors"
-                          >
+                          <div key={idx} className="transition-colors">
                             <button
                               type="button"
                               onClick={() => toggleCAIndex(idx)}
-                              className="w-full px-3 py-2.5 flex items-center justify-between text-left hover:bg-zinc-100/50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer border-none bg-transparent outline-none"
+                              className="w-full py-2.5 flex items-center justify-between text-left hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer border-none bg-transparent outline-none"
                             >
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="font-semibold text-xs text-zinc-800 dark:text-zinc-200 truncate">
+                                <span className="font-medium text-[13px] text-zinc-800 dark:text-zinc-200 truncate">
                                   {comp.name}
                                 </span>
                                 {timingClean && (
-                                  <span className="text-[10px] text-zinc-400 font-medium">
+                                  <span className="text-[11px] text-zinc-400 font-normal">
                                     • {timingClean}
                                   </span>
                                 )}
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0 ml-2">
-                                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                                <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
                                   {comp.weightage}
                                 </span>
                                 <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
@@ -5090,21 +5282,17 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                             </button>
 
                             {isOpen && (
-                              <div className="px-3 pb-3 pt-1 space-y-2 border-t border-zinc-100 dark:border-white/5 text-xs">
+                              <div className="pb-3 pt-0.5 space-y-1.5 pl-2 text-xs">
                                 {comp.syllabus && comp.syllabus !== 'NA' && (
-                                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal">
                                     {comp.syllabus}
                                   </p>
                                 )}
 
                                 {rubricText && rubricText !== '' && (
-                                  <div className="pt-1.5 border-t border-zinc-100/80 dark:border-white/[0.04]">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-0.5">
-                                      Rubric
-                                    </span>
-                                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                                      {rubricText}
-                                    </p>
+                                  <div className="pt-1 text-[11px] text-zinc-400 leading-relaxed font-normal">
+                                    <span className="font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mr-1.5">Rubric:</span>
+                                    {rubricText}
                                   </div>
                                 )}
                               </div>
@@ -5117,29 +5305,29 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 </div>
               )}
 
-              {/* Exam Blueprint */}
+              {/* Exam Blueprint - Clean Grid */}
               {activeCurriculum?.examPatterns && (activeCurriculum.examPatterns.midTerm || activeCurriculum.examPatterns.endTerm) && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Exam Blueprint</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Exam Blueprint</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2 border-y border-zinc-100 dark:border-white/[0.06]">
                     {activeCurriculum.examPatterns.midTerm && (
-                      <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 text-xs space-y-1">
-                        <div className="flex items-center justify-between font-semibold text-zinc-800 dark:text-zinc-200">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center justify-between font-medium text-[13px] text-zinc-800 dark:text-zinc-200">
                           <span>Mid Term</span>
-                          <span className="font-bold">{activeCurriculum.examPatterns.midTerm.weightage}</span>
+                          <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{activeCurriculum.examPatterns.midTerm.weightage}</span>
                         </div>
-                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal">
                           {activeCurriculum.examPatterns.midTerm.description || activeCurriculum.examPatterns.midTerm.title}
                         </p>
                       </div>
                     )}
                     {activeCurriculum.examPatterns.endTerm && (
-                      <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 text-xs space-y-1">
-                        <div className="flex items-center justify-between font-semibold text-zinc-800 dark:text-zinc-200">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center justify-between font-medium text-[13px] text-zinc-800 dark:text-zinc-200">
                           <span>End Term</span>
-                          <span className="font-bold">{activeCurriculum.examPatterns.endTerm.weightage}</span>
+                          <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{activeCurriculum.examPatterns.endTerm.weightage}</span>
                         </div>
-                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal">
                           {activeCurriculum.examPatterns.endTerm.description || activeCurriculum.examPatterns.endTerm.title}
                         </p>
                       </div>
@@ -5148,17 +5336,21 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                 </div>
               )}
 
-              {/* Units Overview */}
+              {/* Units Overview - Clean Numbered List (No Boxes) */}
               {activeCurriculum?.units && activeCurriculum.units.length > 0 && (
                 <div className="space-y-1.5">
-                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Syllabus Outline ({activeCurriculum.units.length} Units)</h4>
-                  <div className="space-y-1">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                    Syllabus Outline ({activeCurriculum.units.length} Units)
+                  </h4>
+                  <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] border-y border-zinc-100 dark:border-white/[0.06]">
                     {activeCurriculum.units.map((unit, idx) => (
-                      <div key={idx} className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 text-xs">
-                        <span className="w-5 h-5 rounded-md bg-zinc-200 dark:bg-white/10 text-[10px] font-bold text-zinc-600 dark:text-zinc-300 flex items-center justify-center shrink-0">
+                      <div key={idx} className="flex items-center gap-3 py-2 text-xs">
+                        <span className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 w-5 text-center shrink-0">
                           {unit.unitNumber || idx + 1}
                         </span>
-                        <span className="text-zinc-700 dark:text-zinc-300 truncate font-medium">{unit.title}</span>
+                        <span className="text-zinc-800 dark:text-zinc-200 font-medium text-[13px] truncate">
+                          {unit.title}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -5174,7 +5366,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         <div className="w-10 h-10 border-4 border-zinc-200 dark:border-white/5 rounded-full absolute" />
                         <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin absolute" style={{ borderTopColor: theme.rawColor, borderRightColor: theme.rawColor, borderBottomColor: theme.rawColor }} />
                       </div>
-                      <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider animate-pulse">
+                      <div className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider animate-pulse">
                         Generating Course Overview...
                       </div>
                     </div>
@@ -5186,12 +5378,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end pt-3 border-t border-zinc-100 dark:border-white/5 shrink-0">
+            <div className="flex justify-end pt-3 border-t border-zinc-100 dark:border-white/[0.06] shrink-0">
               <button
                 type="button"
                 onClick={() => setShowAboutSubjectModal(false)}
-                style={{ backgroundColor: theme.rawColor }}
-                className="px-6 py-2 text-white rounded-xl text-xs font-bold border-none cursor-pointer hover:opacity-90 active:scale-95 transition-all outline-none shadow-xs"
+                className="px-6 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 cursor-pointer border-none bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 shadow-sm"
               >
                 Close
               </button>
