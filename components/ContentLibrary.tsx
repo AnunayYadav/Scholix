@@ -36,7 +36,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 import VerifiedBadge from './VerifiedBadge.tsx';
-import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2, Image as ImageIcon, FileImage, Download } from 'lucide-react';
+import { Code, Database, Compass, Terminal, Globe, Languages, MessageSquare, Landmark, BookOpen, FileText, Cpu, Monitor, Sigma, Folder as FolderIconLucide, HelpCircle, Video, MoreHorizontal, Star, ArrowLeft, Plus, ArrowUp, ArrowDown, Pencil, Trash2, Archive, Layers, Loader2, Image as ImageIcon, FileImage, Download, Search, List, LayoutGrid, SlidersHorizontal, UploadCloud, Square, ChevronDown, ChevronRight, Shield } from 'lucide-react';
 import { getProgramCurriculum, findSubjectMetadata } from '../data/curriculumData.ts';
 import { getSubjectCurriculum } from '../data/subjectCatalog.ts';
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
@@ -54,7 +54,8 @@ const matchSemesterName = (nameA: string, nameB: string): boolean => {
   return norm(nameA) === norm(nameB);
 };
 
-import { FileIcon } from './FileIcon.tsx';
+import { FileIcon, getDisplayFileNameWithExtension } from './FileIcon.tsx';
+import { EmptyStateNoDocument } from './EmptyStateNoDocument';
 
 const FolderIcon = ({ type, name = '', size = "w-7 h-7", iconName, color }: { type: 'semester' | 'subject' | 'category' | 'root', name?: string, size?: string, iconName?: string, color?: string }) => {
   const IconMap: { [key: string]: any } = {
@@ -110,7 +111,7 @@ interface FileStyleConfig {
 
 const getFileStyle = (fileName: string): FileStyleConfig => {
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
-  
+
   const configs: Record<string, FileStyleConfig> = {
     pdf: {
       iconBg: 'bg-rose-500/10 dark:bg-rose-500/10',
@@ -260,21 +261,12 @@ const formatCleanFileName = (fileName: string) => {
 
 
 const SkeletonFolderCard = () => (
-  <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] relative overflow-hidden">
-    <div className="flex items-center gap-3.5 min-w-0 w-full">
-      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl shrink-0 skeleton-pulse" />
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-4 w-1/3 rounded-md skeleton-pulse" />
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <div className="h-3 w-12 rounded-md skeleton-pulse shrink-0" />
-          <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-          <div className="h-3 w-16 rounded-md skeleton-pulse shrink-0" />
-          <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-          <div className="h-3 w-16 rounded-md skeleton-pulse shrink-0" />
-        </div>
-      </div>
+  <div className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] flex flex-col gap-2 shadow-xs">
+    <div className="flex items-center justify-between">
+      <div className="w-6 h-6 rounded-md bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+      <div className="w-4 h-3 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
     </div>
-    <div className="w-4 h-4 rounded skeleton-pulse shrink-0 ml-4" />
+    <div className="h-3.5 w-3/4 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse mt-0.5" />
   </div>
 );
 
@@ -304,11 +296,11 @@ const SubjectDetailHeader: React.FC<{
 
   const units = useMemo(() => {
     if (!syllabusText) return [];
-    
+
     const items: { title: string; content: string[] }[] = [];
     const lines = syllabusText.split('\n');
     let currentUnit: { title: string; content: string[] } | null = null;
-    
+
     lines.forEach(line => {
       const trimmed = line.trim();
       if (trimmed.startsWith('Unit ')) {
@@ -457,6 +449,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>('list');
+  const [fileFilterType, setFileFilterType] = useState<string>('all');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const navigate = useNavigate();
   const routePrefix = uniSlug ? `/${uniSlug}` : '';
 
@@ -542,7 +537,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [isMergingPdfs, setIsMergingPdfs] = useState(false);
 
   const handleOpenMergePdfModal = () => {
-    const pdfs = pendingUploads.filter(up => 
+    const pdfs = pendingUploads.filter(up =>
       up.file.type === 'application/pdf' || up.file.name.toLowerCase().endsWith('.pdf')
     );
     if (pdfs.length < 2) {
@@ -551,12 +546,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
 
     // Sort files naturally by Unit / Lecture number (e.g. Lecture 1, Lecture 2, Lecture 4, Lecture 5...)
-    const sortedPdfs = [...pdfs].sort((a, b) => 
+    const sortedPdfs = [...pdfs].sort((a, b) =>
       (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' })
     );
 
     setMergePdfList(sortedPdfs);
-    
+
     let baseName = sortedPdfs[0].name.replace(/\s*(part|pt|vol|volume|v|lecture|lec|unit|u)\s*\d+/gi, '').replace(/\.(pdf)$/i, '').trim();
     if (!baseName) baseName = 'Merged_Document';
     setMergedOutputName(baseName);
@@ -659,12 +654,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return;
     }
 
-    const sortedImages = [...images].sort((a, b) => 
+    const sortedImages = [...images].sort((a, b) =>
       (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' })
     );
 
     setImageToPdfList(sortedImages);
-    
+
     let baseName = sortedImages[0].name.replace(/\.(png|jpg|jpeg|webp|gif|bmp|heic|tiff|svg)$/i, '').trim();
     if (sortedImages.length > 1) {
       baseName = baseName.replace(/\s*(part|pt|vol|volume|v|page|p|img|image|scan|doc)\s*\d+/gi, '').trim();
@@ -964,7 +959,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               loadedExtra.push(parsed.section);
             }
           }
-        } catch (e) {}
+        } catch (e) { }
       }
     });
 
@@ -1036,10 +1031,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     const fileList = Array.from(files);
     if (fileList.length === 0) return;
 
-    const rawCategory = (typeof forceType === 'string' ? forceType : '') || 
-                        (typeof targetUploadCategoryRef.current === 'string' ? targetUploadCategoryRef.current : '') || 
-                        (typeof activeCategory?.name === 'string' ? activeCategory.name : '');
-    
+    const rawCategory = (typeof forceType === 'string' ? forceType : '') ||
+      (typeof targetUploadCategoryRef.current === 'string' ? targetUploadCategoryRef.current : '') ||
+      (typeof activeCategory?.name === 'string' ? activeCategory.name : '');
+
     // Instantly open upload modal so user sees progress in Pending files section
     setShowUploadModal(true);
 
@@ -1118,7 +1113,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         setPendingUploads(prev => {
           const combined = [...prev, newUploadItem];
           combined.sort((a, b) => (a.name || a.file.name).localeCompare((b.name || b.file.name), undefined, { numeric: true, sensitivity: 'base' }));
-          
+
           if (prev.length === 0 && immediateUploads.length === 0) {
             setActiveUploadIndex(0);
             setMetaForm({
@@ -1309,13 +1304,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         if (activeSemester?.id !== (sem?.id || null)) {
           setActiveSemester(sem || null);
         }
-        
+
         if (subject && sem) {
           const subj = finalFolders.find(f => f.type === 'subject' && matchFolderSlug(f.name, subject) && f.parent_id === sem.id);
           if (activeSubject?.id !== (subj?.id || null)) {
             setActiveSubject(subj || null);
           }
-          
+
           if (category && subj) {
             const cat = finalFolders.find(f => f.type === 'category' && matchLibrarySlug(f.name, category, 'category') && f.parent_id === subj.id);
             if (activeCategory?.id !== (cat?.id || null)) {
@@ -1393,6 +1388,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       }
     }
 
+    if (fileFilterType !== 'all') {
+      data = data.filter(f => {
+        const ext = (f.storage_path || f.name).split('.').pop()?.toLowerCase() || '';
+        if (fileFilterType === 'pdf') return ext === 'pdf';
+        if (fileFilterType === 'docs') return ['doc', 'docx', 'txt'].includes(ext);
+        if (fileFilterType === 'sheets') return ['xls', 'xlsx', 'csv'].includes(ext);
+        if (fileFilterType === 'slides') return ['ppt', 'pptx'].includes(ext);
+        return f.type?.toLowerCase() === fileFilterType.toLowerCase();
+      });
+    }
+
     data.sort((a, b) => {
       // Primary sort: display_order
       const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
@@ -1406,7 +1412,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       return 0;
     });
     return data;
-  }, [allFiles, searchQuery, isAdminView, viewMode, activeSemester, activeSubject, activeCategory, sortBy]);
+  }, [allFiles, searchQuery, isAdminView, viewMode, activeSemester, activeSubject, activeCategory, sortBy, fileFilterType]);
 
   // DnD Sensors
   const sensors = useSensors(
@@ -1485,19 +1491,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const currentFolders = useMemo(() => {
     if (isAdminView || viewMode === 'my-uploads') return [];
-    
+
     const filtered = finalFolders.filter(f => {
       if (!activeSemester) return f.type === 'semester';
       if (!activeSubject) {
         // We are listing subjects
         const isSubject = f.type === 'subject' && f.parent_id === activeSemester.id;
         if (!isSubject) return false;
-        
+
         // If there's a search query, check if the subject matches
         if (searchQuery && searchQuery.trim() !== '') {
           const q = searchQuery.trim().toLowerCase();
           const nameMatches = f.name.toLowerCase().includes(q);
-          
+
           // Count matching files
           const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
           let matchingFilesCount = 0;
@@ -1508,13 +1514,13 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           } else {
             matchingFilesCount = allFiles.filter(file => file.semester?.toLowerCase() === activeSemester.name.toLowerCase() && file.subject?.toLowerCase() === f.name.toLowerCase() && file.name.toLowerCase().includes(q)).length;
           }
-          
+
           // Count matching category folders
           const matchingCategoriesCount = finalFolders.filter(c => c.type === 'category' && c.parent_id === f.id && c.name.toLowerCase().includes(q)).length;
-          
+
           return nameMatches || matchingFilesCount > 0 || matchingCategoriesCount > 0;
         }
-        
+
         return true;
       }
       if (!activeCategory) return f.type === 'category' && f.parent_id === activeSubject.id;
@@ -1532,7 +1538,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const getSubjectSearchMatchText = (folder: Folder) => {
     if (!searchQuery || searchQuery.trim() === '' || folder.type !== 'subject') return null;
     const q = searchQuery.trim().toLowerCase();
-    
+
     // Count matching files
     const isBtech = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '') === 'btechcse';
     let matchingFilesCount = 0;
@@ -1546,10 +1552,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         matchingFilesCount = allFiles.filter(file => file.semester?.toLowerCase() === parentSem.name.toLowerCase() && file.subject?.toLowerCase() === folder.name.toLowerCase() && file.name.toLowerCase().includes(q)).length;
       }
     }
-    
+
     // Count matching category folders
     const matchingCategoriesCount = finalFolders.filter(c => c.type === 'category' && c.parent_id === folder.id && c.name.toLowerCase().includes(q)).length;
-    
+
     if (matchingFilesCount > 0 && matchingCategoriesCount > 0) {
       return `${matchingFilesCount} file${matchingFilesCount > 1 ? 's' : ''}, ${matchingCategoriesCount} category${matchingCategoriesCount > 1 ? 'ies' : ''} matched`;
     } else if (matchingFilesCount > 0) {
@@ -1889,102 +1895,208 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         />
       ) : (
         <div className="space-y-6 animate-fade-in">
+          {/* Clean Toolbar */}
           {!(activeSubject && !activeCategory && viewMode === 'browse' && !searchQuery) && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Left Side: Breadcrumb */}
-              <div className="flex items-center gap-3.5 w-full sm:w-auto min-w-0">
-                <nav className="flex items-center gap-1.5 text-[11px] sm:text-xs text-zinc-400 font-medium min-w-0 flex-wrap">
-                  {program ? (
-                    <>
-                      <Link to={`${routePrefix}/library?change=true`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer font-semibold text-zinc-500 dark:text-zinc-400 shrink-0">Programs</Link>
-                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
-                      <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`} className={`hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer font-semibold shrink-0 ${!activeSemester ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-500 dark:text-zinc-400'}`}>{selectedProgram}</Link>
-                    </>
-                  ) : (
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 shrink-0">Programs</span>
-                  )}
-                  {activeSemester && (
-                    <>
-                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
-                      <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}`} className={`border-none bg-transparent cursor-pointer hover:text-orange-500 transition-colors font-semibold ${!activeSubject ? 'text-zinc-800 dark:text-zinc-200' : ''}`}>{activeSemester.name}</Link>
-                    </>
-                  )}
-                  {activeSubject && (
-                    <>
-                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
-                      <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}/${librarySlug(activeSubject.name, 'subject')}`} className={`border-none bg-transparent cursor-pointer hover:text-orange-500 transition-colors font-semibold truncate ${!activeCategory ? 'text-zinc-800 dark:text-zinc-200' : ''}`}>{activeSubject.name.split(':')[0].trim()}</Link>
-                    </>
-                  )}
-                  {activeCategory && (
-                    <>
-                      <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
-                      <span className="text-zinc-800 dark:text-zinc-200 font-semibold truncate">{activeCategory.name}</span>
-                    </>
-                  )}
-                </nav>
+            <div className="space-y-3">
+              {/* Hierarchical Breadcrumb */}
+              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-zinc-400 font-medium min-w-0 flex-wrap px-0.5">
+                {program ? (
+                  <>
+                    <Link to={`${routePrefix}/library?change=true`} className="hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer font-semibold text-zinc-500 dark:text-zinc-400 shrink-0">Programs</Link>
+                    <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                    <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`} className={`hover:text-orange-500 transition-colors border-none bg-transparent cursor-pointer font-semibold shrink-0 ${!activeSemester ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-500 dark:text-zinc-400'}`}>{selectedProgram}</Link>
+                  </>
+                ) : (
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 shrink-0">Programs</span>
+                )}
+                {activeSemester && (
+                  <>
+                    <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                    <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}`} className={`border-none bg-transparent cursor-pointer hover:text-orange-500 transition-colors font-semibold ${!activeSubject ? 'text-zinc-800 dark:text-zinc-200' : ''}`}>{activeSemester.name}</Link>
+                  </>
+                )}
+                {activeSubject && (
+                  <>
+                    <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                    <Link to={`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester.name, 'semester')}/${librarySlug(activeSubject.name, 'subject')}`} className={`border-none bg-transparent cursor-pointer hover:text-orange-500 transition-colors font-semibold truncate ${!activeCategory ? 'text-zinc-800 dark:text-zinc-200' : ''}`}>{activeSubject.name.split(':')[0].trim()}</Link>
+                  </>
+                )}
+                {activeCategory && (
+                  <>
+                    <span className="opacity-40 text-[9px] mx-0.5 shrink-0">&gt;</span>
+                    <span className="text-zinc-800 dark:text-zinc-200 font-semibold truncate">{activeCategory.name}</span>
+                  </>
+                )}
               </div>
 
-              {/* Center: Search box */}
-              <div className="relative flex-1 max-w-md w-full">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                <input
-                  type="text"
-                  placeholder="Search subjects, resources, PYQs..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  autoComplete="off"
-                  spellCheck="false"
-                  className="w-full pl-10 pr-4 h-10 bg-zinc-100 dark:bg-[#141416] hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d] rounded-full text-[11px] sm:text-xs font-semibold outline-none border-none transition-colors text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500"
-                />
-              </div>              {/* Right Side: Actions */}
-              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                {userProfile?.is_admin && (
-                  <button onClick={toggleAdminView} className={`w-10 h-10 min-h-[40px] max-h-10 rounded-full flex items-center justify-center transition-all border-none shrink-0 cursor-pointer ${isAdminView ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`} title="Review Hub">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+              {/* Main Action Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
+                {/* Left Side: Filter Dropdown */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                      className="h-8 px-2.5 rounded-lg bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/50 dark:border-white/[0.03] text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 hover:bg-zinc-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                    >
+                      <span>
+                        {fileFilterType === 'all'
+                          ? 'All files'
+                          : fileFilterType === 'pdf'
+                            ? 'PDFs'
+                            : fileFilterType === 'docs'
+                              ? 'Documents'
+                              : fileFilterType === 'sheets'
+                                ? 'Spreadsheets'
+                                : 'Presentations'}
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                    </button>
+
+                    {showFilterDropdown && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={() => setShowFilterDropdown(false)} />
+                        <div className="absolute left-0 mt-1 w-36 rounded-xl bg-white dark:bg-[#121214] border border-zinc-200/60 dark:border-white/[0.06] py-1 shadow-xl z-40 text-xs font-medium">
+                          {[
+                            { id: 'all', label: 'All files' },
+                            { id: 'pdf', label: 'PDFs' },
+                            { id: 'docs', label: 'Documents' },
+                            { id: 'sheets', label: 'Spreadsheets' },
+                            { id: 'slides', label: 'Presentations' }
+                          ].map(item => (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                setFileFilterType(item.id);
+                                setShowFilterDropdown(false);
+                              }}
+                              className={`w-full px-3 py-1.5 text-left border-none bg-transparent cursor-pointer transition-colors flex items-center justify-between ${fileFilterType === item.id ? 'font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
+                            >
+                              <span>{item.label}</span>
+                              {fileFilterType === item.id && <span className="text-zinc-900 dark:text-white">✓</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Center: Search Input */}
+                <div className="flex-1 max-w-sm sm:max-w-md w-full md:mx-4 relative">
+                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search Document"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full h-8 pl-8 pr-3 rounded-full border border-zinc-200/50 dark:border-white/[0.03] bg-zinc-100/50 dark:bg-white/[0.03] text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 focus:bg-white dark:focus:bg-white/[0.05] transition-all"
+                  />
+                </div>
+
+                {/* Right Side: Vault, Admin Review Hub, Compact Create Folder (+), Upload Button, View Toggles */}
+                <div className="flex items-center gap-2 shrink-0 justify-end flex-wrap">
+                  {/* Personal Vault Toggle */}
+                  <button
+                    onClick={() => {
+                      if (!userProfile) {
+                        showToast("Please login to access your personal vault.", "info");
+                        onAuthRequired?.();
+                        return;
+                      }
+                      setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads');
+                      navigateTo(null, null, null);
+                      setIsAdminView(false);
+                    }}
+                    className={`h-8 px-2.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${viewMode === 'my-uploads' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-transparent shadow-xs' : 'bg-zinc-100/70 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.03] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:text-zinc-900 dark:hover:text-zinc-200'}`}
+                    title="Personal Vault"
+                  >
+                    <Archive className="w-3.5 h-3.5" />
+                    <span>Vault</span>
                   </button>
-                )}
 
-                <button 
-                  onClick={() => { 
-                    if (!userProfile) {
-                      showToast("Please login to access your personal vault.", "info");
-                      onAuthRequired?.();
-                      return;
-                    }
-                    setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads'); 
-                    navigateTo(null, null, null); 
-                    setIsAdminView(false); 
-                  }} 
-                  className={`px-4 h-10 min-h-[40px] max-h-10 rounded-full flex items-center justify-center gap-1.5 transition-all text-xs font-bold border-none cursor-pointer shrink-0 ${viewMode === 'my-uploads' ? 'bg-orange-500 text-white shadow-md' : 'bg-zinc-100 dark:bg-[#141416] text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-[#1a1a1d]'}`}
-                >
-                  <Archive className="w-3.5 h-3.5" strokeWidth={2.5} />
-                  Vault
-                </button>
+                  {/* Admin Review Hub Toggle (Icon only) */}
+                  {userProfile?.is_admin && (
+                    <button
+                      onClick={() => {
+                        setIsAdminView(!isAdminView);
+                        if (!isAdminView) {
+                          setViewMode('browse');
+                          navigateTo(null, null, null);
+                        }
+                      }}
+                      className={`h-8 w-8 rounded-lg text-xs font-medium border transition-all flex items-center justify-center cursor-pointer shrink-0 relative ${isAdminView
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                          : 'bg-zinc-100/70 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.03] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:text-zinc-900 dark:hover:text-zinc-200'
+                        }`}
+                      title="Admin Review Hub"
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                      {allFiles.filter(f => f.status === 'pending').length > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 bg-red-500 text-white rounded-full text-[8px] font-bold flex items-center justify-center">
+                          {allFiles.filter(f => f.status === 'pending').length}
+                        </span>
+                      )}
+                    </button>
+                  )}
 
-                <button 
-                  onClick={() => { 
-                    if (!userProfile) { 
-                      showToast("Please sign in to contribute materials.", "info"); 
-                      onAuthRequired?.();
-                      return; 
-                    } 
-                    fileInputRef.current?.click(); 
-                  }} 
-                  className="px-4 h-10 min-h-[40px] max-h-10 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-bold text-xs shadow-md border-none transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  Upload {pendingUploads.length > 0 && `(${pendingUploads.length})`}
-                </button>
+                  {/* Compact Create Folder button with + icon for Admins */}
+                  {userProfile?.is_admin && (
+                    <button
+                      onClick={() => {
+                        setNewFolderName('');
+                        setFolderIcon('Folder');
+                        setFolderColor('#ff7a00');
+                        setShowFolderModal(true);
+                      }}
+                      className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-500/20 transition-colors cursor-pointer shrink-0"
+                      title="Create Folder"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  {/* Upload File Button */}
+                  <button
+                    onClick={() => {
+                      if (!userProfile) {
+                        showToast("Please sign in to contribute materials.", "info");
+                        onAuthRequired?.();
+                        return;
+                      }
+                      fileInputRef.current?.click();
+                    }}
+                    className="h-8 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border-none shadow-xs active:scale-95 shrink-0"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>Upload File{pendingUploads.length > 0 ? ` (${pendingUploads.length})` : ''}</span>
+                  </button>
+
+                  {/* List / Grid segmented control */}
+                  <div className="h-8 flex items-center p-0.5 rounded-lg border border-zinc-200/50 dark:border-white/[0.03] bg-zinc-100/60 dark:bg-white/[0.02] shrink-0">
+                    <button
+                      onClick={() => setLayoutMode('list')}
+                      className={`h-full px-2 rounded-md border-none transition-all cursor-pointer flex items-center justify-center ${layoutMode === 'list' ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-xs font-semibold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent'}`}
+                      title="List view"
+                    >
+                      <List className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setLayoutMode('grid')}
+                      className={`h-full px-2 rounded-md border-none transition-all cursor-pointer flex items-center justify-center ${layoutMode === 'grid' ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-xs font-semibold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent'}`}
+                      title="Grid view"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {isLoading ? (
             (!activeSubject && viewMode === 'browse') ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                {Array.from({ length: 6 }).map((_, i) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fade-in">
+                {Array.from({ length: 10 }).map((_, i) => (
                   <SkeletonFolderCard key={i} />
                 ))}
               </div>
@@ -2001,109 +2113,157 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               {/* IIT Madras Section */}
               {availablePrograms.some(isIITMProgram) && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2 mt-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-4.5 rounded-full bg-red-750" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-400">Indian Institute of Technology Madras</span>
+                  <div className="flex items-center justify-between pb-1 mt-2 px-1">
+                    <span className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200">Indian Institute of Technology Madras</span>
+                    <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">IITM Portal</span>
+                  </div>
+                  {layoutMode === 'list' ? (
+                    <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
+                      {availablePrograms.filter(isIITMProgram).map((prog) => {
+                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                        const pResources = allFiles.filter(f => f.program === prog).length;
+                        let subtitle = "4 Years Program (BS Degree)";
+
+                        return (
+                          <Link
+                            key={prog}
+                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                            className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none no-underline"
+                          >
+                            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+                              <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                              </svg>
+                              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
+                                {prog}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                                {subtitle}
+                              </span>
+                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
+                                {pSubjects} {pSubjects === 1 ? 'subject' : 'subjects'}
+                              </span>
+                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                                • {pResources} {pResources === 1 ? 'resource' : 'resources'}
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
                     </div>
-                    <span className="px-2 py-0.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-full text-[9px] font-bold text-red-750 dark:text-red-400">IITM Portal</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                    {availablePrograms.filter(isIITMProgram).map((prog) => {
-                      const color = '#800000'; // Maroon
-                      const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                      const pResources = allFiles.filter(f => f.program === prog).length;
-                      let subtitle = "4 Years Program (BS Degree)";
-                      
-                      return (
-                        <Link
-                          key={prog}
-                          to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
-                        >
-                          <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
-                              <Landmark className="w-5 h-5 text-white" />
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      {availablePrograms.filter(isIITMProgram).map((prog) => {
+                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                        const pResources = allFiles.filter(f => f.program === prog).length;
+
+                        return (
+                          <Link
+                            key={prog}
+                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                            className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-2 shadow-xs select-none no-underline"
+                          >
+                            <div className="flex items-center justify-between">
+                              <svg className="w-6 h-6 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                              </svg>
+                              <span className="text-[10px] font-medium text-zinc-400">
+                                {pSubjects || pResources}
+                              </span>
                             </div>
-                            <div className="min-w-0">
-                              <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
-                              <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-                                <span className="whitespace-nowrap shrink-0">{subtitle}</span>
-                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                                  <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                                  {pSubjects} Subjects
-                                </span>
-                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                                  <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                                  {pResources} Resources
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: color }}><path d="M9 18l6-6-6-6" /></svg>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                            <span
+                              className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors"
+                              title={prog}
+                            >
+                              {prog}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* LPU Section */}
               {availablePrograms.some(p => !isIITMProgram(p)) && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-4.5 rounded-full bg-orange-500" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-400">Lovely Professional University</span>
+                  <div className="flex items-center justify-between pb-1 px-1">
+                    <span className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200">Lovely Professional University</span>
+                    <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">LPU Portals</span>
+                  </div>
+                  {layoutMode === 'list' ? (
+                    <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
+                      {availablePrograms.filter(p => !isIITMProgram(p)).map((prog) => {
+                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                        const pResources = allFiles.filter(f => f.program === prog).length;
+
+                        let subtitle = "3 Years Program";
+                        if (prog.includes("BTech")) subtitle = "4 Years Program";
+                        else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
+
+                        return (
+                          <Link
+                            key={prog}
+                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                            className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none no-underline"
+                          >
+                            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+                              <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                              </svg>
+                              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
+                                {prog}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                                {subtitle}
+                              </span>
+                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
+                                {pSubjects} {pSubjects === 1 ? 'subject' : 'subjects'}
+                              </span>
+                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                                • {pResources} {pResources === 1 ? 'resource' : 'resources'}
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
                     </div>
-                    <span className="px-2 py-0.5 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-full text-[9px] font-bold text-orange-500">LPU Portals</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                    {availablePrograms.filter(p => !isIITMProgram(p)).map((prog, idx) => {
-                      const progColors = ['#ff7a00', '#a855f7', '#0ea5e9', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#6366f1'];
-                      const color = progColors[idx % progColors.length];
-                      
-                      const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                      const pResources = allFiles.filter(f => f.program === prog).length;
-                      
-                      let subtitle = "3 Years Program";
-                      if (prog.includes("BTech")) subtitle = "4 Years Program";
-                      else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
-                      
-                      return (
-                        <Link
-                          key={prog}
-                          to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                          className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99]"
-                        >
-                          <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
-                              <Landmark className="w-5 h-5 text-white" />
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      {availablePrograms.filter(p => !isIITMProgram(p)).map((prog) => {
+                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                        const pResources = allFiles.filter(f => f.program === prog).length;
+
+                        return (
+                          <Link
+                            key={prog}
+                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                            className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-2 shadow-xs select-none no-underline"
+                          >
+                            <div className="flex items-center justify-between">
+                              <svg className="w-6 h-6 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                              </svg>
+                              <span className="text-[10px] font-medium text-zinc-400">
+                                {pSubjects || pResources}
+                              </span>
                             </div>
-                            <div className="min-w-0">
-                              <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{prog}</h4>
-                              <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-                                <span className="whitespace-nowrap shrink-0">{subtitle}</span>
-                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                                  <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                                  {pSubjects} Subjects
-                                </span>
-                                <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-                                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                                  <FileText className="w-3.5 h-3.5 text-zinc-450 dark:text-zinc-500" />
-                                  {pResources} Resources
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: color }}><path d="M9 18l6-6-6-6" /></svg>
-                        </Link>
-                      );
-                    })}
-                  </div>
+                            <span
+                              className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors"
+                              title={prog}
+                            >
+                              {prog}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -2150,6 +2310,21 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               onDeleteFolder={(catFolder, e) => {
                 handleDeleteFolder(catFolder, e);
               }}
+              onVaultClick={() => {
+                if (!userProfile) {
+                  showToast("Please login to access your personal vault.", "info");
+                  onAuthRequired?.();
+                  return;
+                }
+                setViewMode('my-uploads');
+                navigateTo(null, null, null);
+                setIsAdminView(false);
+              }}
+              onAdminReviewClick={() => {
+                setIsAdminView(true);
+                setViewMode('browse');
+                navigateTo(null, null, null);
+              }}
             />
           ) : activeSubject && searchQuery.trim() !== '' ? (
             <div className="space-y-4 animate-fade-in">
@@ -2182,9 +2357,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                 if (matchedFiles.length === 0) {
                   return (
-                    <div className="p-8 text-center bg-zinc-50 dark:bg-white/[0.005] border border-zinc-150 dark:border-white/5 rounded-2xl text-xs text-zinc-400">
-                      No matching files found inside this subject.
-                    </div>
+                    <EmptyStateNoDocument
+                      onUpload={() => setShowUploadModal(true)}
+                    />
                   );
                 }
 
@@ -2204,10 +2379,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         </thead>
                         <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                           {matchedFiles.map((file) => {
-                            const cleanName = file.name;
+                            const fileInfo = getDisplayFileNameWithExtension(file.name, file.storage_path, file.type);
                             const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
                             const formattedDate = new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                            
+
                             const ratingVal = (() => {
                               if (file.rating_votes) {
                                 const votes = Object.values(file.rating_votes as Record<string, number>);
@@ -2220,18 +2395,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                               <tr key={file.id} className="hover:bg-zinc-50/50 dark:hover:bg-white/[0.006] transition-colors group/row">
                                 <td className="py-3 pl-4 pr-3 min-w-[200px]">
                                   <div className="flex items-center gap-3">
-                                    <div 
+                                    <div
                                       onClick={() => handleFileAccess(file)}
-                                      className="w-8 h-8 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-105"
+                                      className="cursor-pointer shrink-0 transition-transform hover:scale-105"
                                     >
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-orange-500"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                                      <FileIcon fileName={file.storage_path || file.name} fileType={file.type} />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <button 
+                                      <button
                                         onClick={() => handleFileAccess(file)}
                                         className="text-xs font-bold text-zinc-800 dark:text-zinc-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors truncate max-w-[180px] sm:max-w-[240px] text-left block bg-transparent border-none cursor-pointer p-0"
                                       >
-                                        {cleanName}
+                                        {fileInfo.fullName}
                                       </button>
                                       <div className="flex items-center gap-1.5 mt-0.5">
                                         <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">{file.size || '0.00 MB'}</span>
@@ -2276,7 +2451,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                   </button>
 
                                   {activeMenuFileId === file.id && (
-                                    <div 
+                                    <div
                                       className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
                                       onClick={(e) => e.stopPropagation()}
                                     >
@@ -2386,10 +2561,9 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                               <>
                                 {visibleGroups.map((group, groupIdx) => (
                                   <div key={group.name} className="space-y-4">
-                                    <div className="flex items-center justify-between border-b border-zinc-150 dark:border-white/5 pb-2.5 mb-2 mt-4">
+                                    <div className="flex items-center justify-between pb-1.5 mb-1 mt-4 px-1">
                                       <div className="flex items-center gap-2 min-w-0">
-                                        <div className="w-1 h-3.5 rounded-full bg-orange-500 shrink-0" />
-                                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 truncate">
+                                        <span className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate">
                                           {group.name}
                                         </span>
 
@@ -2410,14 +2584,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                             {/* Section Options Dropdown */}
                                             {activeSectionMenu === group.name && (
                                               <>
-                                                <div 
-                                                  className="fixed inset-0 z-40" 
+                                                <div
+                                                  className="fixed inset-0 z-40"
                                                   onClick={(e) => {
                                                     e.stopPropagation();
                                                     setActiveSectionMenu(null);
-                                                  }} 
+                                                  }}
                                                 />
-                                                <div 
+                                                <div
                                                   className="absolute left-0 mt-1 w-44 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
                                                   onClick={(e) => e.stopPropagation()}
                                                 >
@@ -2440,11 +2614,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                                       setActiveSectionMenu(null);
                                                       handleMoveSection(group.name, 'up', groups);
                                                     }}
-                                                    className={`w-full px-3.5 py-2 text-left text-xs font-bold transition-colors border-none bg-transparent flex items-center gap-2 ${
-                                                      groupIdx === 0 
-                                                        ? 'opacity-30 cursor-not-allowed text-zinc-400' 
+                                                    className={`w-full px-3.5 py-2 text-left text-xs font-bold transition-colors border-none bg-transparent flex items-center gap-2 ${groupIdx === 0
+                                                        ? 'opacity-30 cursor-not-allowed text-zinc-400'
                                                         : 'text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer'
-                                                    }`}
+                                                      }`}
                                                   >
                                                     <ArrowUp className="w-3.5 h-3.5" />
                                                     Move Up
@@ -2457,11 +2630,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                                       setActiveSectionMenu(null);
                                                       handleMoveSection(group.name, 'down', groups);
                                                     }}
-                                                    className={`w-full px-3.5 py-2 text-left text-xs font-bold transition-colors border-none bg-transparent flex items-center gap-2 ${
-                                                      groupIdx === groups.length - 1 
-                                                        ? 'opacity-30 cursor-not-allowed text-zinc-400' 
+                                                    className={`w-full px-3.5 py-2 text-left text-xs font-bold transition-colors border-none bg-transparent flex items-center gap-2 ${groupIdx === groups.length - 1
+                                                        ? 'opacity-30 cursor-not-allowed text-zinc-400'
                                                         : 'text-zinc-650 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer'
-                                                    }`}
+                                                      }`}
                                                   >
                                                     <ArrowDown className="w-3.5 h-3.5" />
                                                     Move Down
@@ -2485,8 +2657,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                         )}
                                       </div>
 
-                                      <span className="px-2 py-0.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-full text-[9px] font-medium text-zinc-500 dark:text-zinc-400 shrink-0">
-                                        {group.items.length} Course{group.items.length !== 1 ? 's' : ''}
+                                      <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal shrink-0">
+                                        {group.items.length} {group.items.length === 1 ? 'course' : 'courses'}
                                       </span>
                                     </div>
 
@@ -2494,8 +2666,53 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                       <div className="p-6 text-center bg-zinc-50/50 dark:bg-white/[0.005] border border-dashed border-zinc-200 dark:border-white/5 rounded-2xl text-xs text-zinc-400">
                                         No courses in this section yet. Click <span className="font-bold text-orange-500">+</span> above to add a course!
                                       </div>
+                                    ) : layoutMode === 'list' ? (
+                                      <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
+                                        {group.items.map(folder => {
+                                          const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
+                                          const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : '';
+                                          let subjectName = folder.name.includes(':') ? folder.name.split(':')[1]?.trim() : folder.name;
+                                          if (!subjectName || (subjectCode && subjectName.toLowerCase() === subjectCode.toLowerCase())) {
+                                            const meta = findSubjectMetadata(selectedProgram, folder.name);
+                                            subjectName = meta?.title || folder.name;
+                                          }
+                                          if (subjectCode && subjectName.toUpperCase().startsWith(subjectCode)) {
+                                            subjectName = subjectName.slice(subjectCode.length).replace(/^[\s:-]+/, '').trim();
+                                          }
+                                          const displayName = subjectCode ? `${subjectCode} - ${subjectName}` : subjectName;
+                                          const metadata = findSubjectMetadata(selectedProgram, folder.name);
+                                          const catalogCurriculum = getSubjectCurriculum(folder.name);
+                                          const creditsText = catalogCurriculum ? `${catalogCurriculum.credits} Credits` : (metadata ? `${metadata.credits} Credits` : "4 Credits");
+                                          const fCount = folderFileCounts[folder.id] || 0;
+
+                                          return (
+                                            <div
+                                              key={folder.id}
+                                              onClick={() => navigate(getFolderToPath(folder))}
+                                              className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none"
+                                            >
+                                              <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+                                                <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                  <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                                                </svg>
+                                                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
+                                                  {displayName}
+                                                </span>
+                                              </div>
+                                              <div className="flex items-center gap-3 shrink-0">
+                                                <span className="text-xs text-zinc-400 dark:text-zinc-500 hidden sm:inline">
+                                                  {creditsText}
+                                                </span>
+                                                <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
+                                                  {fCount} {fCount === 1 ? 'file' : 'files'}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
                                     ) : (
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                         {group.items.map(folder => (
                                           <FolderCard
                                             key={folder.id}
@@ -2521,6 +2738,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                               setFolderColor(folder.color || '#ff7a00');
                                               setShowRenameModal(true);
                                             }}
+                                            onDelete={(e) => handleDeleteFolder(folder, e)}
                                             isDraggingOver={draggingOverId === folder.id}
                                             subjectsCount={finalFolders.filter(f => f.type === 'subject' && f.parent_id === folder.id).length}
                                             searchMatchText={getSubjectSearchMatchText(folder)}
@@ -2546,8 +2764,39 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                             );
                           })()}
                         </div>
+                      ) : layoutMode === 'list' ? (
+                        <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
+                          {currentFolders.map(folder => {
+                            const subCount = finalFolders.filter(f => f.type === 'subject' && f.parent_id === folder.id).length;
+                            const fCount = folderFileCounts[folder.id] || 0;
+                            return (
+                              <div
+                                key={folder.id}
+                                onClick={() => navigate(getFolderToPath(folder))}
+                                className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none"
+                              >
+                                <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+                                  <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
+                                    {folder.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
+                                    {subCount} {subCount === 1 ? 'subject' : 'subjects'}
+                                  </span>
+                                  <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                                    • {fCount} {fCount === 1 ? 'resource' : 'resources'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                           {currentFolders.map(folder => (
                             <FolderCard
                               key={folder.id}
@@ -2584,31 +2833,33 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   )}
 
                   {displayFiles.length > 0 && searchQuery.trim() === '' ? (
-                    (isAdminView || viewMode === 'my-uploads') ? (
-                      <div className="w-full overflow-hidden border border-zinc-150 dark:border-white/5 rounded-3xl bg-white dark:bg-[#0c0c0e] shadow-sm animate-fade-in">
+                    (layoutMode === 'list' || isAdminView || viewMode === 'my-uploads') ? (
+                      <div className="w-full overflow-hidden border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] shadow-xs animate-fade-in">
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse text-left">
                             <thead>
-                              <tr className="border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
-                                <th className="py-3 pl-4 pr-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[200px]">Name</th>
+                              <tr className="border-b border-zinc-150 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+                                <th className="py-3 pl-4 pr-2 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-10">
+                                  <Square className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600" />
+                                </th>
+                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider min-w-[220px]">Name</th>
                                 {isAdminView && (
                                   <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden md:table-cell w-32">Uploader</th>
                                 )}
-                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-36">Subject</th>
-                                {viewMode === 'my-uploads' ? (
-                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-28">Status</th>
-                                ) : (
-                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-24">Category</th>
+                                {!activeSubject && (
+                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-36">Subject</th>
                                 )}
-                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-28">Updated On</th>
-                                <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-36">Actions</th>
+                                {viewMode === 'my-uploads' && (
+                                  <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-center w-28">Status</th>
+                                )}
+                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider hidden sm:table-cell w-36">Upload Date</th>
+                                <th className="py-3 px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider w-24">Size</th>
+                                <th className="py-3 pr-4 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-right w-12"></th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
                               {displayFiles.map((file) => {
-                                const realNameWithExt = file.name;
-                                const cleanName = formatCleanFileName(realNameWithExt);
-                                const fileStyle = getFileStyle(file.storage_path || file.name);
+                                const fileInfo = getDisplayFileNameWithExtension(file.name, file.storage_path, file.type);
 
                                 const statusConfig = {
                                   pending: { label: 'Queued', color: 'text-orange-500', bg: 'bg-orange-500/10' },
@@ -2617,215 +2868,120 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                 };
                                 const status = statusConfig[file.status] || statusConfig.pending;
 
-                                const formattedDate = file.created_at
-                                  ? new Date(file.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                                  : 'N/A';
+                                const timestamp = file.uploadDate || (file.created_at ? Date.parse(file.created_at) : Date.now());
+                                const formattedDate = new Date(timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
                                 const uploaderName = file.uploader_username || "Anonymous Verto";
                                 const avatarSeed = file.uploader_id || file.name;
 
                                 return (
-                                  <tr key={file.id} className="hover:bg-zinc-50/50 dark:hover:bg-white/[0.006] transition-colors group/row">
-                                    <td className="py-3 pl-4 pr-3 min-w-[200px]">
+                                  <tr
+                                    key={file.id}
+                                    onClick={() => handleFileAccess(file)}
+                                    className="hover:bg-zinc-50/70 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group/row"
+                                  >
+                                    <td className="py-3.5 pl-4 pr-2 w-10" onClick={e => e.stopPropagation()}>
+                                      <Square className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 group-hover/row:text-zinc-400" />
+                                    </td>
+                                    <td className="py-3.5 px-3 min-w-[220px]">
                                       <div className="flex items-center gap-3">
-                                        <div 
-                                          onClick={() => handleFileAccess(file)}
-                                          className={`w-8 h-8 rounded-xl ${fileStyle.iconBg} flex items-center justify-center cursor-pointer shrink-0 transition-transform hover:scale-105`}
-                                        >
-                                          <FileIcon fileName={file.storage_path} size="w-4 h-4" className={fileStyle.iconText} />
-                                        </div>
-                                        <div className="min-w-0">
-                                          <button 
-                                            onClick={() => handleFileAccess(file)}
-                                            className="text-xs font-bold text-zinc-800 dark:text-zinc-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors truncate max-w-[180px] sm:max-w-[240px] text-left block bg-transparent border-none cursor-pointer p-0"
-                                          >
-                                            {cleanName}
-                                          </button>
-                                          <div className="flex items-center gap-1.5 mt-0.5">
-                                            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">{file.size || '0.00 MB'}</span>
-                                            <span className="text-[10px] text-zinc-300 dark:text-zinc-700">•</span>
-                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide ${fileStyle.badgeBg} ${fileStyle.badgeText}`}>
-                                              {fileStyle.label}
-                                            </span>
-                                          </div>
+                                        <FileIcon fileName={file.storage_path || file.name} fileType={file.type} />
+                                        <div className="min-w-0 flex-1">
+                                          <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover/row:text-orange-500 transition-colors truncate block">
+                                            {fileInfo.fullName}
+                                          </span>
                                         </div>
                                       </div>
                                     </td>
 
                                     {isAdminView && (
-                                      <td className="py-3 px-3 hidden md:table-cell w-32">
+                                      <td className="py-3.5 px-3 hidden md:table-cell w-32">
                                         <div className="flex items-center gap-2">
-                                          <img 
+                                          <img
                                             src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(avatarSeed)}`}
                                             alt={uploaderName}
                                             className="w-5 h-5 rounded-full bg-zinc-50 dark:bg-zinc-800 shrink-0"
                                           />
-                                          <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 truncate max-w-[90px]">{uploaderName}</span>
+                                          <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate max-w-[90px]">{uploaderName}</span>
                                         </div>
                                       </td>
                                     )}
 
-                                    <td className="py-3 px-3 w-36">
-                                      <div className="min-w-0">
-                                        <div className="text-xs font-extrabold text-zinc-650 dark:text-zinc-300 truncate max-w-[120px]" title={file.subject}>
-                                          {file.subject.split(':')[0].trim()}
+                                    {!activeSubject && (
+                                      <td className="py-3.5 px-3 w-36">
+                                        <div className="min-w-0">
+                                          <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate max-w-[120px]" title={file.subject}>
+                                            {file.subject.split(':')[0].trim()}
+                                          </div>
                                         </div>
-                                        <div className="text-[9px] font-bold text-zinc-450 dark:text-zinc-500 truncate max-w-[120px]">
-                                          {file.program || 'BTech CSE'} • {file.semester}
-                                        </div>
-                                      </div>
-                                    </td>
+                                      </td>
+                                    )}
 
-                                    {viewMode === 'my-uploads' ? (
-                                      <td className="py-3 px-3 text-center w-28">
-                                        <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black tracking-wider uppercase inline-block ${status.bg} ${status.color}`}>
+                                    {viewMode === 'my-uploads' && (
+                                      <td className="py-3.5 px-3 text-center w-28">
+                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold tracking-wider uppercase inline-block ${status.bg} ${status.color}`}>
                                           {status.label}
                                         </span>
                                       </td>
-                                    ) : (
-                                      <td className="py-3 px-3 text-center w-24">
-                                        <span className="px-2 py-0.5 rounded-lg text-[9px] font-extrabold text-zinc-500 bg-zinc-100 dark:bg-white/[0.04] dark:text-zinc-400 uppercase tracking-wide">
-                                          {file.type || 'Notes'}
-                                        </span>
-                                      </td>
                                     )}
 
-                                    <td className="py-3 px-3 hidden sm:table-cell w-28">
-                                      <span className="text-xs font-bold text-zinc-450 dark:text-zinc-550">{formattedDate}</span>
+                                    <td className="py-3.5 px-3 hidden sm:table-cell w-36">
+                                      <span className="text-xs text-zinc-500 dark:text-zinc-400">{formattedDate}</span>
                                     </td>
 
-                                    <td className="py-3 pr-4 text-right w-36 relative">
+                                    <td className="py-3.5 px-3 w-24">
+                                      <span className="text-xs text-zinc-500 dark:text-zinc-400">{file.size || '2.4 MB'}</span>
+                                    </td>
+
+                                    <td className="py-3.5 pr-4 text-right w-12 relative" onClick={e => e.stopPropagation()}>
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setActiveMenuFileId(activeMenuFileId === file.id ? null : file.id);
                                         }}
-                                        className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-455 dark:text-zinc-350 hover:text-zinc-800 dark:hover:text-white bg-transparent border-none cursor-pointer transition-all hover:scale-105 active:scale-95"
+                                        className="p-1 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-800 dark:hover:text-white bg-transparent border-none cursor-pointer transition-colors"
                                         title="Actions"
                                       >
-                                        <MoreHorizontal size={18} />
+                                        <MoreHorizontal size={16} />
                                       </button>
 
                                       {activeMenuFileId === file.id && (
                                         <>
-                                          <div 
-                                            className="absolute right-4 mt-1 w-36 rounded-2xl bg-white dark:bg-[#121214] border border-zinc-150 dark:border-white/10 py-1.5 shadow-xl z-50 text-left overflow-hidden animate-fade-in"
-                                            onClick={(e) => e.stopPropagation()}
-                                          >
-                                            {/* Details */}
+                                          <div className="fixed inset-0 z-40" onClick={() => setActiveMenuFileId(null)} />
+                                          <div className="absolute right-0 mt-1 w-36 rounded-xl bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/10 py-1 shadow-lg z-50 text-left overflow-hidden animate-fade-in text-xs font-medium">
                                             <button
                                               onClick={() => {
                                                 setActiveMenuFileId(null);
                                                 setSelectedFile(file);
                                                 setShowDetailsModal(true);
                                               }}
-                                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                              className="w-full px-3 py-2 text-left text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
                                             >
-                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                                               Details
                                             </button>
-
-                                            {/* Download */}
                                             <button
                                               onClick={() => {
                                                 setActiveMenuFileId(null);
                                                 handleDirectDownload(file);
                                               }}
-                                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-350 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                              className="w-full px-3 py-2 text-left text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
                                             >
-                                              <Download size={14} className="text-zinc-400" />
+                                              <Download size={13} className="text-zinc-400" />
                                               Download
                                             </button>
-
-                                            {/* Edit */}
-                                            <button
-                                              onClick={() => {
-                                                setActiveMenuFileId(null);
-                                                setSelectedFile(file);
-                                                setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram });
-                                                setShowEditModal(true);
-                                              }}
-                                              className="w-full px-4 py-2.5 text-left text-xs font-bold text-zinc-655 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                            >
-                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                              Edit Metadata
-                                            </button>
-
-                                            {/* Delete / Reject / Approve */}
-                                            {viewMode === 'my-uploads' ? (
+                                            {userProfile?.is_admin && (
                                               <button
-                                                onClick={async () => {
+                                                onClick={() => {
                                                   setActiveMenuFileId(null);
-                                                  const confirmed = await showConfirm("Permanently delete this file?");
-                                                  if (confirmed) {
-                                                    setAllFiles(prev => prev.filter(f => f.id !== file.id));
-                                                    showToast("File deleted successfully!", "success");
-                                                    NexusServer.deleteFile(file.id, file.storage_path)
-                                                      .then(() => fetchFromSource(false));
-                                                  }
+                                                  setSelectedFile(file);
+                                                  setMetaForm({ name: file.name, description: file.description || '', semester: file.semester, subject: file.subject, type: file.type, program: file.program || selectedProgram });
+                                                  setShowEditModal(true);
                                                 }}
-                                                className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                                                className="w-full px-3 py-2 text-left text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
                                               >
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                                                Delete File
+                                                <Pencil size={13} className="text-zinc-400" />
+                                                Edit
                                               </button>
-                                            ) : (
-                                              <>
-                                                <button
-                                                  onClick={async () => {
-                                                    setActiveMenuFileId(null);
-                                                    const confirmed = await showConfirm("Reject and remove this file?");
-                                                    if (confirmed) {
-                                                      setAllFiles(prev => prev.filter(f => f.id !== file.id));
-                                                      showToast("File rejected successfully!", "success");
-                                                      NexusServer.rejectFile(file.id)
-                                                        .then(() => fetchFromSource(false));
-                                                    }
-                                                  }}
-                                                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                                >
-                                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                                                  Reject File
-                                                </button>
-
-                                                <button
-                                                  onClick={async () => {
-                                                    setActiveMenuFileId(null);
-                                                    setIsProcessing(true);
-                                                    try {
-                                                      const allFolders = await NexusServer.fetchFolders('All');
-                                                      let semFolder = allFolders.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && f.program === file.program);
-                                                      if (!semFolder) {
-                                                        await NexusServer.createFolder(file.semester.trim(), 'semester', null, file.program);
-                                                        const fresh = await NexusServer.fetchFolders('All');
-                                                        semFolder = fresh.find(f => f.type === 'semester' && f.name.trim() === file.semester.trim() && (f.program === file.program || f.program === 'All'));
-                                                      }
-                                                      let subjFolder = allFolders.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder?.id && f.program === file.program);
-                                                      if (!subjFolder && semFolder) {
-                                                        await NexusServer.createFolder(file.subject.trim(), 'subject', semFolder.id, file.program);
-                                                        const fresh = await NexusServer.fetchFolders('All');
-                                                        subjFolder = fresh.find(f => f.type === 'subject' && f.name.trim() === file.subject.trim() && f.parent_id === semFolder.id && (f.program === file.program || f.program === 'All'));
-                                                      }
-                                                      if (file.type && file.type.trim()) {
-                                                        let catFolder = allFolders.find(f => f.type === 'category' && f.name.trim() === file.type.trim() && f.parent_id === subjFolder?.id && f.program === file.program);
-                                                        if (!catFolder && subjFolder) {
-                                                          await NexusServer.createFolder(file.type.trim(), 'category', subjFolder.id, file.program);
-                                                        }
-                                                      }
-                                                      await NexusServer.approveFile(file.id);
-                                                      fetchFromSource(false);
-                                                    } catch (e: any) {
-                                                      showToast("Approval error: " + e.message, 'error');
-                                                    } finally {
-                                                      setIsProcessing(false);
-                                                    }
-                                                  }}
-                                                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-emerald-500 hover:bg-emerald-500/10 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
-                                                >
-                                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12" /></svg>
-                                                  Approve File
-                                                </button>
-                                              </>
                                             )}
                                           </div>
                                         </>
@@ -2894,7 +3050,11 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       </SortableContext>
                     )
                   ) : currentFolders.length === 0 && !isLoading && (
-                    <div className="col-span-full py-20 text-center text-zinc-400 text-[11px] sm:text-xs opacity-40">No files found.</div>
+                    <div className="col-span-full py-12 flex justify-center">
+                      <EmptyStateNoDocument
+                        onUpload={() => setShowUploadModal(true)}
+                      />
+                    </div>
                   )}
                 </div>
                 {createPortal(
@@ -2943,27 +3103,17 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             <div className={`modal-overlay ${isClosingDetails ? 'closing' : ''}`}
               style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
               onClick={(e) => { if (e.target === e.currentTarget) handleCloseDetails(); }}>
-              <div ref={modalRef} className={`nexus-modal w-full max-w-md bg-white dark:bg-[#0c0c0e] border border-zinc-100 dark:border-white/5 rounded-[28px] shadow-2xl relative overflow-hidden flex flex-col ${isClosingDetails ? 'closing' : ''}`}>
-                {/* Aurora glow */}
-                <div 
-                  className="absolute -right-24 -top-24 w-48 h-48 rounded-full blur-3xl opacity-20 pointer-events-none z-0"
-                  style={{ backgroundColor: fileStyle.glowColor }}
-                />
-                {/* Giant background faint logo */}
-                <div className="absolute -right-6 -bottom-6 opacity-[0.04] dark:opacity-[0.02] pointer-events-none z-0">
-                  <FileIcon fileName={selectedFile.storage_path} size="w-36 h-36" className={fileStyle.iconText} />
-                </div>
-
-                <header className="p-6 md:p-8 border-b border-zinc-100 dark:border-white/5 bg-transparent flex flex-col gap-4 relative z-10">
+              <div ref={modalRef} className={`nexus-modal w-full max-w-md bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/10 rounded-3xl shadow-xl relative overflow-hidden flex flex-col ${isClosingDetails ? 'closing' : ''}`}>
+                <header className="p-6 border-b border-zinc-150 dark:border-white/5 bg-transparent flex flex-col gap-3 relative z-10">
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 ${fileStyle.iconBg} rounded-xl flex items-center justify-center`}>
-                      <FileIcon fileName={selectedFile.storage_path} size="w-5 h-5" className={fileStyle.iconText} />
-                    </div>
-                    <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase rounded-md ${fileStyle.badgeBg} ${fileStyle.badgeText}`}>
-                      {fileStyle.label}
+                    <FileIcon fileName={selectedFile.storage_path || selectedFile.name} fileType={selectedFile.type} />
+                    <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      {selectedFile.type || 'Document'}
                     </span>
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug pr-8">{selectedFile.name}</h3>
+                  <h3 className="text-lg md:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 leading-snug pr-8">
+                    {getDisplayFileNameWithExtension(selectedFile.name, selectedFile.storage_path, selectedFile.type).fullName}
+                  </h3>
                   <button onClick={handleCloseDetails} className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-600 dark:text-white/30 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer z-20">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
@@ -2991,15 +3141,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                     </p>
                   </div>
 
-                  <div 
+                  <div
                     className="flex items-center justify-between p-4 rounded-2xl border"
-                    style={{ 
+                    style={{
                       backgroundColor: fileStyle.glowColor.replace('0.15', '0.04'),
-                      borderColor: fileStyle.glowColor.replace('0.15', '0.15') 
+                      borderColor: fileStyle.glowColor.replace('0.15', '0.15')
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-[11px] sm:text-xs text-white"
                         style={{ backgroundColor: fileStyle.glowColor.replace('0.15', '0.85') }}
                       >
@@ -3023,8 +3173,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   <button onClick={handleCloseDetails} className="flex-1 py-2.5 text-[11px] sm:text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer font-medium">Discard</button>
                   {selectedFile.status === 'approved' && (
                     <>
-                      <button 
-                        onClick={() => handleShareFile(selectedFile)} 
+                      <button
+                        onClick={() => handleShareFile(selectedFile)}
                         className={`flex-1 py-2.5 rounded-xl font-semibold text-[11px] sm:text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border ${fileStyle.iconText}`}
                         style={{
                           backgroundColor: fileStyle.glowColor.replace('0.15', '0.05'),
@@ -3034,8 +3184,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
                         Share
                       </button>
-                      <button 
-                        onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }} 
+                      <button
+                        onClick={() => { handleCloseDetails(); handleFileAccess(selectedFile); }}
                         className="flex-[2] py-2.5 text-white rounded-xl font-semibold text-[11px] sm:text-xs shadow-md active:scale-95 transition-all border-none cursor-pointer"
                         style={{
                           backgroundColor: fileStyle.glowColor.replace('0.15', '0.85')
@@ -3062,7 +3212,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               <div className="bg-zinc-50 dark:bg-[#0a0a0a]/20 p-6 flex justify-between items-center border-b border-zinc-100 dark:border-white/5"><h3 className="text-[11px] sm:text-xs font-semibold">New Folder</h3><button onClick={handleCloseFolder} className="opacity-50 hover:opacity-100 transition-opacity border-none bg-transparent dark:text-white"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><path d="M18 6L6 18M6 6l12 12" /></svg></button></div>
               <div className="p-6 space-y-4">
                 <input autoFocus placeholder="Name..." value={newFolderName} onChange={e => setNewFolderName(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#0a0a0a]/60 p-4 rounded-xl font-bold border dark:border-white/10 text-[11px] sm:text-xs dark:text-white outline-none focus:ring-2 focus:ring-orange-500" />
-                
+
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Choose Icon Logo</p>
                   <div className="grid grid-cols-6 gap-2 bg-zinc-100 dark:bg-[#0a0a0a]/40 p-3 rounded-xl border border-transparent dark:border-white/5">
@@ -3179,32 +3329,46 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           <div className={`modal-overlay ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
             onClick={(e) => { if (e.target === e.currentTarget && !isProcessing) { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); } }}>
-            <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-md'} overflow-hidden rounded-[24px] sm:rounded-[32px] border-none shadow-2xl bg-white dark:bg-[#111113] flex flex-col ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
-              <header className="p-5 sm:p-6 border-none bg-zinc-50/80 dark:bg-[#161618]/80 flex items-center justify-between shrink-0">
+            <div ref={modalRef} className={`nexus-modal w-full ${showUploadModal ? 'max-w-4xl' : 'max-w-md'} overflow-hidden rounded-[24px] sm:rounded-[28px] border border-zinc-200/80 dark:border-white/[0.08] shadow-[0_25px_70px_rgba(0,0,0,0.5)] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl flex flex-col ${(showUploadModal ? isClosingUpload : isClosingEdit) ? 'closing' : ''}`}>
+              <header className="p-5 sm:p-6 border-b border-zinc-200/60 dark:border-white/[0.06] bg-zinc-50/70 dark:bg-white/[0.02] flex items-center justify-between shrink-0">
                 <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-zinc-900 dark:text-white leading-tight">{showUploadModal ? 'Contribute to Library' : 'Edit Metadata'}</h3>
-                  <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mt-1">
-                    {showUploadModal 
-                      ? `Batch Processing: ${pendingUploads.length + convertingFiles.length} File${(pendingUploads.length + convertingFiles.length) !== 1 ? 's' : ''}${convertingFiles.length > 0 ? ` (${convertingFiles.length} Converting...)` : ''}` 
-                      : 'Refine document properties'}
+                  <h3 className="text-base sm:text-lg font-semibold text-zinc-950 dark:text-white tracking-tight leading-tight">{showUploadModal ? 'Contribute to Library' : 'Edit Metadata'}</h3>
+                  <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 mt-1 flex items-center gap-1.5">
+                    {showUploadModal ? (
+                      <>
+                        <span>Batch Processing:</span>
+                        <span className="px-1.5 py-0.2 rounded-md bg-zinc-200/70 dark:bg-white/10 text-zinc-700 dark:text-zinc-300 font-semibold text-[11px]">
+                          {pendingUploads.length + convertingFiles.length} File{(pendingUploads.length + convertingFiles.length) !== 1 ? 's' : ''}
+                        </span>
+                        {convertingFiles.length > 0 && (
+                          <span className="text-orange-500 font-semibold">({convertingFiles.length} Converting...)</span>
+                        )}
+                      </>
+                    ) : (
+                      'Refine document properties'
+                    )}
                   </p>
                 </div>
-                <button onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-white/5 rounded-xl transition-all border-none bg-transparent cursor-pointer">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <button
+                  onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }}
+                  className="w-8 h-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 hover:bg-zinc-200/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] transition-all border-none cursor-pointer flex items-center justify-center"
+                  title="Close"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </header>
 
               <div className="flex flex-col md:flex-row flex-1 min-h-0 min-w-0 md:h-[60vh] overflow-hidden">
                 {showUploadModal && (
-                  <div className="w-full md:w-64 border-none bg-zinc-50/50 dark:bg-[#141416]/50 overflow-y-auto custom-scrollbar shrink-0 p-3 space-y-2 max-h-[160px] md:max-h-none">
+                  <div className="w-full md:w-64 border-r border-zinc-200/60 dark:border-white/[0.06] bg-zinc-50/50 dark:bg-white/[0.015] overflow-y-auto custom-scrollbar shrink-0 p-3 space-y-1.5 max-h-[160px] md:max-h-none">
                     <div className="flex items-center justify-between px-2 py-1 gap-1">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pending files</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pending files</p>
                       <div className="flex items-center gap-1 shrink-0">
                         {pendingUploads.filter(up => up.file.type === 'application/pdf' || up.file.name.toLowerCase().endsWith('.pdf')).length >= 2 && (
                           <button
                             type="button"
                             onClick={handleOpenMergePdfModal}
-                            className="px-2 py-1 text-[10px] font-bold text-orange-500 hover:text-orange-600 dark:text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
+                            className="px-2 py-1 text-[10px] font-semibold text-orange-500 hover:text-orange-600 dark:text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
                             title="Merge multiple PDFs into 1 document"
                           >
                             <Layers className="w-3 h-3" />
@@ -3215,7 +3379,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           <button
                             type="button"
                             onClick={() => handleOpenImageToPdfModal()}
-                            className="px-2 py-1 text-[10px] font-bold text-purple-500 hover:text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
+                            className="px-2 py-1 text-[10px] font-semibold text-purple-500 hover:text-purple-600 dark:text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 active:scale-95 rounded-lg border-none cursor-pointer transition-all flex items-center gap-1 shrink-0"
                             title="Convert uploaded images into a PDF document"
                           >
                             <ImageIcon className="w-3 h-3" />
@@ -3227,12 +3391,12 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
                     {/* Converting Files Loader Cards */}
                     {convertingFiles.map((cFile, cIdx) => (
-                      <div key={`converting-${cIdx}`} className="w-full p-3 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/30 flex items-center gap-3 animate-pulse min-w-0">
+                      <div key={`converting-${cIdx}`} className="w-full p-2.5 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/25 flex items-center gap-2.5 animate-pulse min-w-0">
                         <div className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
                           <Loader2 className="w-4 h-4 animate-spin" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-orange-600 dark:text-orange-400 truncate leading-tight">{cFile.name}</p>
+                          <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 truncate leading-tight">{cFile.name}</p>
                           <p className="text-[10px] font-medium text-orange-500/80 dark:text-orange-400/80 mt-0.5 truncate">Converting PPT to PDF...</p>
                         </div>
                       </div>
@@ -3242,19 +3406,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       <div key={idx} className="relative group min-w-0">
                         <button
                           onClick={() => switchActiveUpload(idx)}
-                          className={`w-full text-left p-3 rounded-xl transition-all border-none flex items-center gap-3 cursor-pointer min-w-0 ${
-                            activeUploadIndex === idx
-                              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20 font-semibold'
-                              : 'hover:bg-zinc-200/60 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300'
-                          }`}
+                          className={`w-full text-left p-2.5 rounded-xl transition-all border flex items-center gap-2.5 cursor-pointer min-w-0 ${activeUploadIndex === idx
+                              ? 'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500/30 text-zinc-950 dark:text-white shadow-xs ring-1 ring-orange-500/20'
+                              : 'border-transparent hover:bg-zinc-100/80 dark:hover:bg-white/[0.04] text-zinc-700 dark:text-zinc-300'
+                            }`}
                         >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${activeUploadIndex === idx ? 'bg-white/20' : 'bg-zinc-200/60 dark:bg-white/5'}`}>
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${activeUploadIndex === idx ? 'bg-orange-500 text-white shadow-xs' : 'bg-zinc-200/60 dark:bg-white/[0.06] text-zinc-500 dark:text-zinc-400'}`}>
                             <FileIcon fileName={up.file.name} size="w-4 h-4" className={activeUploadIndex === idx ? 'text-white' : ''} />
                           </div>
                           <div className="min-w-0 flex-1 pr-4">
                             <p className="text-xs font-semibold truncate leading-tight">{up.name || up.file.name}</p>
                             <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                              <p className={`text-[10px] font-medium truncate ${activeUploadIndex === idx ? 'text-white/80' : 'text-zinc-400'}`}>
+                              <p className={`text-[10px] font-medium truncate ${activeUploadIndex === idx ? 'text-orange-500 dark:text-orange-400 font-semibold' : 'text-zinc-400'}`}>
                                 {(up.file.size / 1024 / 1024).toFixed(2)} MB
                               </p>
                               {isImageFile(up.file.name, up.file.type) && (
@@ -3264,11 +3427,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                     e.stopPropagation();
                                     handleConvertSingleImageToPdf(idx);
                                   }}
-                                  className={`px-1.5 py-0.5 text-[9px] font-bold rounded border-none cursor-pointer transition-all shrink-0 ${
-                                    activeUploadIndex === idx
-                                      ? 'bg-white/20 text-white hover:bg-white/30'
+                                  className={`px-1.5 py-0.5 text-[9px] font-semibold rounded-md border-none cursor-pointer transition-all shrink-0 ${activeUploadIndex === idx
+                                      ? 'bg-purple-500 text-white hover:bg-purple-600'
                                       : 'bg-purple-500/15 text-purple-600 dark:text-purple-400 hover:bg-purple-500/25'
-                                  }`}
+                                    }`}
                                   title="Make PDF from this image"
                                 >
                                   Make PDF
@@ -3302,9 +3464,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                                 }
                               }
                             }}
-                            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg border-none cursor-pointer transition-all ${
-                              activeUploadIndex === idx ? 'text-white/70 hover:text-white hover:bg-white/20' : 'opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 hover:bg-zinc-200 dark:hover:bg-white/10'
-                            }`}
+                            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg border-none cursor-pointer transition-all ${activeUploadIndex === idx ? 'text-orange-500 hover:text-red-500 hover:bg-orange-500/10' : 'opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 hover:bg-zinc-200 dark:hover:bg-white/10'
+                              }`}
                             title="Remove file"
                           >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -3315,10 +3476,10 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </div>
                 )}
 
-                <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-5 custom-scrollbar min-w-0 bg-white dark:bg-[#111113]">
-                  <div className={`grid grid-cols-1 gap-5 min-w-0 ${showUploadModal ? 'md:grid-cols-2 md:gap-5' : ''}`}>
+                <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-4 custom-scrollbar min-w-0 bg-white/50 dark:bg-[#121215]/50">
+                  <div className={`grid grid-cols-1 gap-4 min-w-0 ${showUploadModal ? 'md:grid-cols-2 md:gap-4' : ''}`}>
                     <div className="min-w-0 space-y-1.5 relative z-[95]">
-                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-0.5 block">Target Program</label>
+                      <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-0.5 block">Target Program</label>
                       {!isCreatingNew.program ? (
                         <NexusDropdown
                           options={availablePrograms}
@@ -3328,6 +3489,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           }}
                           placeholder="Select Program"
                           className="w-full"
+                          buttonClassName="!bg-zinc-100/70 dark:!bg-white/[0.04] !border !border-zinc-200/80 dark:!border-white/[0.08] hover:!bg-zinc-200/50 dark:hover:!bg-white/[0.07] focus:!ring-2 focus:!ring-orange-500/15 focus:!border-orange-500/40 !rounded-xl !px-3.5 !py-2.5 !text-xs !shadow-2xs !font-medium"
                           renderCustomMenu={(close) => (
                             <>
                               {availablePrograms.map(opt => (
@@ -3345,19 +3507,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         />
                       ) : (
                         <div className="flex gap-2">
-                          <input autoFocus placeholder="New Program..." value={metaForm.program} onChange={e => setMetaForm({ ...metaForm, program: e.target.value })} className="flex-1 bg-zinc-100 dark:bg-[#161618] p-3 rounded-2xl font-semibold border-none text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-xs" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-3 bg-zinc-100 dark:bg-white/5 border-none rounded-2xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <input autoFocus placeholder="New Program..." value={metaForm.program} onChange={e => setMetaForm({ ...metaForm, program: e.target.value })} className="flex-1 bg-zinc-100/70 dark:bg-white/[0.04] p-2.5 rounded-xl font-medium border border-zinc-200/80 dark:border-white/[0.08] text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500/20 text-xs" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, program: false }); setMetaForm({ ...metaForm, program: '' }); }} className="p-2.5 bg-zinc-100 dark:bg-white/5 border-none rounded-xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className="min-w-0 space-y-1.5 relative z-[90]">
-                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-0.5 block">Document Title</label>
-                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#161618] px-4 py-3 rounded-2xl font-semibold border-none text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500/40 text-xs transition-all" />
+                      <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-0.5 block">Document Title</label>
+                      <input value={metaForm.name} onChange={e => setMetaForm({ ...metaForm, name: e.target.value })} className="w-full bg-zinc-100/70 dark:bg-white/[0.04] hover:bg-zinc-200/50 dark:hover:bg-white/[0.07] px-3.5 py-2.5 rounded-xl font-medium border border-zinc-200/80 dark:border-white/[0.08] text-zinc-900 dark:text-white outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 text-xs transition-all shadow-2xs" />
                     </div>
 
                     <div className="min-w-0 space-y-1.5 relative z-[80]">
-                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-0.5 block">Semester</label>
+                      <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-0.5 block">Semester</label>
                       {!isCreatingNew.semester ? (
                         <NexusDropdown
                           options={modalSemesters}
@@ -3365,6 +3527,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           onChange={(val) => setMetaForm({ ...metaForm, semester: val, subject: '', type: '' })}
                           placeholder="Select Semester"
                           className="w-full"
+                          buttonClassName="!bg-zinc-100/70 dark:!bg-white/[0.04] !border !border-zinc-200/80 dark:!border-white/[0.08] hover:!bg-zinc-200/50 dark:hover:!bg-white/[0.07] focus:!ring-2 focus:!ring-orange-500/15 focus:!border-orange-500/40 !rounded-xl !px-3.5 !py-2.5 !text-xs !shadow-2xs !font-medium"
                           renderCustomMenu={(close) => (
                             <>
                               {modalSemesters.map(opt => (
@@ -3382,14 +3545,14 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         />
                       ) : (
                         <div className="flex gap-2">
-                          <input autoFocus placeholder="New Sem..." value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="flex-1 bg-zinc-100 dark:bg-[#161618] p-3 rounded-2xl font-semibold border-none text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-xs" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-3 bg-zinc-100 dark:bg-white/5 border-none rounded-2xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <input autoFocus placeholder="New Sem..." value={metaForm.semester} onChange={e => setMetaForm({ ...metaForm, semester: e.target.value })} className="flex-1 bg-zinc-100/70 dark:bg-white/[0.04] p-2.5 rounded-xl font-medium border border-zinc-200/80 dark:border-white/[0.08] text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500/20 text-xs" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, semester: false }); setMetaForm({ ...metaForm, semester: '' }); }} className="p-2.5 bg-zinc-100 dark:bg-white/5 border-none rounded-xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className="min-w-0 space-y-1.5 relative z-[75]">
-                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-0.5 block">Subject</label>
+                      <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-0.5 block">Subject</label>
                       {!isCreatingNew.subject ? (
                         <NexusDropdown
                           options={modalSubjects}
@@ -3397,6 +3560,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           onChange={(val) => setMetaForm({ ...metaForm, subject: val, type: '' })}
                           placeholder="Select Subject"
                           className="w-full"
+                          buttonClassName="!bg-zinc-100/70 dark:!bg-white/[0.04] !border !border-zinc-200/80 dark:!border-white/[0.08] hover:!bg-zinc-200/50 dark:hover:!bg-white/[0.07] focus:!ring-2 focus:!ring-orange-500/15 focus:!border-orange-500/40 !rounded-xl !px-3.5 !py-2.5 !text-xs !shadow-2xs !font-medium"
                           renderCustomMenu={(close) => (
                             <>
                               {modalSubjects.map(opt => (
@@ -3414,8 +3578,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         />
                       ) : (
                         <div className="flex gap-2">
-                          <input autoFocus placeholder="New Subject..." value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="flex-1 bg-zinc-100 dark:bg-[#161618] p-3 rounded-2xl font-semibold border-none text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-xs" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-3 bg-zinc-100 dark:bg-white/5 border-none rounded-2xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <input autoFocus placeholder="New Subject..." value={metaForm.subject} onChange={e => setMetaForm({ ...metaForm, subject: e.target.value })} className="flex-1 bg-zinc-100/70 dark:bg-white/[0.04] p-2.5 rounded-xl font-medium border border-zinc-200/80 dark:border-white/[0.08] text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500/20 text-xs" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, subject: false }); setMetaForm({ ...metaForm, subject: '' }); }} className="p-2.5 bg-zinc-100 dark:bg-white/5 border-none rounded-xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
@@ -3429,6 +3593,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                           onChange={(val) => setMetaForm({ ...metaForm, type: val })}
                           placeholder="Select Category"
                           className="w-full"
+                          buttonClassName="!bg-zinc-100/70 dark:!bg-white/[0.04] !border !border-zinc-200/80 dark:!border-white/[0.08] hover:!bg-zinc-200/50 dark:hover:!bg-white/[0.07] focus:!ring-2 focus:!ring-orange-500/15 focus:!border-orange-500/40 !rounded-xl !px-3.5 !py-2.5 !text-xs !shadow-2xs !font-medium"
                           renderCustomMenu={(close) => (
                             <>
                               {modalCategories.map(opt => (
@@ -3446,41 +3611,41 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                         />
                       ) : (
                         <div className="flex gap-2">
-                          <input autoFocus placeholder="New Category..." value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="flex-1 bg-zinc-100 dark:bg-[#161618] p-3 rounded-2xl font-semibold border-none text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 text-xs" />
-                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-3 bg-zinc-100 dark:bg-white/5 border-none rounded-2xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors border-none cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+                          <input autoFocus placeholder="New Category..." value={metaForm.type} onChange={e => setMetaForm({ ...metaForm, type: e.target.value })} className="flex-1 bg-zinc-100/70 dark:bg-white/[0.04] p-2.5 rounded-xl font-medium border border-zinc-200/80 dark:border-white/[0.08] text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500/20 text-xs" />
+                          <button onClick={() => { setIsCreatingNew({ ...isCreatingNew, type: false }); setMetaForm({ ...metaForm, type: '' }); }} className="p-2.5 bg-zinc-100 dark:bg-white/5 border-none rounded-xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
                         </div>
                       )}
                     </div>
 
                     <div className={`min-w-0 space-y-1.5 relative z-[50] ${showUploadModal ? 'md:col-span-2' : ''}`}>
-                      <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 ml-0.5 block">Short Description</label>
-                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-zinc-100 dark:bg-[#161618] p-4 rounded-2xl font-medium border-none text-zinc-800 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-orange-500/40 resize-none text-xs transition-all custom-scrollbar" placeholder="Tell us more about this file..." />
+                      <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-0.5 block">Short Description</label>
+                      <textarea rows={2} value={metaForm.description} onChange={e => setMetaForm({ ...metaForm, description: e.target.value })} className="w-full bg-zinc-100/70 dark:bg-white/[0.04] hover:bg-zinc-200/50 dark:hover:bg-white/[0.07] p-3.5 rounded-xl font-medium border border-zinc-200/80 dark:border-white/[0.08] text-zinc-900 dark:text-zinc-100 outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 resize-none text-xs transition-all custom-scrollbar shadow-2xs" placeholder="Tell us more about this file..." />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <footer className="p-4 sm:p-6 bg-zinc-50/80 dark:bg-[#161618]/80 border-none flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <footer className="px-5 py-4 sm:px-6 bg-zinc-50/70 dark:bg-white/[0.02] border-t border-zinc-200/60 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3 shrink-0">
                 {showUploadModal && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2.5 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 rounded-xl font-bold text-xs transition-all border-none cursor-pointer flex items-center gap-2 shrink-0 active:scale-95"
+                    className="px-3.5 py-2 bg-zinc-100 hover:bg-zinc-200/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-zinc-700 dark:text-zinc-200 rounded-xl font-semibold text-xs transition-all border border-zinc-200/60 dark:border-white/[0.08] cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95"
                   >
                     <Plus className="w-3.5 h-3.5 text-orange-500" strokeWidth={2.5} />
                     <span>Add More Files</span>
                   </button>
                 )}
-                <div className="flex items-center gap-3 ml-auto">
+                <div className="flex items-center gap-2.5 ml-auto">
                   <button
                     onClick={() => { if (showUploadModal) handleCloseUpload(); else handleCloseEdit(); }}
-                    className="px-4 py-2.5 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 dark:text-zinc-400 rounded-xl font-bold text-xs transition-all border-none cursor-pointer"
+                    className="px-4 py-2 rounded-xl text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white text-xs font-medium transition-all border-none bg-transparent cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={showUploadModal ? handleUpload : handleEditSubmission}
                     disabled={isProcessing || convertingFiles.length > 0 || pendingUploads.length === 0 || !metaForm.name || !metaForm.semester || !metaForm.subject || (showUploadModal && pendingUploads.some(u => !u.name || !u.semester || !u.subject))}
-                    className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl font-bold text-xs shadow-md shadow-orange-500/20 disabled:opacity-50 disabled:hover:scale-100 transition-all border-none cursor-pointer flex items-center gap-2"
+                    className="px-5 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-95 text-white rounded-xl font-semibold text-xs shadow-md shadow-orange-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all border-none cursor-pointer flex items-center gap-1.5"
                   >
                     {isProcessing ? (
                       <span>Processing Batch...</span>
@@ -3488,7 +3653,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                       <span className="flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Converting PPT...</span>
                     ) : (
                       <>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        <UploadCloud className="w-3.5 h-3.5" />
                         <span>{showUploadModal ? `Upload ${pendingUploads.length} Item${pendingUploads.length > 1 ? 's' : ''}` : 'Save Record'}</span>
                       </>
                     )}
@@ -3785,7 +3950,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           />
         )
       }
-      
+
     </div>
   );
 };
@@ -3793,18 +3958,18 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 const getSubjectTheme = (nameOrCode: string, sectionName?: string) => {
   const c = nameOrCode.toUpperCase().trim();
   const sec = (sectionName || '').toUpperCase().trim();
-  
+
   // 1. Languages / Communication / Soft Skills / Language Electives -> PINK (#ec4899)
   if (
     sec.includes('LANG') ||
-    c.includes('FRN') || 
-    c.includes('GER') || 
-    c.includes('JAP') || 
-    c.includes('SPA') || 
-    c.includes('FRENCH') || 
-    c.includes('GERMAN') || 
-    c.includes('JAPANESE') || 
-    c.includes('SPANISH') || 
+    c.includes('FRN') ||
+    c.includes('GER') ||
+    c.includes('JAP') ||
+    c.includes('SPA') ||
+    c.includes('FRENCH') ||
+    c.includes('GERMAN') ||
+    c.includes('JAPANESE') ||
+    c.includes('SPANISH') ||
     c.includes('LANGUAGE') ||
     c.includes('COMMUNICATION') ||
     c.includes('PEL')
@@ -3849,7 +4014,7 @@ const getSubjectTheme = (nameOrCode: string, sectionName?: string) => {
   // 4. Core Courses, Other & Custom Courses -> CYAN / TEAL (#06b6d4)
   const isMath = c.includes('MTH') || c.includes('MATH') || c.includes('CALCULUS') || c.includes('STATISTICS');
   const isCode = c.includes('PROGRAMMING') || c.includes('PYTHON') || c.includes('INT') || c.includes('CSE');
-  
+
   return {
     text: 'text-cyan-500',
     bg: 'bg-cyan-500',
@@ -3876,7 +4041,7 @@ const FolderCard: React.FC<{
   subjectsCount?: number;
   searchMatchText?: string | null;
   sectionName?: string;
-}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver, subjectsCount, searchMatchText, sectionName }) => {
+}> = ({ folder, selectedProgram, userProfile, fileCount, onDragOver, onDragLeave, onDrop, toPath, onRename, onDelete, isDraggingOver, subjectsCount, searchMatchText }) => {
   const isAdmin = userProfile?.is_admin || false;
   const isVirtual = folder.id.startsWith('v-');
 
@@ -3896,152 +4061,88 @@ const FolderCard: React.FC<{
     opacity: isDragging ? 0.3 : 1,
   };
 
-  const meta = folder.type === 'subject' ? findSubjectMetadata(selectedProgram, folder.name) : null;
-
-  // Semester color palette matching the reference design
-  const semesterColors = ['#ff7a00', '#a855f7', '#0ea5e9', '#22c55e', '#f43f5e', '#eab308', '#14b8a6', '#6366f1'];
-
-  if (folder.type === 'semester') {
-    const semNum = folder.name.match(/\d+/)?.[0] || '1';
-    const semIdx = Math.max(0, (parseInt(semNum) - 1)) % semesterColors.length;
-    const semColor = (folder.color && folder.color !== '#ff7a00') ? folder.color : semesterColors[semIdx];
-    
-    return (
-      <Link
-        to={toPath}
-        ref={setNodeRef as any}
-        style={style as any}
-        onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
-        onDragLeave={onDragLeave}
-        onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
-        onClick={(e) => { if (isDragging) e.preventDefault(); }}
-        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
-      >
-        {isAdmin && !isVirtual && (
-          <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5" title="Edit Semester">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-            </button>
-            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5" title="Delete Semester">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
-            </button>
-          </div>
-        )}
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: semColor }}>
-            <FolderIcon type="semester" name={folder.name} size="w-5 h-5 text-white" iconName={folder.icon_name} color="#ffffff" />
-          </div>
-          <div className="min-w-0">
-            <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white leading-snug">{folder.name}</h4>
-            <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-              <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                <BookOpen className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                {subjectsCount || 0} Subjects
-              </span>
-              <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-              <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                {fileCount} Resources
-              </span>
-            </div>
-          </div>
-        </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: semColor }}><path d="M9 18l6-6-6-6" /></svg>
-      </Link>
-    );
-  }
-
+  let displayName = folder.name;
   if (folder.type === 'subject') {
     const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
-    const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : folder.name.split(':')[0].trim();
-    let subjectName = folder.name.split(':')[1]?.trim();
-    if (!subjectName || subjectName.toLowerCase() === subjectCode.toLowerCase()) {
+    const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : '';
+    let subjectName = folder.name.includes(':') ? folder.name.split(':')[1]?.trim() : folder.name;
+    if (!subjectName || (subjectCode && subjectName.toLowerCase() === subjectCode.toLowerCase())) {
       const meta = findSubjectMetadata(selectedProgram, folder.name);
       subjectName = meta?.title || folder.name;
     }
-    const defaultTheme = getSubjectTheme(folder.name, sectionName);
-    const rawTheme = {
-      rawColor: defaultTheme.rawColor,
-      icon: (folder.icon_name && folder.icon_name !== 'Folder') ? (
-        <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
-      ) : (
-        defaultTheme.icon
-      )
-    };
-    const metadata = findSubjectMetadata(selectedProgram, folder.name);
-    const catalogCurriculum = getSubjectCurriculum(folder.name);
-    const creditsText = catalogCurriculum ? `${catalogCurriculum.credits} Credits` : (metadata ? `${metadata.credits} Credits` : "4 Credits");
-    const ltpText = catalogCurriculum ? `L-T-P: ${catalogCurriculum.l}-${catalogCurriculum.t}-${catalogCurriculum.p}` : (metadata ? `L-T-P: ${metadata.l}-${metadata.t}-${metadata.p}` : "L-T-P: 3-0-2");
-
-    return (
-      <Link
-        to={toPath}
-        ref={setNodeRef as any}
-        style={style}
-        onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
-        onDragLeave={onDragLeave}
-        onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
-        onClick={(e) => { if (isDragging) e.preventDefault(); }}
-        className="group flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] hover:bg-zinc-50 dark:hover:bg-[#161618] hover:shadow-md transition-all duration-200 active:scale-[0.99] relative overflow-hidden"
-      >
-        {isAdmin && !isVirtual && (
-          <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-orange-500 hover:bg-orange-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-            </button>
-            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }} className="p-1 bg-white dark:bg-[#0a0a0a] rounded-lg text-red-500 hover:bg-red-50 transition-colors shadow-sm border border-zinc-100 dark:border-white/5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-1 sm:pr-2">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white animate-fade-in" style={{ backgroundColor: rawTheme.rawColor }}>
-            {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug break-words">{subjectName}</h4>
-            <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-              <span className="font-semibold whitespace-nowrap shrink-0" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
-              <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-              {searchMatchText ? (
-                <span className="flex items-center gap-1 font-bold text-orange-500 bg-orange-500/5 dark:bg-orange-500/10 px-2 py-0.5 rounded-lg border border-orange-500/10 whitespace-nowrap shrink-0">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-orange-500 shrink-0"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                  {searchMatchText}
-                </span>
-              ) : (
-                <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                  <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-                  {fileCount} Resources
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-transform shrink-0" style={{ color: rawTheme.rawColor }}><path d="M9 18l6-6-6-6" /></svg>
-      </Link>
-    );
+    if (subjectCode && subjectName.toUpperCase().startsWith(subjectCode)) {
+      subjectName = subjectName.slice(subjectCode.length).replace(/^[\s:-]+/, '').trim();
+    }
+    displayName = subjectName || folder.name;
   }
+
+  const countDisplay = folder.type === 'semester'
+    ? (subjectsCount !== undefined ? subjectsCount : fileCount)
+    : fileCount;
+
+  const folderColor = (folder.color && folder.color !== '#ff7a00') ? folder.color : undefined;
 
   return (
     <Link
       to={toPath}
       ref={setNodeRef as any}
       style={style as any}
+      {...attributes}
+      {...listeners}
       onDragOver={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDragOver(e); }}
       onDragLeave={onDragLeave}
       onDrop={(e) => { if (!isAdmin || isVirtual) return; e.preventDefault(); onDrop(e); }}
       onClick={(e) => { if (isDragging) e.preventDefault(); }}
-      className="group flex items-center justify-between p-4 rounded-2xl border border-zinc-150 dark:border-white/5 bg-white dark:bg-[#121214] hover:bg-zinc-50/50 dark:hover:bg-[#18181c] hover:shadow-md hover:border-zinc-200 dark:hover:border-white/10 transition-all duration-200 active:scale-[0.99]"
+      className={`p-3.5 rounded-xl border ${isDraggingOver ? 'border-amber-400 bg-amber-500/10' : 'border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5'} transition-all cursor-pointer group flex flex-col gap-2 shadow-xs select-none no-underline relative`}
     >
-      <div className="flex items-center gap-3">
-        <FolderIcon type={folder.type} name={folder.name} size="w-8 h-8" iconName={folder.icon_name} color={folder.color} />
-        <div>
-          <h4 className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-100 break-words">{folder.name}</h4>
-          <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium">{fileCount} resources</p>
+      <div className="flex items-center justify-between">
+        {/* Yellow Folder Icon matching category folders */}
+        <svg
+          className="w-6 h-6 text-amber-400 shrink-0"
+          style={folderColor ? { color: folderColor } : undefined}
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+        </svg>
+
+        {/* Right side: count + admin actions */}
+        <div className="flex items-center gap-1.5">
+          {isAdmin && !isVirtual && (
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRename(); }}
+                className="p-1 text-zinc-400 hover:text-amber-500 bg-transparent border-none cursor-pointer"
+                title="Edit"
+              >
+                <Pencil className="w-3 h-3" />
+              </button>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e); }}
+                className="p-1 text-zinc-400 hover:text-red-500 bg-transparent border-none cursor-pointer"
+                title="Delete"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+          <span className="text-[10px] font-medium text-zinc-400">
+            {countDisplay}
+          </span>
         </div>
       </div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 group-hover:translate-x-0.5 transition-all"><path d="M9 18l6-6-6-6" /></svg>
+
+      <span
+        className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors"
+        title={displayName}
+      >
+        {displayName}
+      </span>
+      {searchMatchText && (
+        <span className="text-[10px] text-orange-500 font-medium truncate -mt-1">
+          {searchMatchText}
+        </span>
+      )}
     </Link>
   );
 };
@@ -4051,49 +4152,41 @@ const StaticFolderCard: React.FC<{
   selectedProgram: string;
   fileCount: number;
 }> = ({ folder, selectedProgram, fileCount }) => {
-  const defaultTheme = getSubjectTheme(folder.name);
-  const rawTheme = {
-    rawColor: (folder.color && folder.color !== '#ff7a00') ? folder.color : defaultTheme.rawColor,
-    icon: (folder.icon_name && folder.icon_name !== 'Folder') ? (
-      <FolderIcon type="subject" name={folder.name} size="w-5 h-5" iconName={folder.icon_name} color="#ffffff" />
-    ) : (
-      defaultTheme.icon
-    )
-  };
-  const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
-  const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : folder.name.split(':')[0].trim();
-  const metadata = findSubjectMetadata(selectedProgram, folder.name);
-  const catalogCurriculum = getSubjectCurriculum(folder.name);
-  let subjectName = folder.name.split(':')[1]?.trim();
-  if (!subjectName || subjectName.toLowerCase() === subjectCode.toLowerCase()) {
-    subjectName = catalogCurriculum?.name || metadata?.title || folder.name;
+  let displayName = folder.name;
+  if (folder.type === 'subject') {
+    const subjectCodeMatch = folder.name.match(/^([A-Za-z]+\d{3})/);
+    const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : '';
+    let subjectName = folder.name.includes(':') ? folder.name.split(':')[1]?.trim() : folder.name;
+    if (!subjectName || (subjectCode && subjectName.toLowerCase() === subjectCode.toLowerCase())) {
+      const meta = findSubjectMetadata(selectedProgram, folder.name);
+      subjectName = meta?.title || folder.name;
+    }
+    if (subjectCode && subjectName.toUpperCase().startsWith(subjectCode)) {
+      subjectName = subjectName.slice(subjectCode.length).replace(/^[\s:-]+/, '').trim();
+    }
+    displayName = subjectName || folder.name;
   }
-  const creditsText = catalogCurriculum ? `${catalogCurriculum.credits} Credits` : (metadata ? `${metadata.credits} Credits` : "4 Credits");
-  const ltpText = catalogCurriculum ? `L-T-P: ${catalogCurriculum.l}-${catalogCurriculum.t}-${catalogCurriculum.p}` : (metadata ? `L-T-P: ${metadata.l}-${metadata.t}-${metadata.p}` : "L-T-P: 3-0-2");
+
+  const folderColor = (folder.color && folder.color !== '#ff7a00') ? folder.color : undefined;
 
   return (
-    <div className="p-3 sm:p-3.5 rounded-2xl border-none bg-white dark:bg-[#111113] flex items-center justify-between min-h-[70px] relative overflow-hidden">
-      <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-1 sm:pr-2">
-        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: rawTheme.rawColor }}>
-          {React.isValidElement(rawTheme.icon) ? React.cloneElement(rawTheme.icon as React.ReactElement, { className: 'w-5 h-5 text-white' }) : rawTheme.icon}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white leading-snug break-words">{subjectName}</h4>
-          <div className="flex flex-wrap items-center gap-x-1.5 min-[375px]:gap-x-2 gap-y-0.5 mt-1 text-[9px] min-[375px]:text-[10px] sm:text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-            <span className="font-semibold whitespace-nowrap shrink-0" style={{ color: rawTheme.rawColor }}>{subjectCode}</span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-            <span className="whitespace-nowrap shrink-0">{creditsText}</span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-            <span className="whitespace-nowrap shrink-0">{ltpText}</span>
-            <span className="text-zinc-300 dark:text-zinc-700 font-bold select-none shrink-0">•</span>
-            <span className="flex items-center gap-0.5 whitespace-nowrap shrink-0">
-              <FileText className="w-3.5 h-3.5 text-zinc-455 dark:text-zinc-500" />
-              {fileCount} Resources
-            </span>
-          </div>
-        </div>
+    <div className="p-3.5 rounded-xl border border-amber-400/60 bg-white dark:bg-[#111113] flex flex-col gap-2 shadow-lg select-none w-44">
+      <div className="flex items-center justify-between">
+        <svg
+          className="w-6 h-6 text-amber-400 shrink-0"
+          style={folderColor ? { color: folderColor } : undefined}
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+        </svg>
+        <span className="text-[10px] font-medium text-zinc-400">
+          {fileCount}
+        </span>
       </div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-300 dark:text-zinc-600 shrink-0" style={{ color: rawTheme.rawColor }}><path d="M9 18l6-6-6-6" /></svg>
+      <span className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate">
+        {displayName}
+      </span>
     </div>
   );
 };
@@ -4151,23 +4244,10 @@ const FileCard: React.FC<{
         // Open file details modal
         onShowDetails();
       }}
-      className={`group p-4 rounded-[24px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0c0c0e] ${fileStyle.hoverBorder} hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden flex flex-col min-h-[148px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-2xl border-orange-500 ring-2 ring-orange-500/20' : ''}`}
+      className={`group p-4 rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#0c0c0e] hover:border-zinc-300 dark:hover:border-white/20 hover:shadow-sm transition-all relative flex flex-col min-h-[140px] cursor-pointer no-underline text-current ${isDragging ? 'shadow-lg border-orange-500 ring-2 ring-orange-500/20' : ''}`}
     >
-      {/* Aurora glow on hover */}
-      <div 
-        className="absolute -right-12 -top-12 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ backgroundColor: fileStyle.glowColor }}
-      />
-
-      {/* Giant faint background logo */}
-      <div className="absolute -right-4 -bottom-4 opacity-[0.05] dark:opacity-[0.03] pointer-events-none z-0">
-        <FileIcon fileName={file.storage_path} size="w-28 h-28" className={fileStyle.iconText} />
-      </div>
-
       <div className="flex items-center justify-between mb-3 relative z-10">
-        <div className={`w-9 h-9 ${fileStyle.iconBg} rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}>
-          <FileIcon fileName={file.storage_path} size="w-5 h-5" className={fileStyle.iconText} />
-        </div>
+        <FileIcon fileName={file.storage_path || file.name} fileType={file.type} />
         <div className="flex items-center gap-1.5">
           <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase rounded-md ${fileStyle.badgeBg} ${fileStyle.badgeText} transition-colors`}>
             {fileStyle.label}
@@ -4186,8 +4266,8 @@ const FileCard: React.FC<{
         </div>
       </div>
 
-      <div className={`text-[12px] md:text-[14px] font-medium text-zinc-700 dark:text-zinc-200 tracking-tight leading-snug line-clamp-2 mb-2 ${fileStyle.hoverText} transition-colors duration-300 relative z-10`}>
-        {file.name}
+      <div className="text-[12px] md:text-[13px] font-medium text-zinc-800 dark:text-zinc-200 tracking-tight leading-snug line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors duration-200 relative z-10">
+        {getDisplayFileNameWithExtension(file.name, file.storage_path, file.type).fullName}
       </div>
 
       <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between relative z-10">
@@ -4240,15 +4320,9 @@ const StaticFileCard: React.FC<{
   const isAdmin = userProfile?.is_admin || false;
   const fileStyle = getFileStyle(file.storage_path || file.name);
   return (
-    <div className="p-4 rounded-[24px] border border-orange-500 bg-white dark:bg-[#0c0c0e] flex flex-col min-h-[148px] relative overflow-hidden">
-      {/* Giant faint background logo */}
-      <div className="absolute -right-4 -bottom-4 opacity-[0.05] dark:opacity-[0.03] pointer-events-none z-0">
-        <FileIcon fileName={file.storage_path} size="w-28 h-28" className={fileStyle.iconText} />
-      </div>
+    <div className="p-4 rounded-2xl border border-orange-500 bg-white dark:bg-[#0c0c0e] flex flex-col min-h-[140px] relative overflow-hidden shadow-xl">
       <div className="flex items-center justify-between mb-3">
-        <div className={`w-9 h-9 ${fileStyle.iconBg} rounded-xl flex items-center justify-center`}>
-          <FileIcon fileName={file.storage_path} size="w-5 h-5" className={fileStyle.iconText} />
-        </div>
+        <FileIcon fileName={file.storage_path || file.name} fileType={file.type} />
         <div className="flex items-center gap-1.5">
           <span className={`px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase rounded-md ${fileStyle.badgeBg} ${fileStyle.badgeText}`}>
             {fileStyle.label}
@@ -4260,7 +4334,7 @@ const StaticFileCard: React.FC<{
           )}
         </div>
       </div>
-      <div className="text-[12px] md:text-[14px] font-medium text-zinc-700 dark:text-zinc-200 tracking-tight leading-snug line-clamp-2 mb-2">{file.name}</div>
+      <div className="text-[12px] md:text-[13px] font-medium text-zinc-800 dark:text-zinc-200 tracking-tight leading-snug line-clamp-2 mb-2">{file.name}</div>
       <div className="pt-3 mt-auto border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
         <span className="text-[11px] sm:text-xs text-zinc-400 dark:text-zinc-500 font-normal">{file.size}</span>
       </div>

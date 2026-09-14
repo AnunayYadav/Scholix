@@ -265,11 +265,42 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
                 const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
                 const coverImage = await finalPdf.embedPng(coverImageBytes);
                 const coverPage = finalPdf.addPage([pageWidth, pageHeight]);
-                coverPage.drawImage(coverImage, {
+
+                // 1. Draw solid crisp white background to preserve canvas ratio
+                coverPage.drawRectangle({
                     x: 0,
                     y: 0,
                     width: pageWidth,
                     height: pageHeight,
+                    color: rgb(1, 1, 1),
+                });
+
+                // 2. Preserve natural aspect ratio of the branding graphic (avoid stretching on horizontal/landscape PDFs)
+                const imgAspect = coverImage.width / coverImage.height;
+                const pageAspect = pageWidth / pageHeight;
+
+                let drawWidth = pageWidth;
+                let drawHeight = pageHeight;
+
+                if (imgAspect < pageAspect) {
+                    // Page is wider than the branding image (e.g. horizontal / landscape slides)
+                    drawHeight = pageHeight;
+                    drawWidth = pageHeight * imgAspect;
+                } else {
+                    // Page is taller or same ratio
+                    drawWidth = pageWidth;
+                    drawHeight = pageWidth / imgAspect;
+                }
+
+                // Center the branding graphic perfectly within the page
+                const xOffset = (pageWidth - drawWidth) / 2;
+                const yOffset = (pageHeight - drawHeight) / 2;
+
+                coverPage.drawImage(coverImage, {
+                    x: xOffset,
+                    y: yOffset,
+                    width: drawWidth,
+                    height: drawHeight,
                 });
             }
 
@@ -292,6 +323,11 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
             const textHeight = helveticaBoldFont.heightAtSize(watermarkSize);
 
             for (let i = 0; i < finalPdf.getPageCount(); i++) {
+                // Skip watermark & footer on the injected branding page so it stays pristine
+                if (coverImageBytes && i === 1) {
+                    continue;
+                }
+
                 const page = finalPdf.getPage(i);
                 const { width, height } = page.getSize();
                 const rad45 = (45 * Math.PI) / 180;

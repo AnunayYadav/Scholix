@@ -1886,7 +1886,7 @@ const AppContent: React.FC = () => {
           userProfile={userProfile}
           onOpenAuth={openAuth}
         />
-        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[72px]">
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[60px]">
           <BackgroundEffects />
 
           {false && (
@@ -2114,7 +2114,7 @@ const FeatureRoutes: React.FC<{
       <Route path="/placement/:reportId" element={<PlacementRedirect />} />
       <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
       <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
-      <Route path="/degree-guide" element={<DegreeGuide />} />
+      <Route path="/degree-guide" element={<FeatureGuard module={ModuleType.DEGREE_GUIDE}><DegreeGuide /></FeatureGuard>} />
       <Route path="/lectures" element={<FeatureGuard module={ModuleType.LECTURES}><Navigate to="/tools?tab=lectures" replace /></FeatureGuard>} />
 
 

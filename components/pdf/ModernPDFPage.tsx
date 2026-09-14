@@ -318,7 +318,10 @@ export const ModernPDFPage: React.FC<ModernPDFPageProps> = React.memo(({
             {(!hasBeenRenderedOnce && isIntersecting) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-zinc-50/80 dark:bg-[#09090b]/80 backdrop-blur-xs rounded-xl z-30 animate-fade-in">
                     <div className="flex flex-col items-center gap-2">
-                        <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                        <div
+                            className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"
+                            style={{ animationDuration: '0.55s' }}
+                        />
                         <span className="text-[10px] font-bold text-zinc-400">Page {pageNum}</span>
                     </div>
                 </div>

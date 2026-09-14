@@ -1,14 +1,14 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { LogOut, User, Shield, ChevronRight, Edit2 } from 'lucide-react';
-import { createPortal } from 'react-dom';
+import { 
+  Home, BookOpen, Shield, GraduationCap, LayoutGrid, PhoneCall, 
+  Compass, Settings, LogOut, ChevronRight, Edit2 
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ModuleType, UserProfile } from '../types';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import FeedbackModal from './FeedbackModal.tsx';
-
 
 interface SidebarProps {
   currentModule: ModuleType;
@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const { selectedUniversity, universityInfo, fullBrandName, shortBrandName, studentTerm, uniSlug } = useUniversity();
+  const { universityInfo, shortBrandName, uniSlug } = useUniversity();
 
   const getPathFromModule = (module: ModuleType, slug: string): string => {
     const prefix = slug && slug !== 'none' ? `/${slug}` : '';
@@ -86,65 +86,67 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-
-  const allNavItems = [
+  const primaryItems = [
     {
       id: ModuleType.DASHBOARD,
       label: 'Home',
-      icon: <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+      icon: <Home className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
     {
       id: ModuleType.LIBRARY,
       label: 'Content Library',
-      icon: <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
+      icon: <BookOpen className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
     {
       id: ModuleType.QUIZ,
       label: 'Quizzes',
-      icon: <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
+      icon: <Shield className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
     {
       id: ModuleType.CAMPUS,
       label: 'Campus Hub',
-      icon: <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+      icon: <GraduationCap className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
     {
       id: ModuleType.TOOLS,
       label: 'Tools',
-      icon: <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
+      icon: <LayoutGrid className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
+  ];
+
+  const secondaryItems = [
     {
       id: ModuleType.EMERGENCY,
       label: 'Rescue Line',
-      icon: <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+      icon: <PhoneCall className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
     {
       id: ModuleType.DEGREE_GUIDE,
       label: 'Degree Guide',
-      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z" /><path d="M6 6h10M6 10h10" /></svg>
+      icon: <Compass className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
     {
       id: ModuleType.SETTINGS,
       label: 'Settings',
-      icon: <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.72V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.17a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+      icon: <Settings className="w-[18px] h-[18px]" strokeWidth={1.65} />,
     },
   ];
 
-  const navItems = universityInfo
-    ? allNavItems.filter(item => {
-      if (
-        item.id === ModuleType.DASHBOARD ||
-        item.id === ModuleType.SETTINGS
-      ) return true;
+  const filterModule = (item: { id: ModuleType; label: string; icon: React.ReactNode }) => {
+    if (!universityInfo) return true;
+    if (item.id === ModuleType.DASHBOARD || item.id === ModuleType.SETTINGS) return true;
+    if (item.id === ModuleType.TOOLS) {
+      return (
+        universityInfo.features.enabledModules.includes(ModuleType.ATTENDANCE) ||
+        universityInfo.features.enabledModules.includes(ModuleType.CGPA) ||
+        universityInfo.features.enabledModules.includes(ModuleType.PLACEMENT)
+      );
+    }
+    return universityInfo.features.enabledModules.includes(item.id);
+  };
 
-      if (item.id === ModuleType.TOOLS) {
-        return universityInfo.features.enabledModules.includes(ModuleType.ATTENDANCE) ||
-          universityInfo.features.enabledModules.includes(ModuleType.CGPA) ||
-          universityInfo.features.enabledModules.includes(ModuleType.PLACEMENT);
-      }
-      return universityInfo.features.enabledModules.includes(item.id);
-    })
-    : allNavItems;
+  const filteredPrimary = primaryItems.filter(filterModule);
+  const filteredSecondary = secondaryItems.filter(filterModule);
 
   const isSettingsActive = [
     ModuleType.SETTINGS,
@@ -154,13 +156,53 @@ const Sidebar: React.FC<SidebarProps> = ({
     ModuleType.PRIVACY,
   ].includes(currentModule);
 
+  const isExpanded = isHovered || isMobileMenuOpen;
+
+  const renderNavItem = (item: { id: ModuleType; label: string; icon: React.ReactNode }) => {
+    const isActive = currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE);
+
+    return (
+      <Link
+        key={item.id}
+        to={getPathFromModule(item.id, uniSlug)}
+        onClick={() => {
+          setModule(item.id);
+          if (window.innerWidth < 768) toggleMobileMenu();
+        }}
+        className={`w-full h-10 flex items-center rounded-2xl transition-colors duration-150 relative group cursor-pointer border-none no-underline ${
+          isActive
+            ? 'bg-zinc-100 dark:bg-white/[0.08] text-zinc-900 dark:text-white font-medium'
+            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-white/[0.04]'
+        }`}
+      >
+        {/* Icon container: exactly 40px wide, centered inside the 40px rail slot */}
+        <div className={`w-10 h-10 shrink-0 flex items-center justify-center transition-colors duration-150 ${
+          isActive 
+            ? 'text-zinc-900 dark:text-white' 
+            : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300'
+        }`}>
+          {item.icon}
+        </div>
+
+        {/* Text on right: reveals cleanly on expansion */}
+        <span className={`text-[13.5px] tracking-tight whitespace-nowrap overflow-hidden transition-all duration-200 ease-out ${
+          isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+        }`}>
+          {item.label}
+        </span>
+
+        {/* Tooltip when collapsed */}
+        <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-white/10 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${
+          !isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
+        }`}>
+          {item.label}
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <>
-      {isMobileMenuOpen && (
-        <div className="overlay md:hidden" onClick={toggleMobileMenu} />
-      )}
-
       <FeedbackModal
         isOpen={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
@@ -170,8 +212,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile sidebar backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-[400] bg-[#0a0a0a]/20 dark:bg-[#0a0a0a]/40 md:hidden transition-opacity duration-500 animate-fade-in"
-          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+          className="fixed inset-0 z-[400] bg-black/40 backdrop-blur-md md:hidden transition-opacity duration-300"
           onClick={toggleMobileMenu}
         />
       )}
@@ -180,109 +221,55 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`
-          fixed inset-y-0 left-0 z-[410] md:translate-x-0 transform transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) will-change-[width]
-          bg-white dark:bg-[#0a0a0a] border-r border-zinc-200 dark:border-white/10
-          ${isMobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'}
-          ${isHovered || isMobileMenuOpen ? 'w-64' : 'md:w-[72px]'}
-          flex flex-col h-full
+          fixed inset-y-0 left-0 z-[410] md:translate-x-0 transform transition-[width] duration-200 ease-out
+          bg-white dark:bg-[#0c0c0e] border-r border-zinc-200/80 dark:border-white/[0.06]
+          ${isMobileMenuOpen ? 'translate-x-0 w-56' : '-translate-x-full md:translate-x-0'}
+          ${isExpanded ? 'w-56 shadow-2xl md:shadow-none' : 'md:w-[60px]'}
+          flex flex-col h-full select-none overflow-hidden
         `}
       >
-        <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
-          <defs>
-            <linearGradient id="sidebar-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--brand-primary)" />
-              <stop offset="100%" stopColor="var(--brand-secondary)" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        <div className="h-20 flex items-center overflow-hidden flex-shrink-0 z-[50] relative">
-          <div className="flex items-center w-full h-full">
-            <div className="w-[72px] flex-shrink-0 flex items-center justify-center">
-              <div className="relative w-8 h-8">
-                <img
-                  src={universityInfo?.logo || "/Scholix_light.webp"}
-                  alt="Platform Logo"
-                  width="32"
-                  height="32"
-                  className={`w-full h-full rounded-lg transition-transform cursor-pointer object-contain ${universityInfo?.logo ? '' : 'dark:hidden'}`}
-                  data-nosnippet="true"
-                  onClick={() => setModule(ModuleType.DASHBOARD)}
-                />
-                {!universityInfo?.logo && (
-                  <img
-                    src="/Scholix_dark.webp"
-                    alt="Platform Logo"
-                    width="32"
-                    height="32"
-                    className="w-full h-full rounded-lg transition-transform cursor-pointer object-contain hidden dark:block"
-                    onClick={() => setModule(ModuleType.DASHBOARD)}
-                  />
-                )}
-              </div>
+        {/* Brand Header */}
+        <div 
+          className="h-14 px-2.5 flex items-center cursor-pointer select-none flex-shrink-0"
+          onClick={() => setModule(ModuleType.DASHBOARD)}
+        >
+          <div className="w-full h-10 flex items-center rounded-2xl">
+            {/* Logo container: exactly 40px wide, identical to nav item icon slots */}
+            <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+              <img
+                src={universityInfo?.logo || "/Scholix_dark.webp"}
+                alt="Logo"
+                width="28"
+                height="28"
+                className="w-7 h-7 rounded-lg object-contain"
+              />
             </div>
-            <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-2' : 'max-w-0 opacity-0 ml-0'}`}>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent tracking-tighter whitespace-nowrap">
-                {shortBrandName}
-              </h1>
-            </div>
+            <span className={`text-[14px] font-semibold tracking-tight text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden transition-all duration-200 ease-out ${
+              isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+            }`}>
+              {shortBrandName}
+            </span>
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden relative group/nav">
-          <nav className="h-full px-3 py-4 space-y-1 overflow-y-auto no-scrollbar overflow-x-hidden relative z-10">
-            {navItems.map((item) => (
-              <Link
-                key={item.id}
-                to={getPathFromModule(item.id, uniSlug)}
-                onClick={() => {
-                  setModule(item.id);
-                  if (window.innerWidth < 768) toggleMobileMenu();
-                }}
-                className={`w-full h-12 flex items-center rounded-xl border-none text-left relative group transition-all duration-200
-                  ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE))
-                    ? 'text-zinc-950 dark:text-white'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/[0.03] hover:text-zinc-900 dark:hover:text-zinc-200'
-                  }
-                `}
-              >
-                <div className="flex items-center w-full h-full text-zinc-900/90 dark:text-zinc-100/90">
-                  <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex-shrink-0 flex items-center justify-center ${isHovered || isMobileMenuOpen ? 'w-12' : 'w-12'}`}>
-                    <span className={`flex-shrink-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'scale-110 active-icon-glow' : ''}`}>
-                      {React.cloneElement(item.icon as React.ReactElement, {
-                        className: `w-5 h-5 sm:w-[22px] sm:h-[22px] transition-colors duration-300 ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? '' : 'text-zinc-500 dark:text-zinc-400'}`,
-                        children: React.Children.map((item.icon as React.ReactElement).props.children, (child: any, idx: number) => {
-                          if (!React.isValidElement(child)) return child;
-                          const isActive = currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE);
-                          return React.cloneElement(child as React.ReactElement, {
-                            fill: (idx === 0 && isActive) ? 'url(#sidebar-icon-gradient)' : 'none',
-                            fillOpacity: (idx === 0 && isActive) ? 0.2 : 0,
-                            stroke: isActive ? 'url(#sidebar-icon-gradient)' : 'currentColor',
-                            strokeWidth: 1.5, // Thinner strokes
-                            strokeLinecap: "round",
-                            strokeLinejoin: "round",
-                          });
-                        })
-                      })}
-                    </span>
-                  </div>
-                  <span className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) whitespace-nowrap text-sm tracking-wide overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0'} ${(currentModule === item.id || (item.id === ModuleType.SETTINGS && isSettingsActive && currentModule !== ModuleType.PROFILE)) ? 'font-semibold bg-gradient-to-br from-brand-primary to-brand-secondary bg-clip-text text-transparent' : 'font-medium'}`}>
-                    {item.label}
-                  </span>
-                </div>
+        {/* Navigation List */}
+        <div className="flex-1 overflow-hidden relative">
+          <nav className="h-full px-2.5 py-1 space-y-1 overflow-y-auto no-scrollbar overflow-x-hidden">
+            {filteredPrimary.map(renderNavItem)}
 
-                {!isHovered && !isMobileMenuOpen && (
-                  <div className="fixed left-20 px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[11px] font-semibold tracking-wide rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl">
-                    {item.label}
-                  </div>
-                )}
-              </Link>
-            ))}
+            {filteredSecondary.length > 0 && (
+              <>
+                <div className="my-2.5 mx-1">
+                  <div className="h-px bg-zinc-200/70 dark:bg-white/[0.06]" />
+                </div>
+                {filteredSecondary.map(renderNavItem)}
+              </>
+            )}
           </nav>
         </div>
 
-
-        <div className="p-3 bg-white dark:bg-[#0a0a0a] border-t border-zinc-200 dark:border-white/10 z-[50] relative">
+        {/* User Profile Footer */}
+        <div className="p-2.5 border-t border-zinc-200/70 dark:border-white/[0.06] relative">
           <button
             ref={buttonRef}
             onClick={() => {
@@ -291,117 +278,107 @@ const Sidebar: React.FC<SidebarProps> = ({
                 if (window.innerWidth < 768) toggleMobileMenu();
                 return;
               }
-              if (isHovered || isMobileMenuOpen) {
+              if (isExpanded) {
                 setShowProfileMenu(!showProfileMenu);
               } else {
                 setModule(ModuleType.PROFILE);
                 if (window.innerWidth < 768) toggleMobileMenu();
               }
             }}
-            className={`w-full h-14 flex items-center rounded-2xl border-none text-left relative group transition-all duration-300
-              ${currentModule === ModuleType.PROFILE || showProfileMenu
-                ? 'bg-zinc-50 dark:bg-white/[0.03]'
-                : 'hover:bg-zinc-50 dark:hover:bg-white/[0.03]'
-              }
-            `}
+            className={`w-full h-10 flex items-center rounded-2xl transition-colors cursor-pointer border-none relative group ${
+              currentModule === ModuleType.PROFILE || showProfileMenu
+                ? 'bg-zinc-100 dark:bg-white/[0.08]'
+                : 'bg-transparent hover:bg-zinc-100/70 dark:hover:bg-white/[0.04]'
+            }`}
           >
-            {/* Profile Dropdown Menu */}
-            {(isHovered || isMobileMenuOpen) && showProfileMenu && (
-              <div 
-                ref={menuRef}
-                className="absolute bottom-full left-0 w-full mb-2 p-2 bg-white dark:bg-[#0f0f0f] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl animate-fade-in-up z-[60]"
-              >
-                <div className="space-y-1">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setModule(ModuleType.PROFILE);
-                      setShowProfileMenu(false);
-                      if (window.innerWidth < 768) toggleMobileMenu();
-                    }}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
-                      <Edit2 size={16} />
-                    </div>
-                    <span className="text-xs font-bold">Edit Profile</span>
-                  </button>
-
-                  {userProfile?.is_admin && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setModule(ModuleType.ADMIN_STATS);
-                        setShowProfileMenu(false);
-                        if (window.innerWidth < 768) toggleMobileMenu();
-                      }}
-                      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
-                        <Shield size={16} />
-                      </div>
-                      <span className="text-xs font-bold">Admin View</span>
-                    </button>
-                  )}
-
-                  <div className="h-px bg-zinc-100 dark:bg-white/5 my-1 mx-2" />
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLogout();
-                    }}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-red-500/10 text-red-500 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                      <LogOut size={16} />
-                    </div>
-                    <span className="text-xs font-bold">Logout</span>
-                  </button>
-                </div>
-              </div>
-            )}
-            <div className="flex items-center w-full h-full">
-              <div className="w-12 flex-shrink-0 flex items-center justify-center">
-                <div className="relative">
-                  <div className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all duration-300 ${currentModule === ModuleType.PROFILE ? 'border-brand-primary scale-105' : 'border-zinc-200 dark:border-white/10 group-hover:border-brand-primary/50'}`}>
-                    {userProfile?.avatar_url ? (
-                      <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 flex items-center justify-center text-brand-primary font-bold text-sm">
-                        {userProfile?.username?.[0]?.toUpperCase() || 'U'}
-                      </div>
-                    )}
+            {/* Avatar container: exactly 40px wide, identical to icon slots */}
+            <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+              <div className="relative w-7 h-7 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 shrink-0 flex items-center justify-center">
+                {userProfile?.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-zinc-100 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-300 font-medium text-[10px]">
+                    {userProfile?.username?.[0]?.toUpperCase() || 'U'}
                   </div>
-                  {userProfile?.is_verified === 'yes' && (
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white dark:border-[#0a0a0a] flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="w-2 h-2 text-white fill-current"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></svg>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
-              <div className={`transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col overflow-hidden ${isHovered || isMobileMenuOpen ? 'max-w-[200px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0'}`}>
-                <span className={`text-sm font-semibold tracking-tight truncate ${currentModule === ModuleType.PROFILE ? 'text-zinc-950 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
-                  {userProfile?.username || 'Guest User'}
-                </span>
-                <span className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium truncate">
-                  Level {userProfile?.level || 1} • {userProfile?.level_title || 'Novice'}
-                </span>
-              </div>
-
-              {(isHovered || isMobileMenuOpen) && (
-                <div className="ml-auto mr-2">
-                  <ChevronRight size={16} className={`transition-all duration-300 ${showProfileMenu ? 'rotate-90' : ''} ${currentModule === ModuleType.PROFILE ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`} />
-                </div>
-              )}
             </div>
 
-            {!isHovered && !isMobileMenuOpen && (
-              <div className="fixed left-20 px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-black text-[11px] font-semibold tracking-wide rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl">
-                Profile
-              </div>
-            )}
+            {/* User Details on Right */}
+            <div className={`flex-1 flex flex-col text-left min-w-0 overflow-hidden transition-all duration-200 ease-out ${
+              isExpanded ? 'max-w-[110px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+            }`}>
+              <span className="text-[12.5px] font-medium text-zinc-900 dark:text-zinc-200 truncate">
+                {userProfile?.username || 'Guest User'}
+              </span>
+              <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">
+                Level {userProfile?.level || 1} • {userProfile?.level_title || 'Novice'}
+              </span>
+            </div>
+
+            {/* Chevron */}
+            <div className={`shrink-0 overflow-hidden transition-all duration-200 ease-out ${
+              isExpanded ? 'max-w-[20px] opacity-100 ml-auto mr-1.5' : 'max-w-0 opacity-0 pointer-events-none'
+            }`}>
+              <ChevronRight size={14} className={`transition-transform duration-200 text-zinc-400 ${showProfileMenu ? 'rotate-90' : ''}`} />
+            </div>
+
+            {/* Floating tooltip when collapsed */}
+            <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-white/10 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${
+              !isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
+            }`}>
+              Profile
+            </div>
           </button>
+
+          {/* Profile Dropdown Menu */}
+          {isExpanded && showProfileMenu && (
+            <div 
+              ref={menuRef}
+              className="absolute bottom-full left-2 right-2 mb-2 p-1.5 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] rounded-2xl shadow-2xl animate-fade-in z-[60] space-y-0.5"
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModule(ModuleType.PROFILE);
+                  setShowProfileMenu(false);
+                  if (window.innerWidth < 768) toggleMobileMenu();
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors border-none bg-transparent cursor-pointer"
+              >
+                <span className="text-[13px] font-medium">Edit Profile</span>
+                <Edit2 size={14} className="text-zinc-400" />
+              </button>
+
+              {userProfile?.is_admin && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setModule(ModuleType.ADMIN_STATS);
+                    setShowProfileMenu(false);
+                    if (window.innerWidth < 768) toggleMobileMenu();
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  <span className="text-[13px] font-medium">Admin View</span>
+                  <Shield size={14} className="text-amber-500" />
+                </button>
+              )}
+
+              <div className="h-px bg-zinc-200/70 dark:bg-white/[0.06] my-1 mx-1" />
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLogout();
+                }}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors border-none bg-transparent cursor-pointer"
+              >
+                <span className="text-[13px] font-medium">Logout</span>
+                <LogOut size={14} />
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>

@@ -70,15 +70,20 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
     const [progressPercent, setProgressPercent] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
 
-    // Reading Theme (Matching previous viewer: dark / dark-clean / light)
+    // Reading Theme (Default: 'dark-clean' - dark UI with crisp light pages)
     const [readingTheme, setReadingTheme] = useState<ModernReadingTheme>(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('scholix_pdf_theme') as ModernReadingTheme | null;
-            if (saved && (saved === 'dark' || saved === 'dark-clean' || saved === 'light')) {
+            if (saved && (saved === 'dark-clean' || saved === 'light')) {
                 return saved;
             }
+            if (saved === 'dark') {
+                // Migrate any legacy full-inverted dark mode preference to dark-clean
+                try { localStorage.setItem('scholix_pdf_theme', 'dark-clean'); } catch {}
+                return 'dark-clean';
+            }
         }
-        return typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        return 'dark-clean';
     });
 
     const handleSetTheme = useCallback((nextTheme: ModernReadingTheme) => {
@@ -927,11 +932,10 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
                 numPages={numPages}
                 currentPage={currentPage}
                 pdfDoc={pdfDoc}
-                outline={outline}
-                bookmarks={bookmarks}
                 readingTheme={readingTheme}
                 onJumpToPage={jumpToPage}
-                onToggleBookmark={handleToggleBookmark}
+                file={file}
+                userProfile={userProfile}
             />
 
             {/* Contextual Floating Selection Menu */}
@@ -970,7 +974,10 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
                     {isLoading ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-100/80 dark:bg-[#0a0a0a]/80 backdrop-blur-sm z-30">
                             <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
-                                <div className="w-14 h-14 border-3 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                                <div
+                                    className="w-14 h-14 border-3 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"
+                                    style={{ animationDuration: '0.55s' }}
+                                />
                             </div>
                             <h4 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest animate-pulse">
                                 Loading Document... {loadProgress > 0 && `${loadProgress}%`}
