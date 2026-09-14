@@ -1929,8 +1929,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 )}
               </div>
 
-              {/* Main Action Bar */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
+              {/* Main Action Bar: Desktop (Single Line) */}
+              <div className="hidden md:flex md:items-center justify-between gap-3 pt-1">
                 {/* Left Side: Filter Dropdown */}
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="relative">
@@ -2072,6 +2072,170 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                   </button>
 
                   {/* List / Grid segmented control */}
+                  <div className="h-8 flex items-center p-0.5 rounded-lg border border-zinc-200/50 dark:border-white/[0.03] bg-zinc-100/60 dark:bg-white/[0.02] shrink-0">
+                    <button
+                      onClick={() => setLayoutMode('list')}
+                      className={`h-full px-2 rounded-md border-none transition-all cursor-pointer flex items-center justify-center ${layoutMode === 'list' ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-xs font-semibold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent'}`}
+                      title="List view"
+                    >
+                      <List className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setLayoutMode('grid')}
+                      className={`h-full px-2 rounded-md border-none transition-all cursor-pointer flex items-center justify-center ${layoutMode === 'grid' ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-xs font-semibold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent'}`}
+                      title="Grid view"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Action Bar: Mobile (Compact 2-Row Layout) */}
+              <div className="flex flex-col gap-2 pt-1 md:hidden">
+                {/* Row 1: All files ▾ on left, Action buttons (Vault, Shield, +, Upload) on right */}
+                <div className="flex items-center justify-between gap-2">
+                  {/* Left Side: Filter Dropdown */}
+                  <div className="relative shrink-0">
+                    <button
+                      onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                      className="h-8 px-2.5 rounded-lg bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/50 dark:border-white/[0.03] text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 hover:bg-zinc-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                    >
+                      <span>
+                        {fileFilterType === 'all'
+                          ? 'All files'
+                          : fileFilterType === 'pdf'
+                            ? 'PDFs'
+                            : fileFilterType === 'docs'
+                              ? 'Documents'
+                              : fileFilterType === 'sheets'
+                                ? 'Spreadsheets'
+                                : 'Presentations'}
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                    </button>
+
+                    {showFilterDropdown && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={() => setShowFilterDropdown(false)} />
+                        <div className="absolute left-0 mt-1 w-36 rounded-xl bg-white dark:bg-[#121214] border border-zinc-200/60 dark:border-white/[0.06] py-1 shadow-xl z-40 text-xs font-medium">
+                          {[
+                            { id: 'all', label: 'All files' },
+                            { id: 'pdf', label: 'PDFs' },
+                            { id: 'docs', label: 'Documents' },
+                            { id: 'sheets', label: 'Spreadsheets' },
+                            { id: 'slides', label: 'Presentations' }
+                          ].map(item => (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                setFileFilterType(item.id);
+                                setShowFilterDropdown(false);
+                              }}
+                              className={`w-full px-3 py-1.5 text-left border-none bg-transparent cursor-pointer transition-colors flex items-center justify-between ${fileFilterType === item.id ? 'font-bold text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5'}`}
+                            >
+                              <span>{item.label}</span>
+                              {fileFilterType === item.id && <span className="text-zinc-900 dark:text-white">✓</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Right Side: Action buttons */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Personal Vault Toggle */}
+                    <button
+                      onClick={() => {
+                        if (!userProfile) {
+                          showToast("Please login to access your personal vault.", "info");
+                          onAuthRequired?.();
+                          return;
+                        }
+                        setViewMode(viewMode === 'my-uploads' ? 'browse' : 'my-uploads');
+                        navigateTo(null, null, null);
+                        setIsAdminView(false);
+                      }}
+                      className={`h-8 px-2 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${viewMode === 'my-uploads' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-transparent shadow-xs' : 'bg-zinc-100/70 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.03] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:text-zinc-900 dark:hover:text-zinc-200'}`}
+                      title="Personal Vault"
+                    >
+                      <Archive className="w-3.5 h-3.5" />
+                      <span>Vault</span>
+                    </button>
+
+                    {/* Admin Review Hub Toggle (Icon only) */}
+                    {userProfile?.is_admin && (
+                      <button
+                        onClick={() => {
+                          setIsAdminView(!isAdminView);
+                          if (!isAdminView) {
+                            setViewMode('browse');
+                            navigateTo(null, null, null);
+                          }
+                        }}
+                        className={`h-8 w-8 rounded-lg text-xs font-medium border transition-all flex items-center justify-center cursor-pointer shrink-0 relative ${isAdminView
+                            ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                            : 'bg-zinc-100/70 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.03] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:text-zinc-900 dark:hover:text-zinc-200'
+                          }`}
+                        title="Admin Review Hub"
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        {allFiles.filter(f => f.status === 'pending').length > 0 && (
+                          <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 bg-red-500 text-white rounded-full text-[8px] font-bold flex items-center justify-center">
+                            {allFiles.filter(f => f.status === 'pending').length}
+                          </span>
+                        )}
+                      </button>
+                    )}
+
+                    {/* Compact Create Folder button with + icon for Admins */}
+                    {userProfile?.is_admin && (
+                      <button
+                        onClick={() => {
+                          setNewFolderName('');
+                          setFolderIcon('Folder');
+                          setFolderColor('#ff7a00');
+                          setShowFolderModal(true);
+                        }}
+                        className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center hover:bg-amber-500/20 transition-colors cursor-pointer shrink-0"
+                        title="Create Folder"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    {/* Upload File Button */}
+                    <button
+                      onClick={() => {
+                        if (!userProfile) {
+                          showToast("Please sign in to contribute materials.", "info");
+                          onAuthRequired?.();
+                          return;
+                        }
+                        fileInputRef.current?.click();
+                      }}
+                      className="h-8 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border-none shadow-xs active:scale-95 shrink-0"
+                    >
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>Upload{pendingUploads.length > 0 ? ` (${pendingUploads.length})` : ''}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Row 2: Search Input on left (flex-1), List/Grid toggle on right */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search Document"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="w-full h-8 pl-8 pr-3 rounded-full border border-zinc-200/50 dark:border-white/[0.03] bg-zinc-100/50 dark:bg-white/[0.03] text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-300 dark:focus:border-white/10 focus:bg-white dark:focus:bg-white/[0.05] transition-all"
+                    />
+                  </div>
+
                   <div className="h-8 flex items-center p-0.5 rounded-lg border border-zinc-200/50 dark:border-white/[0.03] bg-zinc-100/60 dark:bg-white/[0.02] shrink-0">
                     <button
                       onClick={() => setLayoutMode('list')}
