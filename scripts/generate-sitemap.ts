@@ -115,8 +115,14 @@ async function generate() {
       const subjSlug = librarySlug(subjectName, 'subject');
       btechSubjMap.set(`v-sub-${term.termNumber}-${subj.code.toLowerCase()}`, { termSlug, nameSlug: subjSlug });
       
-      // Add subject URL
-      urls.push(buildUrlNode(`https://scholix.app/lpu/library/btechcse/${termSlug}/${subjSlug}`, currentDate, 'daily', '0.6'));
+      // Add subject URL with high organic priority
+      const subjUrl = `https://scholix.app/lpu/library/btechcse/${termSlug}/${subjSlug}`;
+      urls.push(buildUrlNode(subjUrl, currentDate, 'daily', '0.9'));
+
+      // Add sub-categories for specific search intents
+      ['notes', 'pyqs', 'syllabus'].forEach(cat => {
+        urls.push(buildUrlNode(`${subjUrl}/${cat}`, currentDate, 'daily', '0.8'));
+      });
     };
 
     term.coreSubjects.forEach(addSubject);
@@ -161,7 +167,7 @@ async function generate() {
         }
         if (parentSemSlug) {
           const subjSlug = librarySlug(f.name, 'subject');
-          urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${parentSemSlug}/${subjSlug}`, currentDate, 'daily', '0.6'));
+          urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${parentSemSlug}/${subjSlug}`, currentDate, 'daily', '0.9'));
         }
       } else if (f.type === 'category') {
         let parentSubjSlug = '';
@@ -192,7 +198,7 @@ async function generate() {
 
         if (parentSubjSlug && grandparentSemSlug) {
           const catSlug = librarySlug(f.name, 'category');
-          urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${grandparentSemSlug}/${parentSubjSlug}/${catSlug}`, currentDate, 'daily', '0.5'));
+          urls.push(buildUrlNode(`https://scholix.app/${uniSlug}/library/${progSlug}/${grandparentSemSlug}/${parentSubjSlug}/${catSlug}`, currentDate, 'daily', '0.8'));
         }
       }
     });

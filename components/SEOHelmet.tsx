@@ -36,14 +36,26 @@ const SEOHelmet: React.FC<SEOHelmetProps> = ({ currentModule }) => {
     // Module specific overrides with deeper granularity
     switch (currentModule) {
       case ModuleType.LIBRARY:
-        if (libraryMatch) {
-          const { semester, subject } = libraryMatch.params;
-          const cleanSubject = decodeURIComponent(subject || '').replace(/-/g, ' ');
-          const cleanSemester = (semester || '').replace(/-/g, ' ');
+        if (categoryMatch) {
+          const { semester, subject, category } = categoryMatch.params;
+          const cleanSubject = decodeURIComponent(subject || '').replace(/-/g, ' ').trim();
+          const codeMatch = cleanSubject.match(/^([a-zA-Z]{2,4}\d{3})/i);
+          const subCode = codeMatch ? codeMatch[1].toUpperCase() : cleanSubject.toUpperCase();
+          const cleanCat = (category || 'notes').replace(/-/g, ' ').toUpperCase();
           
-          title = `${cleanSubject} Notes & PYQs | ${uniShort} ${cleanSemester} | Download Free - ${fullBrandName}`;
-          description = `Download free ${cleanSubject} notes, handwritten PDFs, and previous year question papers (PYQs) for ${uniName} ${cleanSemester}. Best ${uniShort} study material for exam preparation.`;
-          keywords += `, ${cleanSubject} notes, ${cleanSubject} pyq, ${cleanSubject} pdf, ${uniShort} ${cleanSubject}, ${cleanSubject} handwritten notes, ${cleanSubject} previous year paper, ${uniShort} ${cleanSemester} notes`;
+          title = `${subCode} ${uniShort} ${cleanCat} PDF & PYQs | Exam Material - ${fullBrandName}`;
+          description = `Download ${subCode} ${cleanCat} for ${uniName}. Verified student handwritten notes, lecture slides, and exam preparation material.`;
+          keywords += `, ${subCode} ${cleanCat.toLowerCase()}, ${subCode} lpu notes, ${subCode} pyq, ${uniShort} ${subCode}`;
+        } else if (libraryMatch) {
+          const { semester, subject } = libraryMatch.params;
+          const cleanSubject = decodeURIComponent(subject || '').replace(/-/g, ' ').trim();
+          const cleanSemester = (semester || '').replace(/-/g, ' ');
+          const codeMatch = cleanSubject.match(/^([a-zA-Z]{2,4}\d{3})/i);
+          const subCode = codeMatch ? codeMatch[1].toUpperCase() : cleanSubject.toUpperCase();
+          
+          title = `${subCode} ${uniShort} Notes, PYQs & Syllabus | Study Material - ${fullBrandName}`;
+          description = `Download free ${subCode} ${uniShort} notes, handwritten PDFs, previous year question papers (PYQs), and syllabus for ${uniName} ${cleanSemester}. Best exam preparation study material on Scholix.`;
+          keywords += `, ${subCode} lpu notes, ${subCode} notes, ${subCode} pyq, ${subCode} pdf, ${uniShort} ${subCode}, ${subCode} handwritten notes, ${subCode} previous year paper, ${uniShort} ${cleanSemester} notes`;
         } else {
           title = `${uniShort ? uniShort + ' ' : ''}Notes & PYQs Library | Free Study Material - ${fullBrandName}`;
           description = `Download free ${uniName} notes, previous year question papers (PYQs), handwritten PDFs, and study material. Organized by program, semester & subject. ${uniShort} BTech CSE, BCA, MCA, MBA notes available.`;
@@ -128,19 +140,29 @@ const SEOHelmet: React.FC<SEOHelmetProps> = ({ currentModule }) => {
     updateMeta('keywords', keywords);
     
     // OpenGraph Tags
+    const currentFullUrl = `${window.location.origin}${location.pathname}`;
     updateMeta('og:title', title, 'property');
     updateMeta('og:description', description, 'property');
     updateMeta('og:type', 'website', 'property');
-    updateMeta('og:url', window.location.href, 'property');
+    updateMeta('og:url', currentFullUrl, 'property');
     updateMeta('og:site_name', fullBrandName, 'property');
 
+    // Synchronize Canonical Link Tag
+    let canonicalTag = document.querySelector('link[rel="canonical"]');
+    if (!canonicalTag) {
+      canonicalTag = document.createElement('link');
+      canonicalTag.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalTag);
+    }
+    canonicalTag.setAttribute('href', currentFullUrl);
+
     // Schema Org Json-LD
-    let schemaBody = {
+    let schemaBody: any = {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": fullBrandName,
       "description": description,
-      "url": window.location.origin,
+      "url": currentFullUrl,
       "applicationCategory": "EducationalApplication",
       "genre": "Education",
       "operatingSystem": "Web",
@@ -150,6 +172,53 @@ const SEOHelmet: React.FC<SEOHelmetProps> = ({ currentModule }) => {
         "name": "Scholix Team"
       }
     };
+
+    if (libraryMatch) {
+      const { subject } = libraryMatch.params;
+      const cleanSubject = decodeURIComponent(subject || '').replace(/-/g, ' ').trim();
+      const codeMatch = cleanSubject.match(/^([a-zA-Z]{2,4}\d{3})/i);
+      const subCode = codeMatch ? codeMatch[1].toUpperCase() : cleanSubject.toUpperCase();
+
+      schemaBody = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Course",
+            "@id": `${currentFullUrl}#course`,
+            "name": `${subCode} Notes & Study Material`,
+            "courseCode": subCode,
+            "description": description,
+            "provider": {
+              "@type": "CollegeOrUniversity",
+              "name": uniName
+            }
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": `${window.location.origin}/`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Library",
+                "item": `${window.location.origin}/lpu/library`
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": `${subCode} Notes`,
+                "item": currentFullUrl
+              }
+            ]
+          }
+        ]
+      };
+    }
 
     let script = document.getElementById('schema-ld');
     if (!script) {
