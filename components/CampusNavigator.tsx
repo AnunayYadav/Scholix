@@ -592,7 +592,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
                 {/* Days of the Week */}
                 <div className="flex items-center justify-center max-w-lg sm:max-w-xl mx-auto w-full">
-                  <div className="w-full flex items-center justify-between p-1 rounded-2xl bg-zinc-100/90 dark:bg-[#151518] border border-zinc-200/80 dark:border-zinc-800/80 gap-1">
+                  <div className="w-full flex items-center justify-between p-0.5 sm:p-1 rounded-xl sm:rounded-2xl bg-zinc-100/90 dark:bg-[#151518] border border-zinc-200/80 dark:border-zinc-800/80 gap-0.5 sm:gap-1">
                     {weekDaysWithDates.map(({ day, dateNumber, isToday }) => {
                       const isSelected = selectedDay === day;
 
@@ -602,23 +602,21 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                           data-day={day}
                           onClick={() => setSelectedDay(day)}
                           className={`
-                            flex-1 py-2 sm:py-2.5 rounded-xl transition-all duration-150 cursor-pointer flex flex-col items-center justify-center border-none relative
+                            flex-1 py-1.5 sm:py-2.5 px-0.5 rounded-lg sm:rounded-xl transition-all duration-150 cursor-pointer flex flex-col items-center justify-center border-none relative
                             ${isSelected
                               ? 'bg-white dark:bg-[#202025] text-zinc-950 dark:text-white shadow-xs font-semibold'
                               : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-white/[0.04] bg-transparent'
                             }
                           `}
                         >
-                          <span className={`text-sm sm:text-base font-bold leading-tight ${isSelected ? 'text-zinc-950 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                          <span className={`text-xs sm:text-sm font-bold leading-tight ${isSelected ? 'text-zinc-950 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
                             {dateNumber}
                           </span>
-                          <span className={`text-[10px] font-semibold uppercase tracking-wider mt-0.5 ${isSelected ? 'text-brand-primary' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                          <span className={`text-[9px] sm:text-[10px] font-medium sm:font-semibold uppercase tracking-tight sm:tracking-wider mt-0.5 ${isSelected ? 'text-brand-primary' : 'text-zinc-400 dark:text-zinc-500'}`}>
                             {day.slice(0, 3)}
                           </span>
-                          {isToday ? (
-                            <span className="w-1 h-1 rounded-full mt-1 bg-brand-primary" />
-                          ) : (
-                            <span className="w-1 h-1 mt-1 opacity-0" />
+                          {isToday && (
+                            <span className="w-1 h-1 rounded-full bg-brand-primary absolute bottom-0.5 sm:bottom-1" />
                           )}
                         </button>
                       );
