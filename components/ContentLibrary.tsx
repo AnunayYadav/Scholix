@@ -1312,8 +1312,21 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           }
 
           if (category && subj) {
-            const cat = finalFolders.find(f => f.type === 'category' && matchLibrarySlug(f.name, category, 'category') && f.parent_id === subj.id);
-            if (activeCategory?.id !== (cat?.id || null)) {
+            let cat = finalFolders.find(f => f.type === 'category' && matchLibrarySlug(f.name, category, 'category') && f.parent_id === subj.id);
+            if (!cat) {
+              const defaultNames = ["Notes", "PYQs", "Lectures", "Syllabus", "Lab Manuals", "Books"];
+              const matchedDefault = defaultNames.find(n => matchLibrarySlug(n, category, 'category'));
+              if (matchedDefault) {
+                cat = {
+                  id: `default-cat-${matchedDefault.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+                  name: matchedDefault,
+                  type: 'category',
+                  parent_id: subj.id,
+                  color: '#ff7a00'
+                };
+              }
+            }
+            if (activeCategory?.id !== (cat?.id || null) || activeCategory?.name !== (cat?.name || '')) {
               setActiveCategory(cat || null);
             }
           } else {
@@ -1896,7 +1909,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       ) : (
         <div className="space-y-6 animate-fade-in">
           {/* Clean Toolbar */}
-          {!(activeSubject && !activeCategory && viewMode === 'browse' && !searchQuery) && (
+          {!(activeSubject && viewMode === 'browse' && !searchQuery) && (
             <div className="space-y-3">
               {/* Hierarchical Breadcrumb */}
               <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-zinc-400 font-medium min-w-0 flex-wrap px-0.5">
@@ -2431,7 +2444,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 </div>
               )}
             </div>
-          ) : activeSubject && !activeCategory && viewMode === 'browse' && searchQuery.trim() === '' ? (
+          ) : activeSubject && viewMode === 'browse' && searchQuery.trim() === '' ? (
             <SubjectCommunity
               activeSubject={activeSubject}
               activeSemester={activeSemester}
@@ -2441,6 +2454,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               allFiles={allFiles}
               allFolders={finalFolders}
               userProgressList={userProgressList}
+              activeCategory={activeCategory}
+              onCategoryChange={(cat) => {
+                setActiveCategory(cat);
+                const subjectBasePath = (program && semester && subject)
+                  ? `${routePrefix}/library/${program}/${semester}/${subject}`
+                  : `${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}/${librarySlug(activeSubject.name, 'subject')}`;
+                if (cat) {
+                  const catSlug = librarySlug(cat.name, 'category') || slugify(cat.name);
+                  navigate(`${subjectBasePath}/${catSlug}`);
+                } else {
+                  navigate(subjectBasePath);
+                }
+              }}
               onFileAccess={handleFileAccess}
               onUploadClick={(catName) => {
                 targetUploadCategoryRef.current = (typeof catName === 'string') ? catName : '';
@@ -2452,7 +2478,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
                 setShowUploadModal(true);
               }}
               onBack={() => {
-                navigate(`${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}`);
+                const semesterPath = (program && semester)
+                  ? `${routePrefix}/library/${program}/${semester}`
+                  : `${routePrefix}/library/${librarySlug(selectedProgram, 'program')}/${librarySlug(activeSemester?.name || '', 'semester')}`;
+                navigate(semesterPath);
+              }}
+              onNavigateToProgram={() => {
+                const programPath = program
+                  ? `${routePrefix}/library/${program}`
+                  : `${routePrefix}/library/${librarySlug(selectedProgram, 'program')}`;
+                navigate(programPath);
               }}
               searchQuery={searchQuery}
               onRefresh={() => fetchFromSource(false)}

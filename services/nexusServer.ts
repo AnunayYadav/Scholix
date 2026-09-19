@@ -1780,13 +1780,8 @@ class NexusServer {
   static async fetchFiles(program: string, q?: string): Promise<LibraryFile[]> {
     const client = getSupabase();
     if (!client) return [];
-    let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)').eq('status', 'approved');
-    if (program && program !== 'All') query = query.eq('program', program);
-    if (q) query = query.ilike('name', `%${q}%`);
-    const { data, error } = await query
-      .order('created_at', { ascending: false });
-    if (error) { console.error("Fetch Error:", error); return []; }
-    return (data || []).map(item => ({
+
+    const mapDoc = (item: any): LibraryFile => ({
       id: item.id, name: item.name, subject: item.subject, semester: item.semester, type: item.type,
       uploadDate: new Date(item.created_at).getTime(), size: item.size, status: item.status, storage_path: item.storage_path,
       program: item.program,
@@ -1806,7 +1801,103 @@ class NexusServer {
       upvoted_by: item.upvoted_by,
       downvoted_by: item.downvoted_by,
       downloads: item.downloads
-    }));
+    });
+
+    if (!q || !q.trim()) {
+      let query = client.from('documents').select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)').eq('status', 'approved');
+      if (program && program !== 'All') query = query.eq('program', program);
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) { console.error("Fetch Error:", error); return []; }
+      return (data || []).map(mapDoc);
+    }
+
+    const trimmedQ = q.trim();
+    // Detect subject code pattern (e.g. CSE202, cse 202, MTH302, int108, CHE-110)
+    const subjectMatch = trimmedQ.match(/\b([a-zA-Z]{2,5})\s*[-_]?\s*(\d{2,4}[a-zA-Z]?)\b/i);
+
+    if (subjectMatch) {
+      const rawCode = subjectMatch[0];
+      const normalizedCode = (subjectMatch[1] + subjectMatch[2]).toUpperCase();
+      const remainder = trimmedQ.replace(rawCode, '').replace(/\s+/g, ' ').trim();
+
+      // Query 1: Files belonging to this subject
+      let subjectQuery = client.from('documents')
+        .select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)')
+        .eq('status', 'approved')
+        .or(`subject.ilike.%${normalizedCode}%,subject.ilike.%${rawCode}%,name.ilike.%${normalizedCode}%`);
+      if (program && program !== 'All') subjectQuery = subjectQuery.eq('program', program);
+
+      // Query 2: Fallback query matching full query or remainder in name/description
+      let fallbackQuery = client.from('documents')
+        .select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)')
+        .eq('status', 'approved')
+        .or(`name.ilike.%${trimmedQ}%,name.ilike.%${remainder || trimmedQ}%,description.ilike.%${remainder || trimmedQ}%`);
+      if (program && program !== 'All') fallbackQuery = fallbackQuery.eq('program', program);
+
+      const [subRes, fallbackRes] = await Promise.all([
+        subjectQuery.limit(60),
+        fallbackQuery.limit(30)
+      ]);
+
+      const seen = new Set<string>();
+      const combined: any[] = [];
+      [...(subRes.data || []), ...(fallbackRes.data || [])].forEach(item => {
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          combined.push(item);
+        }
+      });
+
+      // Smart ranking:
+      // 1. Files whose subject matches AND name/desc matches remainder (e.g. Unit 1 inside CSE202)
+      // 2. Files whose name matches the full query string
+      // 3. Files in the subject
+      // 4. Other keyword matches
+      const remLower = remainder.toLowerCase();
+      const codeLower = normalizedCode.toLowerCase();
+      const rawLower = rawCode.toLowerCase();
+      const qLower = trimmedQ.toLowerCase();
+
+      combined.sort((a, b) => {
+        const aSub = (a.subject || '').toLowerCase();
+        const aNm = (a.name || '').toLowerCase();
+        const bSub = (b.subject || '').toLowerCase();
+        const bNm = (b.name || '').toLowerCase();
+
+        const aHasSub = aSub.includes(codeLower) || aSub.includes(rawLower) || aNm.includes(codeLower);
+        const bHasSub = bSub.includes(codeLower) || bSub.includes(rawLower) || bNm.includes(codeLower);
+
+        const aHasRem = remLower ? (aNm.includes(remLower) || (a.description || '').toLowerCase().includes(remLower)) : true;
+        const bHasRem = remLower ? (bNm.includes(remLower) || (b.description || '').toLowerCase().includes(remLower)) : true;
+
+        // Top Priority: Subject matches AND specific unit/topic matches
+        if (aHasSub && aHasRem && !(bHasSub && bHasRem)) return -1;
+        if (bHasSub && bHasRem && !(aHasSub && aHasRem)) return 1;
+
+        // Next: Exact query in file name
+        if (aNm.includes(qLower) && !bNm.includes(qLower)) return -1;
+        if (bNm.includes(qLower) && !aNm.includes(qLower)) return 1;
+
+        // Next: Belongs to matching subject
+        if (aHasSub && !bHasSub) return -1;
+        if (bHasSub && !aHasSub) return 1;
+
+        return 0;
+      });
+
+      return combined.map(mapDoc);
+    }
+
+    // Default multi-field search when no specific subject code pattern is detected
+    let query = client.from('documents')
+      .select('*, uploader:profiles!uploader_id(username, is_admin, avatar_url)')
+      .eq('status', 'approved')
+      .or(`name.ilike.%${trimmedQ}%,subject.ilike.%${trimmedQ}%,description.ilike.%${trimmedQ}%`);
+    if (program && program !== 'All') query = query.eq('program', program);
+
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(40);
+    if (error) { console.error("Fetch Error:", error); return []; }
+    return (data || []).map(mapDoc);
   }
 
   static async fetchFileById(id: string): Promise<LibraryFile | null> {

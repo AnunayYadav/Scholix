@@ -1927,7 +1927,7 @@ const AppContent: React.FC = () => {
                         className="w-11 h-11 transition-all relative group text-left border-none cursor-pointer flex items-center justify-center rounded-full bg-gradient-to-tr from-brand-primary to-brand-secondary p-[1.5px] shadow-[0_8px_20px_var(--brand-glow)] hover:scale-105 active:scale-95"
                       >
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-nexus-darker flex items-center justify-center">
-                          {userProfile.avatar_url ? (
+                          {userProfile.avatar_url && !userProfile.avatar_url.includes('dicebear') ? (
                             <img
                               src={userProfile.avatar_url}
                               alt="Avatar"
@@ -1946,7 +1946,7 @@ const AppContent: React.FC = () => {
                           <div className={`absolute right-0 mt-3 w-56 bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_64px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.8)] overflow-hidden py-3 z-50 animate-fade-in backdrop-blur-xl transition-all duration-300 ${isClosingProfile ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
                             <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center gap-3">
                               <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-[11px] sm:text-xs shrink-0 border border-brand-primary/5 overflow-hidden">
-                                {userProfile.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || studentTerm[0])}
+                                {userProfile.avatar_url && !userProfile.avatar_url.includes('dicebear') ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="" /> : (userProfile.username?.[0]?.toUpperCase() || studentTerm[0])}
                               </div>
                               <div className="flex flex-col text-left min-w-0">
                                 <div className="flex items-center gap-1.5">

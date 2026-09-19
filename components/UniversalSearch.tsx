@@ -196,39 +196,51 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     });
 
     try {
+      const trimmedQuery = q.trim();
+      const codeMatch = trimmedQuery.match(/\b([a-zA-Z]{2,5})\s*[-_]?\s*(\d{2,4}[a-zA-Z]?)\b/i);
+      const normalizedCode = codeMatch ? (codeMatch[1] + codeMatch[2]).toLowerCase() : null;
+
       const [files, folders] = await Promise.all([
         NexusServer.fetchFiles('All', q),
         NexusServer.fetchFolders('All')
       ]);
 
       folders.forEach(f => {
-        if (f.name.toLowerCase().includes(searchLower)) {
+        const folderNameLower = f.name.toLowerCase();
+        const matchesQuery = folderNameLower.includes(searchLower);
+        const matchesCode = normalizedCode ? folderNameLower.includes(normalizedCode) : false;
+
+        if (matchesQuery || matchesCode) {
           newResults.push({
             id: `folder-${f.id}`,
             type: 'folder',
             title: f.name,
-            description: `${f.type.charAt(0).toUpperCase() + f.type.slice(1)} folder in ${f.program}`,
+            description: `${f.type.charAt(0).toUpperCase() + f.type.slice(1)} • ${f.program}`,
             path: `/library/${slugify(f.program)}`,
-            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-orange-500"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>,
-            category: 'Library Folders'
+            icon: (
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4.5 h-4.5 text-brand-primary">
+                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+              </svg>
+            ),
+            category: f.type === 'subject' ? 'Subject' : 'Folder'
           });
         }
       });
 
-      files.slice(0, 5).forEach(f => {
+      files.slice(0, 8).forEach(f => {
         newResults.push({
           id: `file-${f.id}`,
           type: 'file',
           title: f.name,
           description: `${f.subject} • ${f.size}`,
           path: `/library/${slugify(f.program)}/${slugify(f.semester)}/${slugify(f.subject)}`,
-          icon: <FileIcon fileName={f.storage_path} size="w-5 h-5" />,
-          category: 'Library Files'
+          icon: <FileIcon fileName={f.storage_path} size="w-4 h-5" />,
+          category: 'File'
         });
       });
 
       const marketplaceItems = await NexusServer.fetchMarketplaceItems();
-      marketplaceItems.slice(0, 5).forEach(item => {
+      marketplaceItems.slice(0, 4).forEach(item => {
         if (item.title.toLowerCase().includes(searchLower) || item.description?.toLowerCase().includes(searchLower)) {
           newResults.push({
             id: `market-${item.id}`,
@@ -236,14 +248,14 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
             title: item.title,
             description: `₹${item.price} • ${item.category}`,
             path: `/market/item/${item.id}`,
-            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-green-500"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>,
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-green-500"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>,
             category: 'Marketplace'
           });
         }
       });
 
       const roommateRequests = await NexusServer.fetchRoommateRequests();
-      roommateRequests.slice(0, 5).forEach(req => {
+      roommateRequests.slice(0, 4).forEach(req => {
         if (req.description?.toLowerCase().includes(searchLower) || req.preferences?.toLowerCase().includes(searchLower)) {
           newResults.push({
             id: `roommate-${req.id}`,
@@ -251,7 +263,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
             title: `${req.user_username}'s Request`,
             description: req.description,
             path: '/roommate',
-            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>,
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>,
             category: 'Roommates'
           });
         }
@@ -261,7 +273,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
       console.error("Global search error:", e);
     }
 
-    setResults(newResults.slice(0, 10));
+    setResults(newResults.slice(0, 12));
     setIsLoading(false);
     setSelectedIndex(0);
   };
@@ -277,44 +289,63 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     if (!isOpen) return null;
 
     const resultsDropdown = (
-      <div className={`${isInline || resultsPortalRef ? 'relative mt-3' : 'absolute top-full left-0 right-0 mt-2 z-[100]'} bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden search-dropdown-anim`}>
-        <div className={`no-scrollbar p-3 ${(isInline || resultsPortalRef) ? 'max-h-none' : 'max-h-[70vh] overflow-y-auto'}`}>
+      <div className={`${isInline || resultsPortalRef ? 'relative mt-3' : 'absolute top-full left-0 right-0 mt-2 z-[100]'} bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-2xl search-dropdown-anim`}>
+        <div className={`no-scrollbar p-1.5 ${(isInline || resultsPortalRef) ? 'max-h-none' : 'max-h-[70vh] overflow-y-auto'}`}>
           {isLoading ? (
-            <div className="py-12 flex flex-col items-center justify-center opacity-40">
-              <div className="w-6 h-6 rounded-full border-2 border-brand-primary border-t-transparent animate-spin mb-4"></div>
+            <div className="py-10 flex flex-col items-center justify-center opacity-40">
+              <div className="w-5 h-5 rounded-full border-2 border-brand-primary border-t-transparent animate-spin mb-3"></div>
               <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Searching Scholix...</p>
             </div>
           ) : results.length > 0 ? (
-            <div className="grid grid-cols-1 gap-1">
+            <div className="grid grid-cols-1 gap-0.5">
               {results.map((result, index) => (
                 <button
                   key={result.id}
                   onClick={() => handleSelect(result)}
                   onMouseEnter={() => setSelectedIndex(index)}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-brand-primary' : 'bg-transparent hover:bg-zinc-50 dark:hover:bg-[#202025]'}`}
+                  className={`w-full text-left px-3 py-2 sm:py-2.5 rounded-xl flex items-center gap-3 transition-colors border-none group cursor-pointer relative ${
+                    selectedIndex === index 
+                      ? 'bg-zinc-100 dark:bg-[#202025]' 
+                      : 'bg-transparent hover:bg-zinc-50 dark:hover:bg-[#1a1a1d]'
+                  }`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-[#202025] text-zinc-500 dark:text-zinc-400'}`}>
+                  {/* Subtle brand left indicator when selected */}
+                  <div className={`w-0.5 h-4 rounded-full bg-brand-primary shrink-0 transition-opacity ${
+                    selectedIndex === index ? 'opacity-100' : 'opacity-0'
+                  }`} />
+
+                  {/* Icon */}
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 text-zinc-500 dark:text-zinc-400">
                     {result.icon}
                   </div>
+
+                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{result.title}</h4>
-                      <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-zinc-400 dark:text-zinc-500'}`}>{result.category}</span>
+                      <h4 className={`text-[13px] sm:text-[13.5px] font-medium tracking-tight truncate transition-colors ${
+                        selectedIndex === index ? 'text-zinc-950 dark:text-white' : 'text-zinc-800 dark:text-zinc-200'
+                      }`}>
+                        {result.title}
+                      </h4>
+                      <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider shrink-0">
+                        {result.category}
+                      </span>
                     </div>
                     {result.description && (
-                      <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-zinc-500 dark:text-zinc-400'}`}>{result.description}</p>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 font-normal truncate mt-0.5">
+                        {result.description}
+                      </p>
                     )}
                   </div>
                 </button>
               ))}
             </div>
           ) : query ? (
-            <div className="py-12 text-center opacity-40">
-              <p className="text-xs font-bold">No results for "{query}"</p>
+            <div className="py-10 text-center opacity-40">
+              <p className="text-xs font-medium">No results for "{query}"</p>
             </div>
           ) : (
-            <div className="p-4 space-y-4">
+            <div className="p-3 space-y-3">
               <div className="space-y-2">
                 <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Trending Now</h3>
                 <div className="flex flex-wrap gap-1.5">
@@ -322,7 +353,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
                     <button 
                       key={s} 
                       onClick={() => setQuery(s)}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-[#202025] border border-zinc-200 dark:border-zinc-800/80 text-[10px] font-normal text-zinc-500 dark:text-zinc-400 hover:border-brand-primary/50 hover:text-brand-primary transition-all"
+                      className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-[#202025] border border-zinc-200/80 dark:border-zinc-800/80 text-[11px] font-normal text-zinc-600 dark:text-zinc-400 hover:border-brand-primary/50 hover:text-brand-primary transition-all cursor-pointer"
                     >
                       {s}
                     </button>
@@ -334,10 +365,21 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
         </div>
         
         {!(isInline || resultsPortalRef) && (
-          <div className="px-5 py-2.5 bg-zinc-50/50 dark:bg-[#121215] border-t border-zinc-200 dark:border-zinc-800/60 flex items-center justify-between">
-            <div className="flex gap-3">
-              <span className="text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tracking-widest cursor-default">ESC TO CLOSE</span>
+          <div className="px-4 py-2 bg-zinc-50/80 dark:bg-[#121215] border-t border-zinc-200/70 dark:border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-[#202025] text-[9.5px] font-sans font-medium text-zinc-600 dark:text-zinc-400">↵</kbd> select
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-[#202025] text-[9.5px] font-sans font-medium text-zinc-600 dark:text-zinc-400">↑↓</kbd> navigate
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-zinc-200/60 dark:bg-[#202025] text-[9.5px] font-sans font-medium text-zinc-600 dark:text-zinc-400">esc</kbd> close
+              </span>
             </div>
+            {results.length > 0 && (
+              <span className="text-[10.5px] font-medium text-zinc-400 dark:text-zinc-500">{results.length} results</span>
+            )}
           </div>
         )}
       </div>

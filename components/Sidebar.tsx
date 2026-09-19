@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Home, BookOpen, Shield, GraduationCap, LayoutGrid, PhoneCall, 
-  Compass, Settings, LogOut, ChevronRight, Edit2 
+import {
+  Home, BookOpen, Shield, GraduationCap, LayoutGrid, PhoneCall,
+  Compass, Settings, LogOut, ChevronRight, Edit2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ModuleType, UserProfile } from '../types';
@@ -68,8 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node) && 
-          buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
       }
     };
@@ -169,32 +169,28 @@ const Sidebar: React.FC<SidebarProps> = ({
           setModule(item.id);
           if (window.innerWidth < 768) toggleMobileMenu();
         }}
-        className={`w-full h-10 flex items-center rounded-2xl transition-colors duration-150 relative group cursor-pointer border-none no-underline ${
-          isActive
+        className={`w-full h-10 flex items-center rounded-2xl transition-colors duration-150 relative group cursor-pointer border-none no-underline ${isActive
             ? 'bg-zinc-100 dark:bg-[#1c1c20] text-zinc-900 dark:text-white font-medium'
             : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
-        }`}
+          }`}
       >
         {/* Icon container: exactly 40px wide, centered inside the 40px rail slot */}
-        <div className={`w-10 h-10 shrink-0 flex items-center justify-center transition-colors duration-150 ${
-          isActive 
-            ? 'text-zinc-900 dark:text-white' 
+        <div className={`w-10 h-10 shrink-0 flex items-center justify-center transition-colors duration-150 ${isActive
+            ? 'text-zinc-900 dark:text-white'
             : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300'
-        }`}>
+          }`}>
           {item.icon}
         </div>
 
         {/* Text on right: reveals cleanly on expansion */}
-        <span className={`text-[13.5px] tracking-tight whitespace-nowrap overflow-hidden transition-all duration-200 ease-out ${
-          isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
-        }`}>
+        <span className={`text-[13.5px] tracking-tight whitespace-nowrap overflow-hidden transition-all duration-200 ease-out ${isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+          }`}>
           {item.label}
         </span>
 
         {/* Tooltip when collapsed */}
-        <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-zinc-800 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${
-          !isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
-        }`}>
+        <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-zinc-800 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${!isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
+          }`}>
           {item.label}
         </div>
       </Link>
@@ -205,10 +201,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     <>
 
       {/* Main navigation rail - unified backdrop blur and surface */}
-      <div 
-        className={`hidden md:block fixed inset-y-0 left-0 z-[400] transition-opacity duration-200 pointer-events-none ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`}
+      <div
+        className={`hidden md:block fixed inset-y-0 left-0 z-[400] transition-opacity duration-200 pointer-events-none ${isHovered ? 'opacity-100' : 'opacity-0'
+          }`}
       />
 
       <FeedbackModal
@@ -237,7 +232,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         `}
       >
         {/* Brand Header */}
-        <div 
+        <div
           className="h-14 px-2.5 flex items-center cursor-pointer select-none flex-shrink-0"
           onClick={() => setModule(ModuleType.DASHBOARD)}
         >
@@ -251,9 +246,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
             {/* Brand Text on Right: reveals cleanly on expansion */}
-            <div className={`overflow-hidden transition-all duration-200 ease-out flex items-center ${
-              isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
-            }`}>
+            <div className={`overflow-hidden transition-all duration-200 ease-out flex items-center ${isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+              }`}>
               <span className="text-[14.5px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight whitespace-nowrap">
                 Scholix
               </span>
@@ -294,16 +288,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                 if (window.innerWidth < 768) toggleMobileMenu();
               }
             }}
-            className={`w-full h-10 flex items-center rounded-2xl transition-colors cursor-pointer border-none relative group ${
-              currentModule === ModuleType.PROFILE || showProfileMenu
+            className={`w-full h-10 flex items-center rounded-2xl transition-colors cursor-pointer border-none relative group ${currentModule === ModuleType.PROFILE || showProfileMenu
                 ? 'bg-zinc-100 dark:bg-[#1c1c20]'
                 : 'bg-transparent hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
-            }`}
+              }`}
           >
             {/* Avatar container: exactly 40px wide, identical to icon slots */}
             <div className="w-10 h-10 shrink-0 flex items-center justify-center">
               <div className="relative w-7 h-7 rounded-full overflow-hidden border border-zinc-200 dark:border-white/10 shrink-0 flex items-center justify-center">
-                {userProfile?.avatar_url ? (
+                {userProfile?.avatar_url && !userProfile.avatar_url.includes('dicebear') ? (
                   <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-zinc-100 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-300 font-medium text-[10px]">
@@ -314,9 +307,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* User Details on Right */}
-            <div className={`flex-1 flex flex-col text-left min-w-0 overflow-hidden transition-all duration-200 ease-out ${
-              isExpanded ? 'max-w-[110px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
-            }`}>
+            <div className={`flex-1 flex flex-col text-left min-w-0 overflow-hidden transition-all duration-200 ease-out ${isExpanded ? 'max-w-[110px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
+              }`}>
               <span className="text-[12.5px] font-medium text-zinc-900 dark:text-zinc-200 truncate">
                 {userProfile?.username || 'Guest User'}
               </span>
@@ -326,23 +318,21 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Chevron */}
-            <div className={`shrink-0 overflow-hidden transition-all duration-200 ease-out ${
-              isExpanded ? 'max-w-[20px] opacity-100 ml-auto mr-1.5' : 'max-w-0 opacity-0 pointer-events-none'
-            }`}>
+            <div className={`shrink-0 overflow-hidden transition-all duration-200 ease-out ${isExpanded ? 'max-w-[20px] opacity-100 ml-auto mr-1.5' : 'max-w-0 opacity-0 pointer-events-none'
+              }`}>
               <ChevronRight size={14} className={`transition-transform duration-200 text-zinc-400 ${showProfileMenu ? 'rotate-90' : ''}`} />
             </div>
 
             {/* Floating tooltip when collapsed */}
-            <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-white/10 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${
-              !isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
-            }`}>
+            <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-white/10 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${!isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
+              }`}>
               Profile
             </div>
           </button>
 
           {/* Profile Dropdown Menu */}
           {isExpanded && showProfileMenu && (
-            <div 
+            <div
               ref={menuRef}
               className="absolute bottom-full left-2 right-2 mb-2 p-1.5 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-white/[0.08] rounded-2xl shadow-2xl animate-fade-in z-[60] space-y-0.5"
             >

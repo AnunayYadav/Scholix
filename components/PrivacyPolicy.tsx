@@ -66,7 +66,7 @@ To exercise these rights, please contact our support team.`
                     </div>
                 </div>
 
-                <div className="p-6 md:p-8 rounded-[32px] bg-zinc-50 dark:bg-[#111111] space-y-6 transition-all">
+                <div className="p-6 md:p-8 rounded-2xl bg-zinc-50/60 dark:bg-[#121215] border border-zinc-200/70 dark:border-white/5 space-y-6 transition-all">
                     <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
                         At <span className="text-orange-600 font-bold">{shortBrandName}</span>, accessible from {uniSlug ? `${uniSlug}.` : ''}scholix.app, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by {shortBrandName} and how we use it.
                     </p>

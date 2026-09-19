@@ -68,6 +68,9 @@ interface SubjectCommunityProps {
   onDropFiles?: (files: File[], categoryName?: string) => void;
   onVaultClick?: () => void;
   onAdminReviewClick?: () => void;
+  activeCategory?: FolderType | null;
+  onCategoryChange?: (category: FolderType | null) => void;
+  onNavigateToProgram?: () => void;
 }
 
 const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string, sectionName?: string) => {
@@ -932,7 +935,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   onDeleteFolder,
   onDropFiles,
   onVaultClick,
-  onAdminReviewClick
+  onAdminReviewClick,
+  activeCategory,
+  onCategoryChange,
+  onNavigateToProgram
 }) => {
   const subjectCodeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : activeSubject.name.split(':')[0].trim();
@@ -1065,7 +1071,31 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'social' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');
-  const [activeCategoryFolder, setActiveCategoryFolder] = useState<FolderType | null>(null);
+  const [activeCategoryFolder, setActiveCategoryFolder] = useState<FolderType | null>(activeCategory || null);
+
+  useEffect(() => {
+    if (activeCategory !== undefined) {
+      if (activeCategory) {
+        const matchInDisplay = displayCategories.find(c =>
+          c.id === activeCategory.id ||
+          c.name.toLowerCase().trim() === activeCategory.name.toLowerCase().trim()
+        );
+        setActiveCategoryFolder(matchInDisplay || activeCategory);
+      } else {
+        setActiveCategoryFolder(null);
+      }
+    }
+  }, [activeCategory, displayCategories]);
+
+  const handleCategoryClick = useCallback((cat: FolderType) => {
+    setActiveCategoryFolder(cat);
+    onCategoryChange?.(cat);
+  }, [onCategoryChange]);
+
+  const handleCategoryBack = useCallback(() => {
+    setActiveCategoryFolder(null);
+    onCategoryChange?.(null);
+  }, [onCategoryChange]);
   const [socialFilter, setSocialFilter] = useState<'all' | 'discussions' | 'requests'>('all');
   const [joined, setJoined] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -3892,7 +3922,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             <button
               onClick={() => {
                 if (activeCategoryFolder) {
-                  setActiveCategoryFolder(null);
+                  handleCategoryBack();
                 } else {
                   onBack();
                 }
@@ -3903,7 +3933,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               <ArrowLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={onBack}
+              onClick={onNavigateToProgram || onBack}
               className="font-bold text-zinc-900 dark:text-white bg-transparent border-none cursor-pointer hover:underline p-0 shrink-0"
             >
               Library
@@ -3922,7 +3952,11 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
             <span className="text-zinc-400 font-light shrink-0">/</span>
             <div className="inline-flex items-center gap-1.5 min-w-0 flex-wrap">
               <button
-                onClick={() => setActiveCategoryFolder(null)}
+                onClick={() => {
+                  if (activeCategoryFolder) {
+                    handleCategoryBack();
+                  }
+                }}
                 className={`font-semibold bg-transparent border-none cursor-pointer p-0 text-left ${!activeCategoryFolder ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400 hover:underline'}`}
               >
                 {subjectName}
@@ -4332,7 +4366,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         return (
                           <div
                             key={cat.id}
-                            onClick={() => setActiveCategoryFolder(cat)}
+                            onClick={() => handleCategoryClick(cat)}
                             className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/folder select-none"
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -4385,7 +4419,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
                         return (
                           <div
                             key={cat.id}
-                            onClick={() => setActiveCategoryFolder(cat)}
+                            onClick={() => handleCategoryClick(cat)}
                             className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-2 shadow-xs"
                           >
                             <div className="flex items-center justify-between">
