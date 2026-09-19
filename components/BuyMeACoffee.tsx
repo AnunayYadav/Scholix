@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Check, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowRight } from 'lucide-react';
 import { UserProfile } from '../types.ts';
 import { useUniversity } from '../hooks/useUniversity.tsx';
 import NexusServer from '../services/nexusServer.ts';
@@ -11,8 +11,8 @@ interface BuyMeACoffeeProps {
   compact?: boolean;
 }
 
-const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, compact = false }) => {
-  const { fullBrandName, shortBrandName, studentTerm } = useUniversity();
+const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className = '', compact = false }) => {
+  const { studentTerm } = useUniversity();
   const [amount, setAmount] = useState<number>(50);
   const [loading, setLoading] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
@@ -42,13 +42,12 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
     try {
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
-        alert("Failed to load Razorpay SDK. Please check your internet connection.");
+        alert("Failed to load payment gateway. Please check your internet connection.");
         setLoading(false);
         setIsProcessing(false);
         return;
       }
 
-      // 1. Create order on the server
       const response = await fetch('/api/razorpay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,18 +60,15 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
         throw new Error(orderData.error || 'Failed to initiate payment');
       }
 
-      // 2. Open Razorpay Checkout
       const options = {
         key: orderData.keyId,
         amount: orderData.amount,
-
         currency: orderData.currency,
         name: "Scholix",
         description: "Support Scholix Development",
-        image: "/logo.png", // Dynamic logo from public directory
+        image: "/logo.png",
         order_id: orderData.id,
         handler: function (response: any) {
-          // Success callback
           setIsProcessing(false);
           setLoading(false);
           
@@ -82,7 +78,6 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
           const receiptReference = `SCX-${paymentId.slice(-8).toUpperCase()}`;
           const paymentDate = new Date().toISOString();
 
-          // Save transaction to Supabase (fire-and-forget — don't block navigation)
           NexusServer.saveTransaction({
             paymentId,
             orderId,
@@ -94,7 +89,6 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
             userUsername: userProfile?.username || null,
           }).catch(err => console.error('Background transaction save failed:', err));
 
-          // Redirect to success page with data
           navigate('/payment-success', { 
             state: { 
               paymentId,
@@ -112,7 +106,7 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
           contact: ""
         },
         theme: {
-          color: "#f97316", // orange-500
+          color: "#09090b",
         },
         modal: {
           ondismiss: function() {
@@ -135,222 +129,181 @@ const BuyMeACoffee: React.FC<BuyMeACoffeeProps> = ({ userProfile, className, com
   const presetAmounts = [50, 100, 200, 500];
 
   return compact ? (
-    <div className={`relative p-6 md:p-8 rounded-[32px] bg-zinc-50 dark:bg-[#111111] transition-all max-w-[500px] mx-auto ${className}`}>
-      <div className="relative z-10 flex flex-col gap-6">
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-1">
-            <Heart className="w-3 h-3 text-brand-primary fill-brand-primary" />
-            <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">Support Our Mission</span>
+    <div className={`p-6 sm:p-7 rounded-2xl bg-white dark:bg-[#0c0c0e] border border-zinc-200/80 dark:border-white/[0.06] max-w-[440px] mx-auto ${className}`}>
+      <div className="flex flex-col gap-4 sm:gap-5">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-primary">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+            Community Support
           </div>
-          <h3 className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">
-            Support <span className="text-brand-primary">Scholix</span>
+          <h3 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Support Scholix
           </h3>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
-            Join the community in supporting Scholix. Your contributions help keep the servers running.
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal leading-relaxed">
+            Help fund server maintenance and free tools for students.
           </p>
         </div>
 
-        <div className="w-full space-y-4 bg-white dark:bg-[#0a0a0a] p-5 rounded-[32px] border border-zinc-200 dark:border-white/5 shadow-sm">
-          <div className="space-y-3">
-            <p className="text-[11px] font-bold text-zinc-900 dark:text-zinc-100 px-1">Choose an amount</p>
-            <div className="grid grid-cols-2 gap-2">
-            {presetAmounts.map((amt) => (
-              <button
-                key={amt}
-                disabled={loading}
-                onClick={() => { setAmount(amt); setCustomAmount(''); }}
-                className={`relative py-2.5 rounded-xl text-xs font-bold transition-all border ${amount === amt && !customAmount 
-                  ? 'bg-brand-primary/5 text-brand-primary border-brand-primary/30 ring-1 ring-brand-primary/10' 
-                  : 'bg-zinc-50 dark:bg-white/[0.03] text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-zinc-100 dark:hover:bg-white/10'}`}
-              >
-                ₹{amt}
-                {amount === amt && !customAmount && (
-                  <div className="absolute top-1 right-1">
-                    <div className="bg-brand-primary rounded-full p-0.5">
-                      <Check className="w-1.5 h-1.5 text-white stroke-[4]" />
-                    </div>
-                  </div>
-                )}
-              </button>
-            ))}
-            </div>
+        <div className="space-y-3">
+          <div className="grid grid-cols-4 gap-2">
+            {presetAmounts.map((amt) => {
+              const isSelected = amount === amt && !customAmount;
+              return (
+                <button
+                  key={amt}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => { setAmount(amt); setCustomAmount(''); }}
+                  className={`py-2.5 px-2 rounded-xl text-xs font-medium transition-colors cursor-pointer border ${
+                    isSelected
+                      ? 'bg-brand-primary text-white border-transparent'
+                      : 'bg-zinc-50 dark:bg-white/[0.03] text-zinc-700 dark:text-zinc-300 border-zinc-200/70 dark:border-white/[0.06] hover:bg-zinc-100 dark:hover:bg-white/[0.06] hover:border-brand-primary/30'
+                  }`}
+                >
+                  ₹{amt}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="relative group">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-sm">₹</div>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-zinc-400">₹</span>
             <input
               type="number"
-              placeholder="Custom Amount"
+              placeholder="Custom amount"
               value={customAmount}
               onChange={(e) => {
                 const val = e.target.value;
                 setCustomAmount(val);
                 if (val) setAmount(Number(val));
               }}
-              className="w-full pl-8 pr-12 py-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 text-xs font-bold text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-brand-primary focus:border-brand-primary transition-all no-spinner"
+              className="w-full pl-7 pr-11 py-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/70 dark:border-white/[0.06] text-xs font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-brand-primary/60 dark:focus:border-brand-primary/50 transition-colors no-spinner"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-zinc-400 font-black tracking-widest uppercase opacity-60">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">
               INR
-            </div>
+            </span>
           </div>
 
           <button
+            type="button"
             onClick={() => handlePayment(amount)}
             disabled={loading || amount < 1}
-            className={`w-full py-3 rounded-xl bg-brand-primary text-white font-bold text-xs flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] shadow-lg shadow-brand-primary/20 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-brand-primary/90'}`}
+            className="w-full py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-white font-medium text-xs flex items-center justify-center gap-2 transition-colors active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-3.5 h-3.5 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <Lock className="w-3.5 h-3.5" />
-                <span>Secure Checkout</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <Lock size={13} strokeWidth={2} />
+                <span>Pay ₹{amount}</span>
+                <ArrowRight size={13} className="ml-0.5 opacity-80" />
               </>
             )}
           </button>
 
-          <div className="space-y-3 pt-1">
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-100 dark:border-white/5"></div>
-              </div>
-              <div className="relative bg-white dark:bg-[#0a0a0a] px-2">
-                <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
-                  Secure payments powered by
-                </span>
-              </div>
-            </div>
-
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-100 dark:border-white/5"></div>
-              </div>
-              <div className="relative bg-white dark:bg-[#0a0a0a] px-3">
-                <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.15em]">
-                  Secure payments powered by
-                </span>
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-50 dark:bg-[#111111] border border-zinc-100 dark:border-white/10 shadow-sm">
-                <img src="/Razorpay_logo.svg" alt="Razorpay" width={57} height={12} className="h-3 w-auto dark:brightness-150 dark:contrast-125" />
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50/50 dark:bg-[#0d1a14] border border-emerald-100 dark:border-emerald-500/20 shadow-sm">
-                <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                <p className="text-[8px] text-emerald-600 dark:text-emerald-500 font-black uppercase tracking-wider">
-                  100% Secured
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center justify-center gap-1.5 pt-0.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+            <ShieldCheck size={13} className="text-brand-primary/70" />
+            <span>Payments secured by Razorpay</span>
           </div>
         </div>
       </div>
     </div>
   ) : (
-    <div className={`relative overflow-hidden p-8 sm:p-12 rounded-[32px] bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/5 shadow-sm ${className}`}>
-      {/* Refined Background Gradients */}
-      <div className="absolute -top-24 -right-24 w-80 h-80 bg-brand-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-secondary/5 blur-[100px] rounded-full pointer-events-none"></div>
-
-      <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 md:gap-16 max-w-5xl mx-auto">
-        <div className="flex-1 text-center md:text-left space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-2 transition-transform hover:scale-105 cursor-default">
-            <Heart className="w-4 h-4 text-brand-primary fill-brand-primary" />
-            <span className="text-xs font-bold text-brand-primary tracking-wide">Support Our Mission</span>
+    <div className={`p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#0c0c0e] border border-zinc-200/80 dark:border-white/[0.06] ${className}`}>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 max-w-5xl mx-auto">
+        {/* Left Side: Editorial Apple Typography */}
+        <div className="flex-1 space-y-2.5 text-center md:text-left">
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-brand-primary">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+            Community Support
           </div>
-          <h3 className="text-3xl sm:text-4xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Support <span className="text-brand-primary">Scholix</span>
+
+          <h3 className="text-2xl sm:text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight">
+            Support Scholix
           </h3>
-          <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium max-w-sm mx-auto md:mx-0">
-            Join the community in supporting the growth and maintenance of Scholix. Your contributions help us keep the servers running and develop new AI features.
+
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal max-w-md mx-auto md:mx-0">
+            Scholix is completely free and built for students. Your contribution directly covers hosting costs, database upkeep, and the development of new features.
           </p>
+
+          <div className="hidden sm:flex items-center gap-4 pt-1 text-[12px] text-zinc-400 dark:text-zinc-500 justify-center md:justify-start">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-brand-primary/80" />
+              100% Encrypted & Safe
+            </span>
+            <span>•</span>
+            <span>No recurring subscription</span>
+          </div>
         </div>
 
-        <div className="w-full md:w-[400px] shrink-0 space-y-6 bg-zinc-50/50 dark:bg-white/[0.02] p-6 sm:p-8 rounded-[32px] border border-zinc-200 dark:border-white/5 backdrop-blur-sm shadow-xl dark:shadow-2xl">
-          <div className="space-y-4">
-            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 px-1">Choose an amount</p>
-            <div className="grid grid-cols-2 gap-3">
-            {presetAmounts.map((amt) => (
-              <button
-                key={amt}
-                disabled={loading}
-                onClick={() => { setAmount(amt); setCustomAmount(''); }}
-                className={`relative py-4 rounded-xl text-base font-bold transition-colors border ${amount === amt && !customAmount 
-                  ? 'bg-brand-primary/5 text-brand-primary border-brand-primary/40 ring-1 ring-brand-primary/20' 
-                  : 'bg-white dark:bg-white/[0.03] text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-zinc-100 dark:hover:bg-white/10 shadow-sm'}`}
-              >
-                ₹{amt}
-                {amount === amt && !customAmount && (
-                  <div className="absolute top-2 right-2">
-                    <div className="bg-brand-primary rounded-full p-0.5 shadow-lg shadow-brand-primary/20">
-                      <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
-                    </div>
-                  </div>
-                )}
-              </button>
-            ))}
+        {/* Right Side: Flat Minimal Apple Payment Box */}
+        <div className="w-full md:w-[360px] shrink-0 p-5 sm:p-6 rounded-2xl bg-zinc-50/70 dark:bg-white/[0.02] border border-zinc-200/70 dark:border-white/[0.05] space-y-3.5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Select amount</span>
+              <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 uppercase">INR</span>
+            </div>
+
+            <div className="grid grid-cols-4 gap-2">
+              {presetAmounts.map((amt) => {
+                const isSelected = amount === amt && !customAmount;
+                return (
+                  <button
+                    key={amt}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => { setAmount(amt); setCustomAmount(''); }}
+                    className={`py-2.5 px-2 rounded-xl text-xs font-medium transition-colors cursor-pointer border ${
+                      isSelected
+                        ? 'bg-brand-primary text-white border-transparent'
+                        : 'bg-white dark:bg-white/[0.04] text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-white/[0.06] hover:bg-zinc-100 dark:hover:bg-white/[0.08] hover:border-brand-primary/30'
+                    }`}
+                  >
+                    ₹{amt}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-black text-lg">₹</div>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-zinc-400">₹</span>
             <input
               type="number"
-              placeholder="Custom Amount"
+              placeholder="Or enter custom amount"
               value={customAmount}
               onChange={(e) => {
                 const val = e.target.value;
                 setCustomAmount(val);
                 if (val) setAmount(Number(val));
               }}
-              className="w-full pl-10 pr-16 py-4.5 rounded-xl bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 text-sm font-bold text-zinc-900 dark:text-zinc-100 shadow-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-brand-primary/50 focus:border-brand-primary transition-all no-spinner"
+              className="w-full pl-8 pr-12 py-2.5 rounded-xl bg-white dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.06] text-xs font-medium text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-brand-primary/60 dark:focus:border-brand-primary/50 transition-colors no-spinner"
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-bold tracking-widest uppercase opacity-60">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">
               INR
-            </div>
+            </span>
           </div>
 
           <button
+            type="button"
             onClick={() => handlePayment(amount)}
             disabled={loading || amount < 1}
-            className={`group w-full py-4.5 rounded-xl bg-brand-primary text-white font-black text-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl shadow-brand-primary/20 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-brand-primary/90 hover:shadow-brand-primary/30'}`}
+            className="w-full py-3 rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <Lock className="w-4 h-4" />
-                <span>Secure Checkout</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <Lock size={14} strokeWidth={2} />
+                <span>Contribute ₹{amount}</span>
+                <ArrowRight size={14} className="ml-0.5 opacity-80" />
               </>
             )}
           </button>
 
-          <div className="space-y-5 pt-3">
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-200 dark:border-white/5"></div>
-              </div>
-              <div className="relative bg-zinc-50 dark:bg-[#0d0d0d] px-5">
-                <span className="text-[11px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
-                  Secure payments powered by
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-3">
-              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-white dark:bg-[#111111] border border-zinc-200 dark:border-white/10 shadow-sm transition-all hover:border-blue-500/30">
-                <img src="/Razorpay_logo.svg" alt="Razorpay" width={85} height={18} className="h-4.5 w-auto dark:brightness-150 dark:contrast-125" />
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-50 dark:bg-[#0d1a14] border border-emerald-100 dark:border-emerald-500/20 shadow-sm transition-all hover:border-emerald-500/40">
-                <ShieldCheck className="w-4.5 h-4.5 text-emerald-500" />
-                <span className="text-[11px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">
-                  100% Secured
-                </span>
-              </div>
-            </div>
+          <div className="pt-0.5 flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+            <ShieldCheck size={13} className="text-brand-primary/70" />
+            <span>Payments secured by Razorpay</span>
           </div>
         </div>
       </div>

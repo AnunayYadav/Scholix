@@ -14,6 +14,7 @@ import html2canvas from 'html2canvas';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
+import { Trophy, Flame, ArrowLeft, CheckCircle2, Clock, Sparkles, X, ChevronRight, Award } from 'lucide-react';
 
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { findSubjectMetadata } from '../data/curriculumData.ts';
@@ -289,17 +290,16 @@ const RewardItemCard: React.FC<{
 }> = ({ tier, isRewardUnlocked, isCollected, userQuizProfile, userProfile, updateUserQuizProfile, userId, frameConfig }) => {
   return (
     <div className="flex flex-col items-center gap-2 group/reward relative">
-      <div className={`relative w-12 h-12 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl border border-white/10 shadow-lg shadow-black/20 ${
-        isRewardUnlocked && !isCollected ? 'ring-2 ring-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : ''
-      }`}>
+      <div className={`relative w-12 h-12 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl border border-white/10 shadow-lg shadow-black/20 ${isRewardUnlocked && !isCollected ? 'ring-2 ring-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : ''
+        }`}>
         {/* Shine Animation for available collection */}
         {isRewardUnlocked && !isCollected && (
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               x: ['-100%', '200%'],
               opacity: [0, 0.5, 0]
             }}
-            transition={{ 
+            transition={{
               duration: 2,
               repeat: Infinity,
               ease: "easeInOut",
@@ -311,7 +311,7 @@ const RewardItemCard: React.FC<{
 
         {/* Pulsing Glow for available collection */}
         {isRewardUnlocked && !isCollected && (
-          <motion.div 
+          <motion.div
             animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
             className="absolute inset-0 z-20 bg-orange-500/20 blur-xl pointer-events-none"
@@ -320,20 +320,20 @@ const RewardItemCard: React.FC<{
 
         {/* Rarity Background */}
         {tier.rarity && (
-          <img 
-            src={`/Rarity/${tier.rarity}.png`} 
+          <img
+            src={`/Rarity/${tier.rarity}.png`}
             alt={tier.rarity}
             className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover/reward:scale-110 transition-transform duration-500"
           />
         )}
-        
+
         {/* Frame Asset */}
         <div className="relative w-[60%] h-[60%] flex items-center justify-center z-10">
-          <img 
+          <img
             src={`/Nexus-Journey/${tier.rewardFrame}`}
             alt="Reward Frame"
             className="w-full h-full object-contain"
-            style={{ 
+            style={{
               transform: `scale(${frameConfig?.scale || 1.1}) translateY(${frameConfig?.translateY || '0%'})`,
               filter: 'none',
               opacity: 1
@@ -348,7 +348,7 @@ const RewardItemCard: React.FC<{
           </div>
         )}
       </div>
-      
+
       <div className="w-full flex justify-center">
         {isRewardUnlocked ? (
           isCollected ? (
@@ -357,7 +357,7 @@ const RewardItemCard: React.FC<{
               OWNED
             </div>
           ) : (
-            <button 
+            <button
               onClick={async (e) => {
                 e.stopPropagation();
                 const NexusServer = (await import('../services/nexusServer')).default;
@@ -419,7 +419,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   const [subjectsWithSyllabi, setSubjectsWithSyllabi] = useState<SubjectWithSyllabus[]>([]);
   const [showProgressModal, setShowProgressModal] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<SubjectWithSyllabus | null>(null);
-  
+
   // ═══════════ Official Exam Papers State ═══════════
   const [quizModeTab, setQuizModeTab] = useState<'official' | 'custom'>('official');
   const [examPapers, setExamPapers] = useState<ExamPaper[]>([]);
@@ -444,7 +444,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   const [executionOutput, setExecutionOutput] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
   const [pyodide, setPyodide] = useState<any>(null);
-  const [testResults, setTestResults] = useState<{in: string, out: string, actual: string, passed: boolean}[]>([]);
+  const [testResults, setTestResults] = useState<{ in: string, out: string, actual: string, passed: boolean }[]>([]);
   const [stdinValue, setStdinValue] = useState('');
   const [showStdin, setShowStdin] = useState(false);
   const [userInputs, setUserInputs] = useState<string[]>([]);
@@ -477,13 +477,13 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [timeSpentByQuestion, setTimeSpentByQuestion] = useState<Record<number, number>>({});
 
-  
+
   // Question Feedback States
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportQuestionId, setReportQuestionId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
   const [isReporting, setIsReporting] = useState(false);
-  
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<QuizQuestion | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -586,7 +586,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
 
   const runCode = async (isSubmit: boolean = false, isResume: boolean = false) => {
     const isPython = currentLanguage === 'python';
-    
+
     if (isPython && !pyodide) {
       showToast("Python engine is still loading...", "info");
       return;
@@ -594,9 +594,9 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
 
     setIsExecuting(true);
     setIsAwaitingInput(false);
-    
+
     if (isSubmit) {
-      setTestResults([]); 
+      setTestResults([]);
     } else if (!isResume) {
       setExecutionOutput("Running...");
       setUserInputs([]);
@@ -766,7 +766,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       if (solvedIds.length > 0) {
         saveSolvedQuestions(solvedIds);
       }
-      
+
       // Log quiz completion for analytics
       NexusServer.saveRecord(userProfile?.id || null, 'quiz_complete', `Completed ${selectedSubject?.name} Quiz`, {
         subject: selectedSubject?.name,
@@ -786,14 +786,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         setExamPapers([]);
         return;
       }
-      
+
       setIsFetchingQuestions(true);
       setIsFetchingExamPapers(true);
       try {
         const subjectName = selectedSubject.name || '';
         const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
         const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
-        
+
         // 1. Fetch official exam papers catalog
         const papers = await NexusServer.fetchExamPapers(subjectCode);
         setExamPapers(papers);
@@ -811,7 +811,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         setIsFetchingExamPapers(false);
       }
     };
-    
+
     fetchSubjectData();
   }, [selectedSubject]);
 
@@ -905,10 +905,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   const availableTopicsByUnit = useMemo(() => {
     const topicsMap: Record<number, Set<string>> = {};
-    const filteredQuestions = selectedUnits.length > 0 
-      ? subjectQuestions.filter(q => selectedUnits.includes(q.unit)) 
+    const filteredQuestions = selectedUnits.length > 0
+      ? subjectQuestions.filter(q => selectedUnits.includes(q.unit))
       : subjectQuestions;
-    
+
     filteredQuestions.forEach(q => {
       if (q.topic) {
         if (!topicsMap[q.unit]) topicsMap[q.unit] = new Set();
@@ -965,8 +965,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
   const availableQuestionTypes = useMemo(() => {
     const types = new Set<string>();
-    const filtered = selectedUnits.length > 0 
-      ? subjectQuestions.filter(q => selectedUnits.includes(q.unit)) 
+    const filtered = selectedUnits.length > 0
+      ? subjectQuestions.filter(q => selectedUnits.includes(q.unit))
       : subjectQuestions;
 
     filtered.forEach(q => {
@@ -1022,7 +1022,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     setInitializing(true);
     try {
       const subjectsMap = new Map<string, SubjectWithSyllabus>();
-      
+
       // Fetch distinct subject codes that actually exist in Supabase (questions + exam_papers)
       const subjectNames = await NexusServer.fetchSubjectNames();
 
@@ -1039,7 +1039,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         // Normalize code by removing spaces: "MTH 401" -> "MTH401"
         const subjectMatch = rawSubject.match(/^[A-Za-z]+[\s-]*[0-9]+/);
         const normalizedCode = subjectMatch ? subjectMatch[0].replace(/[\s-]+/g, '').toUpperCase() : rawSubject.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
-        
+
         // 1. Try finding in comprehensive subject catalog (scraped from curriculum)
         const catalogItem = getSubjectCurriculum(normalizedCode);
 
@@ -1080,7 +1080,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       // Final unique subjects list (ONLY subjects in DB)
       const finalSubjects = Array.from(subjectsMap.values())
         .sort((a, b) => a.name.localeCompare(b.name));
-        
+
       setSubjectsWithSyllabi(finalSubjects);
 
       // Auto-select if selectedSubject is not set or not in list
@@ -1149,7 +1149,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         setQuizCompleted(data.quizCompleted || false);
         setCompletedOnLoad(data.quizCompleted || false);
         setQuizIdInState(quizId);
-        
+
         // Ensure selected subject matches
         if (data.subject && (!selectedSubject || selectedSubject.name !== data.subject)) {
           const sub = subjectsWithSyllabi.find(s => s.name === data.subject);
@@ -1165,7 +1165,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       // Determine the display name and search key
       let currentSubjectName = selectedSubject?.name;
       let displayName = selectedSubject?.name;
-      
+
       if (activeQuizType === 'featured') {
         currentSubjectName = 'featured';
         displayName = featuredQuiz?.name || 'Today\'s Featured';
@@ -1188,7 +1188,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         lastUpdated: Date.now()
       };
       localStorage.setItem(`nexus_quiz_${quizId}`, JSON.stringify(data));
-      
+
       // Also update a "recent quizzes" list
       const recent = JSON.parse(localStorage.getItem('nexus_recent_quizzes') || '[]');
       const filtered = recent.filter((q: any) => q.id !== quizId);
@@ -1244,10 +1244,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       return;
     }
     if (!featuredQuiz || featuredCompleted) return;
-    
+
     // First shuffle the order of questions
     const shuffledQuestionList = shuffleArray(featuredQuiz.questions);
-    
+
     const questions = shuffledQuestionList.map((q: any, idx: number) => {
       const enriched = {
         ...q,
@@ -1282,46 +1282,46 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       return;
     }
     if (completedChallengeIds.has(challenge.id)) return;
-    
+
     setLoading(true);
     setStatus('Gathering challenge questions...');
-    
+
     try {
       const subjectCode = (challenge.subject || '').split(':')[0].trim();
       const pool = await NexusServer.fetchQuestions(subjectCode);
       const mcqs = pool.filter(q => q.type === 'mcq');
-      
+
       if (mcqs.length === 0) {
         showToast('No questions available for this challenge subject.', 'error');
         return;
       }
-      
+
       const shuffled = [...mcqs].sort(() => 0.5 - Math.random()).slice(0, challenge.question_count);
-    const questions = shuffled.map((q: any, idx: number) => {
-      const enriched = {
-        ...q,
-        id: q.id || `challenge-${idx}`,
-        unit: q.unit || 1,
-        type: q.type || 'mcq',
-        questionType: q.questionType || 'MCQ',
-      };
-      return shuffleQuestion(enriched as QuizQuestion);
-    });
-    setActiveQuizType('challenge');
-    setActiveChallengeId(challenge.id);
-    setQuizQuestions(questions);
-    setCurrentQuestionIdx(0);
-    setUserAnswers({});
-    setQuizCompleted(false);
-    setCompletedOnLoad(false);
-    setTimerActive(true);
-    setTimeLeft(challenge.question_count * challenge.time_limit_per_question);
-    setVisitedQuestions(new Set([0]));
-    setMarkedForReview(new Set());
-    setTimeSpentByQuestion({});
-    const newQuizId = challenge.id; // Using static window-based ID
-    setQuizIdInState(newQuizId);
-    navigate(`${routePrefix}/quiz/challenge/${newQuizId}`);
+      const questions = shuffled.map((q: any, idx: number) => {
+        const enriched = {
+          ...q,
+          id: q.id || `challenge-${idx}`,
+          unit: q.unit || 1,
+          type: q.type || 'mcq',
+          questionType: q.questionType || 'MCQ',
+        };
+        return shuffleQuestion(enriched as QuizQuestion);
+      });
+      setActiveQuizType('challenge');
+      setActiveChallengeId(challenge.id);
+      setQuizQuestions(questions);
+      setCurrentQuestionIdx(0);
+      setUserAnswers({});
+      setQuizCompleted(false);
+      setCompletedOnLoad(false);
+      setTimerActive(true);
+      setTimeLeft(challenge.question_count * challenge.time_limit_per_question);
+      setVisitedQuestions(new Set([0]));
+      setMarkedForReview(new Set());
+      setTimeSpentByQuestion({});
+      const newQuizId = challenge.id; // Using static window-based ID
+      setQuizIdInState(newQuizId);
+      navigate(`${routePrefix}/quiz/challenge/${newQuizId}`);
     } catch (err) {
       console.error(err);
       showToast('Error starting challenge!', 'error');
@@ -1423,19 +1423,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       saveSolvedQuestions(solvedIds);
     }
   }, [
-    quizCompleted, 
-    completedOnLoad, 
-    quizQuestions, 
-    userAnswers, 
-    userId, 
-    awardXP, 
-    recordCompletion, 
-    saveCompletion, 
-    timeSpentByQuestion, 
-    timerMinutes, 
-    activeQuizType, 
-    quizIdInState, 
-    selectedSubject, 
+    quizCompleted,
+    completedOnLoad,
+    quizQuestions,
+    userAnswers,
+    userId,
+    awardXP,
+    recordCompletion,
+    saveCompletion,
+    timeSpentByQuestion,
+    timerMinutes,
+    activeQuizType,
+    quizIdInState,
+    selectedSubject,
     activeChallengeId,
     level,
     currentStreak,
@@ -1464,14 +1464,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       // We already have subjectQuestions fetched in the hook
       let pool = subjectQuestions.filter(q => selectedUnits.includes(Number(q.unit)));
-      
+
       if (pool.length === 0) {
         // Double check with a direct fetch if pool is empty (maybe it wasn't fully loaded)
         setStatus('Checking databases...');
         const subjectName = selectedSubject.name || '';
         const subjectMatch = subjectName.match(/[A-Za-z]+[0-9]+/);
         const subjectCode = subjectMatch ? subjectMatch[0].toUpperCase() : subjectName.split(':')[0].trim().replace(/\s+/g, '').toUpperCase();
-        
+
         console.log(`[DEBUG] Attempting targeted fetch for ${subjectCode} units:`, selectedUnits);
         pool = await NexusServer.fetchQuestions(subjectCode, selectedUnits);
         console.log(`[DEBUG] Fetched ${pool.length} questions from DB`);
@@ -1479,9 +1479,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         pool = pool.filter(q => selectedUnits.includes(Number(q.unit)));
         console.log(`[DEBUG] After unit filter: ${pool.length} questions`);
       }
-      
+
       console.log(`[DEBUG] Pool for generation: ${pool.length}`);
-      
+
       // Apply Filters
       if (selectedDifficulties.length > 0) {
         const lowerSelected = selectedDifficulties.map(d => d.toLowerCase());
@@ -1492,43 +1492,43 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         });
         console.log(`[DEBUG] After difficulty filter: ${pool.length} questions`);
       }
-      
+
       if (selectedTopics.length > 0) {
         const lowerSelectedTopics = selectedTopics.map(t => t.toLowerCase());
         console.log(`[DEBUG] Applying topic filter (lower):`, lowerSelectedTopics);
         pool = pool.filter(q => q.topic && lowerSelectedTopics.includes(q.topic.toLowerCase()));
         console.log(`[DEBUG] After topic filter: ${pool.length} questions`);
       }
-      
+
       // Filter by Question Type (MCQ, PYQ, Case Study)
       let availableMcqs = pool.filter(q => {
         const typeMatch = (q.type || '').toLowerCase() === 'mcq';
         const questionTypeStr = String(q.questionType || 'MCQ').toUpperCase();
-        
+
         // If nothing selected, default to true for all mcq types
         const questionTypeMatch = selectedQuestionTypes.length === 0 || selectedQuestionTypes.some(selected => {
           const s = selected.toUpperCase();
           return questionTypeStr.includes(s) || s.includes(questionTypeStr);
         });
-        
+
         return typeMatch && questionTypeMatch;
       });
       console.log(`[DEBUG] Available MCQs: ${availableMcqs.length}`);
-      
+
       let availableSubj = pool.filter(q => (q.type || '').toLowerCase() === 'subjective');
       let availableCoding = pool.filter(q => (q.type || '').toLowerCase() === 'coding');
-      
+
       console.log(`[DEBUG] Available categories: MCQ(${availableMcqs.length}) Subj(${availableSubj.length}) Coding(${availableCoding.length})`);
 
       // Prioritize unsolved but fill with solved if needed
       const unsolvedMcqs = availableMcqs.filter(q => !solvedQuestionIds.has(q.id));
       const solvedMcqs = availableMcqs.filter(q => solvedQuestionIds.has(q.id));
       const poolMcq = [...shuffleArray(unsolvedMcqs), ...shuffleArray(solvedMcqs)];
-      
+
       const unsolvedSubj = availableSubj.filter(q => !solvedQuestionIds.has(q.id));
       const solvedSubj = availableSubj.filter(q => solvedQuestionIds.has(q.id));
       const poolSubj = [...shuffleArray(unsolvedSubj), ...shuffleArray(solvedSubj)];
-      
+
       // If includeSolved is false, we strictly use only unsolved
       const finalMcqPool = includeSolved ? poolMcq : unsolvedMcqs;
       const finalSubjPool = includeSolved ? poolSubj : unsolvedSubj;
@@ -1539,7 +1539,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       const pickedCoding = [...availableCoding].sort(() => 0.5 - Math.random()).slice(0, numCoding);
 
       finalSelection = [...pickedMcq, ...pickedSubj, ...pickedCoding].sort(() => 0.5 - Math.random());
-      
+
       console.log(`[DEBUG] Final selection size: ${finalSelection.length} (Wanted: ${numMCQ + numSubjective + numCoding})`);
       console.log(`[DEBUG] Unsolved available: ${unsolvedMcqs.length}, Solved available: ${solvedMcqs.length}`);
 
@@ -1573,15 +1573,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     setQuizQuestions(enriched);
     setIsCached(cached);
-    
+
     // Generate random ID for this instance
     const newQuizId = `q${Math.random().toString(36).substring(2, 11)}`;
     setQuizIdInState(newQuizId);
-    NexusServer.saveRecord(userProfile?.id || null, 'quiz_start', `Started ${selectedSubject?.name} Quiz`, { 
-      quizId: newQuizId, 
+    NexusServer.saveRecord(userProfile?.id || null, 'quiz_start', `Started ${selectedSubject?.name} Quiz`, {
+      quizId: newQuizId,
       subject: selectedSubject?.name,
       questionCount: enriched.length,
-      difficulty: selectedDifficulties 
+      difficulty: selectedDifficulties
     });
     navigate(`${routePrefix}/quiz/${slugify(selectedSubject!.name)}/${newQuizId}`);
 
@@ -1674,7 +1674,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       const updatedQ = { ...editingQuestion, ...editForm } as QuizQuestion;
       await NexusServer.updateQuestion(updatedQ);
       showToast("Question updated successfully.", "success");
-      
+
       // Update local state
       setQuizQuestions(prev => prev.map(q => q.id === updatedQ.id ? updatedQ : q));
       setShowEditModal(false);
@@ -1691,16 +1691,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <>
         <AnimatePresence>
           {/* Report Modal */}
-            {showReportModal && (
+          {showReportModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/80 backdrop-blur-xl" 
-                onClick={() => setShowReportModal(false)} 
+                className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+                onClick={() => setShowReportModal(false)}
               />
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1712,25 +1712,24 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
-                
+
                 <div className="space-y-6">
                   <p className="text-sm text-zinc-400 leading-relaxed">What's wrong with this question? Your report will be reviewed by {fullBrandName} Moderators to ensure content quality.</p>
-                  
+
                   <div className="space-y-3">
                     {['Incorrect Answer', 'Typo/Grammar Error', 'Out of Syllabus', 'Technical Glitch'].map((option) => (
                       <button
                         key={option}
                         onClick={() => setReportReason(option)}
-                        className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                          reportReason === option 
-                            ? 'bg-orange-500/10 border-orange-500 text-orange-400' 
+                        className={`w-full text-left p-4 rounded-2xl border transition-all ${reportReason === option
+                            ? 'bg-orange-500/10 border-orange-500 text-orange-400'
                             : 'bg-white/5 border-white/5 text-zinc-400 hover:border-orange-500/30'
-                        }`}
+                          }`}
                       >
                         <span className="text-sm font-semibold">{option}</span>
                       </button>
                     ))}
-                    
+
                     <textarea
                       placeholder="Additional details or specific concerns..."
                       value={reportReason}
@@ -1756,14 +1755,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           {/* Edit Modal (Admin Only) */}
           {showEditModal && editingQuestion && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl" 
-                onClick={() => setShowEditModal(false)} 
+                className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl"
+                onClick={() => setShowEditModal(false)}
               />
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1778,7 +1777,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
-                
+
                 <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Question Text</label>
@@ -1806,7 +1805,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             }}
                             className="flex-1 p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50 text-zinc-800 dark:text-zinc-200"
                           />
-                          <button 
+                          <button
                             onClick={() => setEditForm(prev => ({ ...prev, correctAnswer: idx }))}
                             className={`px-3 rounded-xl border text-[8px] font-bold uppercase transition-all ${editForm.correctAnswer === idx ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-200 dark:border-white/10 text-zinc-400 hover:border-emerald-500/30'}`}
                           >
@@ -1892,14 +1891,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     return Object.entries(userAnswers).reduce((acc, [idx, ans]) => {
       const question = quizQuestions[parseInt(idx)];
       if (question.type === 'subjective') return acc;
-      
+
       if (question.type === 'coding') {
         const ansObj = ans as any;
         return (ansObj && typeof ansObj === 'object' && ansObj.passed) ? acc + 1 : acc;
       }
 
       if (ans === undefined) return acc;
-      
+
       const isCorrect = ans === question.correctAnswer;
       if (isCorrect) return acc + 1;
       return negativeMarking ? acc - 0.25 : acc;
@@ -2066,7 +2065,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     const getMilestoneIcon = (icon: string) => {
       const getIconColor = (type: string) => {
-        switch(type) {
+        switch (type) {
           case 'seedling': return 'text-emerald-500';
           case 'footsteps': return 'text-amber-600';
           case 'badge': return 'text-zinc-500';
@@ -2100,7 +2099,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         viewBox: "0 0 24 24",
         width: "24",
         height: "24",
-        fill: "none", 
+        fill: "none",
         stroke: "currentColor",
         strokeWidth: "2.5",
         strokeLinecap: "round" as const,
@@ -2108,7 +2107,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         className: `w-7 h-7 transition-all duration-300 group-hover:scale-110 ${getIconColor(icon)}`
       };
 
-      switch(icon) {
+      switch (icon) {
         case 'seedling': return (
           <svg {...props}>
             <path d="M7 20h10" />
@@ -2281,19 +2280,19 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     return (
       <div className="font-sans text-zinc-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
         <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-fade-in">
-          
+
           {/* Centered Results Header */}
           <div className="text-center space-y-6">
             <div className="relative inline-block">
-               <div className="absolute inset-0 bg-orange-500/10 blur-[40px] rounded-full animate-pulse" />
-               <div className="relative w-14 h-14 mx-auto bg-transparent flex items-center justify-center shadow-lg">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-500">
-                   <path d="M6 9l6 6 6-6" className="transform rotate-180 origin-center" /><path d="M12 15V3" className="transform rotate-180 origin-center" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" className="transform rotate-180 origin-center" />
-                 </svg>
-                 <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-white"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                 </div>
-               </div>
+              <div className="absolute inset-0 bg-orange-500/10 blur-[40px] rounded-full animate-pulse" />
+              <div className="relative w-14 h-14 mx-auto bg-transparent flex items-center justify-center shadow-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-500">
+                  <path d="M6 9l6 6 6-6" className="transform rotate-180 origin-center" /><path d="M12 15V3" className="transform rotate-180 origin-center" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" className="transform rotate-180 origin-center" />
+                </svg>
+                <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-white"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -2303,7 +2302,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 </span>
               </h1>
               <p className="text-zinc-500 dark:text-zinc-400 font-medium text-sm max-w-xl mx-auto leading-relaxed">
-                {percentage >= 80 
+                {percentage >= 80
                   ? `You've outperformed ${Math.min(99, 70 + Math.floor(percentage / 4))}% of users in ${selectedSubject?.name}. Mastery achieved.`
                   : `Steady progress in ${selectedSubject?.name}. Review the detailed breakdown below to polish your skills.`}
               </p>
@@ -2314,7 +2313,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-3 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5" /></svg>
               </div>
               <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Correct</span>
               <p className="text-3xl font-bold text-zinc-900 dark:text-white">{score}/{totalAuto}</p>
@@ -2322,7 +2321,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </div>
               <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Incorrect</span>
               <p className="text-3xl font-bold text-zinc-900 dark:text-white">{totalAuto - score}</p>
@@ -2330,7 +2329,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
               </div>
               <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Avg Speed</span>
               <p className="text-3xl font-bold text-zinc-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
@@ -2338,7 +2337,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
             <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
               <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
               <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Time Taken</span>
               <p className="text-3xl font-bold text-zinc-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
@@ -2347,23 +2346,23 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
           {/* Quick Actions */}
           <div className="flex flex-col items-center gap-6">
-            <button 
+            <button
               onClick={() => document.getElementById('question-review-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="w-full max-w-lg py-5 bg-orange-500 hover:bg-orange-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
             >
               <span>Review Results</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
             </button>
 
             <div className="flex gap-4 w-full max-w-lg">
-              <button 
+              <button
                 onClick={handleGenerate}
                 className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-500 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
                 Retake Quiz
               </button>
-              <button 
+              <button
                 onClick={handleBackToDashboard}
                 className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
               >
@@ -2379,33 +2378,31 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <div className="flex items-center mb-6">
                 <span className="text-[10px] font-semibold text-zinc-400 tracking-wider transition-all duration-500 opacity-60">Achievements Unlocked</span>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
                 {activeMilestones.map((m, idx) => (
-                  <div 
+                  <div
                     key={idx}
                     className="flex flex-col items-center text-center gap-3 transition-all duration-300 hover:scale-105 group relative"
                   >
                     {/* Background Glow for High Rarity */}
                     {(m.rarity === 'epic' || m.rarity === 'legendary') && (
-                      <div className={`absolute -inset-2 opacity-0 group-hover:opacity-10 blur-xl rounded-full transition-opacity duration-500 ${
-                        m.rarity === 'legendary' ? 'bg-orange-500' : 'bg-indigo-500'
-                      }`} />
+                      <div className={`absolute -inset-2 opacity-0 group-hover:opacity-10 blur-xl rounded-full transition-opacity duration-500 ${m.rarity === 'legendary' ? 'bg-orange-500' : 'bg-indigo-500'
+                        }`} />
                     )}
-                    
+
                     <div className="relative p-1 transition-transform duration-500 group-hover:-translate-y-1">
                       {getMilestoneIcon(m.icon || '')}
                     </div>
-                    
+
                     <div className="relative space-y-0.5">
                       <p className="text-[12px] font-bold tracking-tight leading-none text-zinc-800 dark:text-zinc-300">{m.label}</p>
-                      <p className={`text-[8px] font-bold tracking-wider ${
-                        m.rarity === 'legendary' ? 'text-orange-500' :
-                        m.rarity === 'epic' ? 'text-indigo-500' :
-                        m.rarity === 'rare' ? 'text-emerald-500' :
-                        m.rarity === 'uncommon' ? 'text-blue-500' :
-                        'text-zinc-500'
-                      }`}>{m.rarity}</p>
+                      <p className={`text-[8px] font-bold tracking-wider ${m.rarity === 'legendary' ? 'text-orange-500' :
+                          m.rarity === 'epic' ? 'text-indigo-500' :
+                            m.rarity === 'rare' ? 'text-emerald-500' :
+                              m.rarity === 'uncommon' ? 'text-blue-500' :
+                                'text-zinc-500'
+                        }`}>{m.rarity}</p>
                     </div>
                   </div>
                 ))}
@@ -2426,38 +2423,38 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 tracking-wider">{quizQuestions.length} Items Total</span>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4">
             {quizQuestions.map((q, i) => {
               const isSubjective = q.type === 'subjective';
               const isCoding = q.type === 'coding';
               const ansObj = userAnswers[i] as any;
-              const isCorrect = isCoding 
+              const isCorrect = isCoding
                 ? (ansObj && typeof ansObj === 'object' ? ansObj.passed : false)
                 : (!isSubjective && userAnswers[i] === q.correctAnswer);
-              
+
               const timeSpent = timeSpentByQuestion[i] || 0;
               const struggleMultiplier = q.difficulty === 'Easy' ? 1.25 : q.difficulty === 'Hard' ? 2.0 : 1.5;
               const isStruggle = timeSpent > avgTimePerQuestion * struggleMultiplier;
-              
-              const statusColorOptions = isSubjective 
-                ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-500 dark:text-orange-400' 
-                : isCorrect 
-                  ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
+
+              const statusColorOptions = isSubjective
+                ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-500 dark:text-orange-400'
+                : isCorrect
+                  ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                   : 'bg-red-50/50 border-red-200 dark:bg-red-500/5 dark:border-red-500/20 text-red-600 dark:text-red-400';
-              
-              const badgeColors = isSubjective 
-                ? 'bg-orange-100/50 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' 
-                : isCorrect 
-                  ? 'bg-emerald-100/50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' 
+
+              const badgeColors = isSubjective
+                ? 'bg-orange-100/50 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200 dark:border-orange-500/30'
+                : isCorrect
+                  ? 'bg-emerald-100/50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
                   : 'bg-red-100/50 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30';
-              
+
               const label = isCoding ? (isCorrect ? 'Tests Passed' : 'Tests Failed') : (isSubjective ? 'Subjective' : (isCorrect ? 'Correct' : 'Incorrect'));
 
               return (
                 <div key={i} className={`p-5 md:p-6 rounded-[24px] border shadow-sm transition-all ${statusColorOptions}`}>
                   <div className="flex flex-col space-y-4">
-                    
+
                     {/* Header Row */}
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`px-2 py-0.5 rounded-md text-[9px] font-semibold tracking-wider border ${badgeColors}`}>
@@ -2469,7 +2466,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         </span>
                       )}
                       <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider flex items-center gap-1.5">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 opacity-60"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 opacity-60"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
                         {timeSpent}s
                       </span>
                       <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider">
@@ -2485,14 +2482,13 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           {q.questionType}
                         </span>
                       )}
-                      
+
                       <button
                         onClick={() => toggleBookmark(q.id || '')}
-                        className={`ml-auto p-1 transition-all active:scale-90 ${
-                          bookmarkedIds.has(q.id || '')
+                        className={`ml-auto p-1 transition-all active:scale-90 ${bookmarkedIds.has(q.id || '')
                             ? 'text-blue-500'
                             : 'text-zinc-300 dark:text-zinc-600 hover:text-blue-400'
-                        }`}
+                          }`}
                         title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
                       >
                         <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
@@ -2500,7 +2496,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         </svg>
                       </button>
                     </div>
-                    
+
                     {/* Question Text */}
                     <h4 className="text-sm md:text-base font-bold text-zinc-800 dark:text-zinc-100 leading-relaxed">
                       {parseText(q.question)}
@@ -2515,7 +2511,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                             {ansObj?.code || '# No code submitted'}
                           </pre>
                         </div>
-                        
+
                         {ansObj?.results && ansObj.results.length > 0 && (
                           <div className="space-y-2">
                             <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1 tracking-wider text-[10px]">Test Results</span>
@@ -2546,9 +2542,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
                         <div className={`p-4 rounded-2xl border text-xs font-semibold tracking-wider flex items-center gap-2 ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
                           {isCorrect ? (
-                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg> All validation tests passed</>
+                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg> All validation tests passed</>
                           ) : (
-                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12"/></svg> Some tests failed</>
+                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg> Some tests failed</>
                           )}
                         </div>
                       </div>
@@ -2566,7 +2562,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                         {!isCorrect && (
                           <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-zinc-800 dark:text-zinc-200">
                             <span className="text-emerald-600/70 dark:text-emerald-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
                               Correct Solution
                             </span>
                             <span className="font-semibold text-sm text-emerald-700 dark:text-emerald-400">
@@ -2578,7 +2574,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     ) : (
                       <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 mt-2">
                         <span className="text-orange-500/70 dark:text-orange-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                           Feedback
                         </span>
                         <span className="font-semibold text-sm text-orange-700 dark:text-orange-400">
@@ -2590,7 +2586,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     {/* Explanation Box */}
                     <div className="mt-4 p-5 md:p-6 bg-white dark:bg-white/[0.02] rounded-2xl border border-zinc-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                       <div className="flex items-center gap-2 mb-3">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-400"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
                         <span className="text-[11px] font-semibold text-zinc-500 tracking-wider">Explanation</span>
                       </div>
                       <div className="text-sm text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed">
@@ -2616,7 +2612,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <LevelUpOverlay />
       <StreakToast />
       {renderModals()}
-      
+
 
     </>
   );
@@ -2628,19 +2624,21 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         {globalOverlays}
 
         {/* Header */}
-        <header className="text-center space-y-3 pt-2">
-          <h2 className="text-2xl md:text-4xl font-semibold text-zinc-900 dark:text-white tracking-tighter leading-none">Quiz <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">Taker</span></h2>
+        <header className="text-center space-y-2 pt-2">
+          <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">
+            Quiz <span className="text-brand-primary">Taker</span>
+          </h2>
           <p className="text-zinc-500 font-medium text-xs">Your personal assessment dashboard</p>
         </header>
 
         {error && (
-          <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] text-center space-y-3 animate-fade-in">
-            <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center space-y-2 animate-fade-in">
+            <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
+              <X className="w-4 h-4" />
             </div>
-            <h4 className="text-xs font-medium text-red-500 tracking-widest">Protocol Interrupted</h4>
-            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{error}</p>
-            <button onClick={() => setError(null)} className="text-[9px] font-medium text-zinc-400 hover:text-orange-500 transition-colors">Dismiss</button>
+            <h4 className="text-xs font-semibold text-red-500">Protocol Interrupted</h4>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">{error}</p>
+            <button onClick={() => setError(null)} className="text-[10px] font-medium text-zinc-400 hover:text-brand-primary transition-colors cursor-pointer">Dismiss</button>
           </div>
         )}
 
@@ -2665,104 +2663,88 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         {/* XP & Streak Stats Refined Layout */}
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.6fr] gap-4 mb-4">
           {/* XP & Level Card - Clickable Progress Modal Trigger */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ scale: 1.02, cursor: 'pointer' }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.99 }}
             onClick={() => setShowProgressModal(true)}
-            className="bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/50 dark:hover:bg-[#141416] p-6 rounded-[24px] border-none shadow-none relative overflow-hidden group transition-all flex flex-col gap-4 cursor-pointer"
+            className="bg-white dark:bg-[#17171a] hover:border-zinc-300 dark:hover:border-zinc-700 p-6 rounded-2xl sm:rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-none relative overflow-hidden group transition-all flex flex-col justify-between cursor-pointer"
           >
-            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-40 transition-opacity">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-              </svg>
-            </div>
-
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-orange-500/90 uppercase tracking-widest leading-none">Level {level.level}</p>
-                <h3 className="text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-none">{level.title}</h3>
+                <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">Level {level.level}</p>
+                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">{level.title}</h3>
               </div>
-              <div className="w-14 h-14 rounded-[18px] bg-zinc-200/60 dark:bg-white/5 flex items-center justify-center text-2xl">
-                {level.icon || '🌱'}
+              <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 text-brand-primary flex items-center justify-center">
+                <Trophy className="w-6 h-6" />
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-baseline gap-2">
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total XP</p>
+            <div className="space-y-3 pt-4">
+              <div className="flex items-baseline justify-between">
+                <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Total Experience</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-orange-500 tabular-nums leading-none">
+                  <span className="text-2xl font-bold text-zinc-900 dark:text-white tabular-nums leading-none">
                     {totalXP}
                   </span>
-                  <span className="text-[11px] font-bold text-zinc-400">XP</span>
+                  <span className="text-[11px] font-semibold text-brand-primary">XP</span>
                 </div>
               </div>
 
               {/* High Contrast Progress Line */}
-              <div className="space-y-2">
-                <div className="h-2 w-full bg-zinc-200/80 dark:bg-white/10 rounded-full overflow-hidden">
-                  <motion.div 
+              <div className="space-y-1.5">
+                <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-full overflow-hidden">
+                  <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${level.progress}%` }}
-                    transition={{ duration: 1.5, ease: "circOut" }}
+                    transition={{ duration: 1.2, ease: "circOut" }}
                     viewport={{ once: true }}
-                    className="h-full bg-orange-500 rounded-full"
+                    className="h-full bg-brand-primary rounded-full"
                   />
                 </div>
                 {level.nextLevel && (
-                  <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
-                    Need <span className="font-bold text-zinc-700 dark:text-zinc-200">{level.nextLevel!.minXP - totalXP} more</span> to reach {level.nextLevel!.title}
+                  <p className="text-[10px] font-medium text-zinc-400">
+                    Need <span className="font-semibold text-zinc-700 dark:text-zinc-200">{level.nextLevel!.minXP - totalXP} more</span> to reach {level.nextLevel!.title}
                   </p>
                 )}
               </div>
             </div>
           </motion.div>
 
-          {/* Streak Card - Narrower & Shorter */}
-          <motion.div 
+          {/* Streak Card */}
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="bg-zinc-100 dark:bg-[#111113] p-5 rounded-[24px] border-none shadow-none relative overflow-hidden flex flex-col items-center justify-between transition-all"
+            transition={{ delay: 0.05 }}
+            className="bg-white dark:bg-[#17171a] p-6 rounded-2xl sm:rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-none relative overflow-hidden flex flex-col items-center justify-between transition-all"
           >
             <div className="flex flex-col items-center w-full">
-              <div className="flex items-center justify-center gap-3 mb-1">
-                <motion.span 
-                  animate={{ scale: [1, 1.1, 1] }} 
-                  transition={{ repeat: Infinity, duration: 2.5 }}
-                  className="text-3xl"
-                >
-                  🔥
-                </motion.span>
-                <h4 className="text-6xl font-black text-zinc-900 dark:text-white tabular-nums leading-none">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Flame className="w-7 h-7 text-brand-primary fill-brand-primary" />
+                <h4 className="text-4xl font-black text-zinc-900 dark:text-white tabular-nums leading-none">
                   {currentStreak}
                 </h4>
               </div>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Day Streak</p>
-              
-              <div className="px-3 py-1 rounded-full bg-orange-500/10 border-none mb-4">
-                <p className="text-[9px] font-black text-orange-500 dark:text-orange-400 uppercase tracking-widest leading-none">Best: {longestStreak}</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Day Streak</p>
+
+              <div className="px-2.5 py-0.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-3">
+                <p className="text-[9px] font-semibold text-brand-primary uppercase tracking-wider leading-none">Best: {longestStreak}</p>
               </div>
             </div>
 
-            <div className="w-full">
-              <div className="flex justify-between items-center px-0.5">
+            <div className="w-full pt-1">
+              <div className="flex justify-between items-center px-1">
                 {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, i) => {
                   const day = streakCalendar.slice(-7)[i];
                   const isCompleted = day?.completed;
                   return (
-                    <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                      <span className={`text-[8px] font-bold ${isCompleted ? 'text-orange-500' : 'text-zinc-400'}`}>{label}</span>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-orange-500 shadow-lg shadow-orange-500/20' : 'bg-zinc-200/60 dark:bg-white/5'}`}>
-                        {isCompleted && (
-                          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3">
-                            <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
+                    <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+                      <span className={`text-[9px] font-medium ${isCompleted ? 'text-brand-primary' : 'text-zinc-400'}`}>{label}</span>
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-brand-primary text-white' : 'bg-zinc-100 dark:bg-zinc-800/60'}`}>
+                        {isCompleted && <CheckCircle2 className="w-3 h-3 text-white" />}
                       </div>
                     </div>
                   );
@@ -2792,7 +2774,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Close button */}
-                  <button 
+                  <button
                     onClick={() => setShowProgressModal(false)}
                     className="absolute top-4 right-4 p-2.5 rounded-2xl bg-white/50 dark:bg-black/50 hover:bg-zinc-100 dark:hover:bg-white/10 backdrop-blur-sm transition-all z-50 group border border-zinc-200 dark:border-white/10"
                   >
@@ -2819,8 +2801,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 text-orange-500"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>
                         </div>
                         <div className="flex items-center gap-5 relative z-10">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center text-xl shadow-lg shadow-orange-500/20">
-                            🏆
+                          <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center text-white">
+                            <Trophy className="w-5 h-5 text-white" />
                           </div>
                           <div className="text-left">
                             <p className="text-[10px] font-black text-orange-500 dark:text-orange-400 uppercase tracking-widest mb-0.5 whitespace-nowrap">Account Rank</p>
@@ -2842,9 +2824,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                           const isCurrent = level.level === tier.level;
                           const isCollected = false;
                           const frameConfig = null;
-                          
+
                           // Calculate exact progress to next level for the connector
-                          const connectorProgress = nextTier 
+                          const connectorProgress = nextTier
                             ? Math.max(0, Math.min(1, (userQuizProfile.total_xp - tier.minXP) / (nextTier.minXP - tier.minXP)))
                             : (userQuizProfile.total_xp >= tier.minXP ? 1 : 0);
 
@@ -2859,7 +2841,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                               {/* Connector - Improved with exact progress */}
                               {index < LEVEL_THRESHOLDS.length - 1 && (
                                 <div className="absolute left-1/2 md:left-auto md:top-[38px] md:right-[-32px] w-2 md:w-[64px] h-[40px] md:h-[4px] z-0 bottom-[-20px] md:bottom-auto translate-x-[-50%] md:translate-x-0 overflow-hidden bg-zinc-100 dark:bg-white/5 rounded-full border border-zinc-200/50 dark:border-white/5 shadow-inner">
-                                  <motion.div 
+                                  <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${connectorProgress * 100}%` }}
                                     transition={{ duration: 1, ease: "easeOut" }}
@@ -2868,13 +2850,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                 </div>
                               )}
 
-                              <div className={`relative z-10 p-5 rounded-[32px] border transition-all duration-500 overflow-hidden ${
-                                isCurrent 
-                                  ? 'bg-gradient-to-br from-white to-orange-50/30 dark:from-dark-900 dark:to-orange-500/5 border-orange-500/30 shadow-2xl shadow-orange-500/10 scale-105' 
+                              <div className={`relative z-10 p-5 rounded-[32px] border transition-all duration-500 overflow-hidden ${isCurrent
+                                  ? 'bg-gradient-to-br from-white to-orange-50/30 dark:from-dark-900 dark:to-orange-500/5 border-orange-500/30 shadow-2xl shadow-orange-500/10 scale-105'
                                   : isRewardUnlocked
                                     ? 'bg-white/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:border-orange-500/20'
                                     : 'bg-zinc-50/50 dark:bg-white/[0.02] border-zinc-200/50 dark:border-white/5 opacity-80'
-                              }`}>
+                                }`}>
                                 {/* Active Glow for Current Level */}
                                 {isCurrent && (
                                   <div className="absolute -top-12 -right-12 w-24 h-24 bg-orange-500/10 blur-3xl animate-pulse" />
@@ -2884,17 +2865,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   {/* Level Badge Header */}
                                   <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-3">
-                                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black transition-all duration-500 ${
-                                        isRewardUnlocked 
-                                          ? 'bg-gradient-to-br from-orange-500 to-orange-500 text-white shadow-xl shadow-orange-500/30 ring-4 ring-orange-500/10 rotate-3 group-hover/card:rotate-0' 
+                                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black transition-all duration-500 ${isRewardUnlocked
+                                          ? 'bg-gradient-to-br from-orange-500 to-orange-500 text-white shadow-xl shadow-orange-500/30 ring-4 ring-orange-500/10 rotate-3 group-hover/card:rotate-0'
                                           : 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-600 border border-zinc-300 dark:border-white/10'
-                                      }`}>
+                                        }`}>
                                         {tier.level}
                                       </div>
                                       <div>
-                                        <h4 className={`text-base font-black uppercase tracking-tight leading-none mb-1 flex items-center gap-2 ${
-                                          isRewardUnlocked ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'
-                                        }`}>
+                                        <h4 className={`text-base font-black uppercase tracking-tight leading-none mb-1 flex items-center gap-2 ${isRewardUnlocked ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'
+                                          }`}>
                                           {tier.title} <span className="text-lg">{tier.icon}</span>
                                         </h4>
                                         <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
@@ -2910,11 +2889,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                   </div>
 
                                   {/* Collectible Section - Integrated */}
-                                  <div className={`p-4 rounded-2xl border transition-all duration-500 ${
-                                    isRewardUnlocked 
-                                      ? 'bg-zinc-50 dark:bg-black/20 border-zinc-100 dark:border-white/5' 
+                                  <div className={`p-4 rounded-2xl border transition-all duration-500 ${isRewardUnlocked
+                                      ? 'bg-zinc-50 dark:bg-black/20 border-zinc-100 dark:border-white/5'
                                       : 'bg-transparent border-dashed border-zinc-200 dark:border-white/10'
-                                  }`}>
+                                    }`}>
                                     <div className="flex items-center gap-4">
                                       {tier.rewardFrame ? (
                                         <RewardItemCard
@@ -2933,7 +2911,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                           <div className="text-[8px] text-zinc-500">Keep climbing!</div>
                                         </div>
                                       )}
-                                      
+
                                       {tier.rewardFrame && (
                                         <div className="flex-1 space-y-1">
                                           <p className="text-[8px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Collectible</p>
@@ -2941,8 +2919,8 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                                             {tier.rarity} Frame
                                           </p>
                                           <div className={`text-[8px] leading-tight ${isRewardUnlocked ? 'text-zinc-500' : 'text-zinc-400/60'}`}>
-                                            {isRewardUnlocked 
-                                              ? 'Unlocked and ready for your profile.' 
+                                            {isRewardUnlocked
+                                              ? 'Unlocked and ready for your profile.'
                                               : `Reach ${tier.title} to unlock this frame.`}
                                           </div>
                                         </div>
@@ -3011,25 +2989,26 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     return (
       <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
         {globalOverlays}
-        
+
         {/* Header with Back Button */}
-        <div className="flex items-center gap-4 pt-4">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            type="button"
             onClick={() => setDashboardView('dashboard')}
-            className="p-3 rounded-2xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-400 hover:text-orange-500 transition-colors border border-zinc-200 dark:border-white/10"
+            className="w-9 h-9 rounded-xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all flex items-center justify-center cursor-pointer"
+            title="Back to Dashboard"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-          </motion.button>
+            <ArrowLeft className="w-4 h-4" />
+          </button>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">Quiz <span className="text-orange-500">history</span></h2>
-            <p className="text-zinc-500 font-medium text-[11px] uppercase tracking-widest">Review your past performance</p>
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">
+              Quiz History
+            </h2>
+            <p className="text-xs text-zinc-400">Review your past performance and answers</p>
           </div>
         </div>
 
-        <div className="glass-panel p-6 md:p-10 rounded-[40px] shadow-xl">
-          <HistorySection />
-        </div>
+        <HistorySection />
       </div>
     );
   }

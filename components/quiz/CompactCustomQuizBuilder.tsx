@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, Play } from 'lucide-react';
 import CustomDropdown, { DropdownOption } from './CustomDropdown.tsx';
 import { getSubjectCurriculum } from '../../data/subjectCatalog.ts';
 
@@ -44,7 +44,7 @@ interface CompactCustomQuizBuilderProps {
   showTopics?: boolean;
   setShowTopics?: (show: boolean) => void;
   onStartQuiz: () => void;
-  onSwitchToOfficialPapers: () => void;
+  onSwitchToOfficialPapers?: () => void;
   onBackToDashboard?: () => void;
   isLoading: boolean;
   maxSubjectMCQs?: number;
@@ -105,78 +105,61 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
   }, [subjects]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in pb-12">
+    <div className="w-full max-w-2xl mx-auto space-y-4 animate-fade-in pb-12">
       
       {/* Top Header */}
-      <div className="flex items-center justify-between gap-4 pb-2 border-b border-zinc-200/50 dark:border-white/5">
-        <div className="flex items-center gap-3">
-          {onBackToDashboard && (
-            <button
-              type="button"
-              onClick={onBackToDashboard}
-              className="p-2.5 rounded-xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-500 hover:text-orange-500 transition-colors cursor-pointer"
-              title="Back to Dashboard"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            </button>
-          )}
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-              Custom Quiz <span className="text-orange-500">Builder</span>
-            </h1>
-            <p className="text-xs text-zinc-500 font-medium">
-              Configure topics, difficulty, and timer to start a custom test
-            </p>
-          </div>
+      <div className="flex items-center gap-3 pt-1">
+        {onBackToDashboard && (
+          <button
+            type="button"
+            onClick={onBackToDashboard}
+            className="w-9 h-9 rounded-xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all flex items-center justify-center cursor-pointer"
+            title="Back to Dashboard"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        )}
+        <div>
+          <h1 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">
+            Custom Assessment
+          </h1>
+          <p className="text-xs text-zinc-400">Configure parameters for a personalized test</p>
         </div>
-
-        <button
-          type="button"
-          onClick={onSwitchToOfficialPapers}
-          className="px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-white/5 hover:bg-orange-500/10 text-zinc-700 dark:text-zinc-300 hover:text-orange-500 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-orange-500">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <span>Official Papers</span>
-        </button>
       </div>
 
-      {/* Form Fields */}
-      <div className="space-y-5">
+      {/* Main Settings Card */}
+      <div className="p-5 rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 space-y-4.5">
         
-        {/* 1. Styled Course Dropdown */}
+        {/* 1. Course Dropdown */}
         <CustomDropdown
-          label="Select Course"
+          label="Course"
           value={selectedSubject?.id || ''}
           options={subjectOptions}
           onChange={(val) => {
             const sub = subjects.find(s => s.id === val);
             if (sub) onSelectSubject(sub);
           }}
-          placeholder="Choose a course..."
+          placeholder="Select course..."
           searchPlaceholder="Search course code or title..."
           searchable={true}
         />
 
-        {/* 2. Units Scope */}
-        <div className="space-y-2">
+        {/* 2. Units Selector - Compact Segmented Chips */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-              Select Units
+            <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 block px-0.5">
+              Target Units
             </label>
             <button
               type="button"
               onClick={onSelectAllUnits}
-              className="text-[11px] font-bold text-orange-500 hover:underline cursor-pointer"
+              className="text-[11px] font-medium text-brand-primary hover:underline cursor-pointer"
             >
-              {allUnitsSelected ? 'Deselect All' : 'Select All (Units 1-6)'}
+              {allUnitsSelected ? 'Deselect All' : 'Select All'}
             </button>
           </div>
 
-          <div className="grid grid-cols-6 gap-2">
+          <div className="grid grid-cols-6 gap-1.5">
             {[1, 2, 3, 4, 5, 6].map(u => {
               const isAvailable = availableUnits.includes(u);
               const isSelected = selectedUnits.includes(u);
@@ -187,12 +170,12 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
                   type="button"
                   disabled={!isAvailable}
                   onClick={() => onToggleUnit(u)}
-                  className={`py-2 rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${
+                  className={`py-1.5 rounded-lg text-xs font-medium transition-all text-center cursor-pointer border ${
                     !isAvailable
-                      ? 'opacity-30 bg-zinc-100/40 dark:bg-white/[0.01] text-zinc-400 cursor-not-allowed'
+                      ? 'opacity-30 bg-zinc-50 dark:bg-zinc-800/20 border-zinc-200/40 dark:border-zinc-800/40 text-zinc-400 cursor-not-allowed'
                       : isSelected
-                        ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
-                        : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-white/10'
+                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
+                        : 'bg-zinc-50 dark:bg-[#202025] border-zinc-200/80 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                   }`}
                 >
                   Unit {u}
@@ -202,16 +185,16 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
           </div>
         </div>
 
-        {/* 3. Difficulty */}
+        {/* 3. Difficulty Level - Apple Segmented Bar */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">
-            Difficulty Level
+          <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 block px-0.5">
+            Difficulty
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="bg-zinc-100 dark:bg-[#0c0c0e] p-1 rounded-xl flex gap-1 border border-zinc-200/60 dark:border-zinc-800/80">
             {[
-              { id: 'easy', label: 'Easy (L1)', dot: 'bg-emerald-400' },
-              { id: 'medium', label: 'Medium (L2)', dot: 'bg-amber-400' },
-              { id: 'hard', label: 'Hard (L3)', dot: 'bg-red-400' },
+              { id: 'easy', label: 'Easy (L1)', dot: 'bg-emerald-500' },
+              { id: 'medium', label: 'Medium (L2)', dot: 'bg-amber-500' },
+              { id: 'hard', label: 'Hard (L3)', dot: 'bg-rose-500' },
             ].map(lvl => {
               const isSelected = selectedDifficulties.includes(lvl.id);
               return (
@@ -219,10 +202,10 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
                   key={lvl.id}
                   type="button"
                   onClick={() => onToggleDifficulty(lvl.id)}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
-                      : 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-white/10'
+                      ? 'bg-white dark:bg-[#202025] text-zinc-900 dark:text-white shadow-xs'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${lvl.dot}`} />
@@ -233,21 +216,23 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
           </div>
         </div>
 
-        {/* 4. Questions & Time Limit */}
+        {/* 4. Questions & Timer Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          {/* MCQ Count */}
+          {/* Question Count */}
           {hasMCQs && (
-            <div className="p-3.5 rounded-xl bg-zinc-100/70 dark:bg-white/[0.03] space-y-2">
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#121215] border border-zinc-200/70 dark:border-zinc-800/80 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">MCQ Questions</span>
+                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">MCQ Questions</span>
                 <div className="flex items-center gap-1">
                   {[10, 20, 30].map(cnt => (
                     <button
                       key={cnt}
                       type="button"
                       onClick={() => setNumMCQ(cnt)}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-lg cursor-pointer ${
-                        numMCQ === cnt ? 'bg-orange-500 text-white' : 'bg-zinc-200 dark:bg-white/10 text-zinc-500'
+                      className={`text-[10px] font-medium px-2 py-0.5 rounded-md cursor-pointer transition-colors ${
+                        numMCQ === cnt 
+                          ? 'bg-brand-primary text-white' 
+                          : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700'
                       }`}
                     >
                       {cnt}
@@ -261,23 +246,25 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
                 max="100"
                 value={numMCQ}
                 onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900/80 rounded-lg text-xs font-bold text-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full px-2.5 py-1 bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-lg text-xs font-semibold text-brand-primary focus:outline-none focus:border-brand-primary/50"
               />
             </div>
           )}
 
           {/* Time Limit */}
-          <div className="p-3.5 rounded-xl bg-zinc-100/70 dark:bg-white/[0.03] space-y-2">
+          <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#121215] border border-zinc-200/70 dark:border-zinc-800/80 space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Timer (Minutes)</span>
+              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Timer (Minutes)</span>
               <div className="flex items-center gap-1">
                 {[15, 30, 60].map(mins => (
                   <button
                     key={mins}
                     type="button"
                     onClick={() => setTimerMinutes(mins)}
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-lg cursor-pointer ${
-                      timerMinutes === mins ? 'bg-orange-500 text-white' : 'bg-zinc-200 dark:bg-white/10 text-zinc-500'
+                    className={`text-[10px] font-medium px-2 py-0.5 rounded-md cursor-pointer transition-colors ${
+                      timerMinutes === mins 
+                        ? 'bg-brand-primary text-white' 
+                        : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700'
                     }`}
                   >
                     {mins}m
@@ -291,79 +278,69 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
               max="180"
               value={timerMinutes}
               onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900/80 rounded-lg text-xs font-bold text-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="w-full px-2.5 py-1 bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-lg text-xs font-semibold text-brand-primary focus:outline-none focus:border-brand-primary/50"
             />
           </div>
         </div>
 
-        {/* 5. Toggles */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-          <button
-            type="button"
+        {/* 5. Apple Settings List (Toggles) */}
+        <div className="rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#121215] divide-y divide-zinc-100 dark:divide-zinc-800/60 overflow-hidden">
+          {/* Practice Mode */}
+          <div 
             onClick={() => setIsPracticeMode(!isPracticeMode)}
-            className={`p-3 rounded-xl text-left transition-all flex items-center justify-between cursor-pointer ${
-              isPracticeMode ? 'bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/30' : 'bg-zinc-100/70 dark:bg-white/[0.03]'
-            }`}
+            className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-[#1a1a1f] transition-colors"
           >
             <div>
-              <span className="text-xs font-bold block text-zinc-900 dark:text-white">Practice Mode</span>
-              <span className="text-[10px] text-zinc-400">Instant answers</span>
+              <span className="text-xs font-medium block text-zinc-900 dark:text-white">Practice Mode</span>
+              <span className="text-[11px] text-zinc-400">Show instant answers and explanations after each question</span>
             </div>
-            <div className={`w-8 h-4 rounded-full relative transition-colors ${isPracticeMode ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-              <div className={`w-3 h-3 rounded-full bg-white absolute top-0.5 transition-all ${isPracticeMode ? 'right-0.5' : 'left-0.5'}`} />
+            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ml-3 ${isPracticeMode ? 'bg-brand-primary' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+              <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all ${isPracticeMode ? 'right-0.5' : 'left-0.5'}`} />
             </div>
-          </button>
+          </div>
 
-          <button
-            type="button"
+          {/* Negative Marking */}
+          <div 
             onClick={() => setNegativeMarking(!negativeMarking)}
-            className={`p-3 rounded-xl text-left transition-all flex items-center justify-between cursor-pointer ${
-              negativeMarking ? 'bg-red-500/10 text-red-500 ring-1 ring-red-500/30' : 'bg-zinc-100/70 dark:bg-white/[0.03]'
-            }`}
+            className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-[#1a1a1f] transition-colors"
           >
             <div>
-              <span className="text-xs font-bold block text-zinc-900 dark:text-white">Negative Marking</span>
-              <span className="text-[10px] text-zinc-400">-0.25 penalty</span>
+              <span className="text-xs font-medium block text-zinc-900 dark:text-white">Negative Marking</span>
+              <span className="text-[11px] text-zinc-400">Apply -0.25 mark penalty for wrong answers</span>
             </div>
-            <div className={`w-8 h-4 rounded-full relative transition-colors ${negativeMarking ? 'bg-red-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-              <div className={`w-3 h-3 rounded-full bg-white absolute top-0.5 transition-all ${negativeMarking ? 'right-0.5' : 'left-0.5'}`} />
+            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ml-3 ${negativeMarking ? 'bg-rose-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+              <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all ${negativeMarking ? 'right-0.5' : 'left-0.5'}`} />
             </div>
-          </button>
+          </div>
 
-          <button
-            type="button"
+          {/* Include Solved */}
+          <div 
             onClick={() => setIncludeSolved(!includeSolved)}
-            className={`p-3 rounded-xl text-left transition-all flex items-center justify-between cursor-pointer ${
-              includeSolved ? 'bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/30' : 'bg-zinc-100/70 dark:bg-white/[0.03]'
-            }`}
+            className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-[#1a1a1f] transition-colors"
           >
             <div>
-              <span className="text-xs font-bold block text-zinc-900 dark:text-white">Include Solved</span>
-              <span className="text-[10px] text-zinc-400">{solvedCount} mastered</span>
+              <span className="text-xs font-medium block text-zinc-900 dark:text-white">Include Solved</span>
+              <span className="text-[11px] text-zinc-400">Include previously mastered questions ({solvedCount} mastered)</span>
             </div>
-            <div className={`w-8 h-4 rounded-full relative transition-colors ${includeSolved ? 'bg-orange-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-              <div className={`w-3 h-3 rounded-full bg-white absolute top-0.5 transition-all ${includeSolved ? 'right-0.5' : 'left-0.5'}`} />
+            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ml-3 ${includeSolved ? 'bg-brand-primary' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+              <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all ${includeSolved ? 'right-0.5' : 'left-0.5'}`} />
             </div>
-          </button>
+          </div>
         </div>
 
         {/* 6. Start Button */}
-        <div className="pt-3 flex justify-center">
-          <motion.button
+        <div className="pt-2">
+          <button
             type="button"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             onClick={onStartQuiz}
             disabled={isLoading || totalSelectedQuestions === 0 || selectedUnits.length === 0}
-            className="px-8 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-30 text-white font-bold text-xs shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2 cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary/90 disabled:opacity-40 text-white font-medium text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
+            <Play className="w-3.5 h-3.5 fill-white" />
             <span>
-              {isLoading ? 'Starting...' : `Start Custom Quiz (${totalSelectedQuestions} Qs • ${timerMinutes}m)`}
+              {isLoading ? 'Preparing assessment...' : `Start Custom Quiz (${totalSelectedQuestions} Qs • ${timerMinutes}m)`}
             </span>
-          </motion.button>
+          </button>
         </div>
 
       </div>

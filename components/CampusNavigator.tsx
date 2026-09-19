@@ -9,7 +9,25 @@ import RoommateFinder from './RoommateFinder.tsx';
 import NexusAd from './NexusAd.tsx';
 import type { UserProfile } from '../types';
 import CampusFacilities from './CampusFacilities.tsx';
-import { ChevronLeft, Utensils } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  ArrowUpRight, 
+  Utensils, 
+  MapPin, 
+  Compass, 
+  ShoppingBag, 
+  Users, 
+  Building2, 
+  CalendarCheck, 
+  Calculator, 
+  Store, 
+  Clock, 
+  AlertCircle, 
+  X, 
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 
 const IconMarket = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className || "w-5 h-5 mr-2"}>
@@ -86,18 +104,18 @@ const IconBus = ({ className }: { className?: string }) => (
 
 
 const MealSkeleton = () => (
-  <div className="rounded-[32px] sm:rounded-[36px] bg-zinc-100/60 dark:bg-white/[0.03] p-6 sm:p-7 space-y-4 animate-pulse border-none">
-    <div className="flex items-center justify-between pb-3 border-b border-zinc-200/40 dark:border-white/[0.03]">
+  <div className="rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 p-5 sm:p-6 space-y-4 animate-pulse">
+    <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60">
       <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-full bg-zinc-200/60 dark:bg-white/5" />
-        <div className="h-4 w-24 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+        <div className="w-8 h-8 rounded-lg bg-zinc-200/70 dark:bg-[#202025]" />
+        <div className="h-4 w-24 bg-zinc-200/70 dark:bg-[#202025] rounded-md" />
       </div>
-      <div className="h-4 w-28 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+      <div className="h-4 w-20 bg-zinc-200/70 dark:bg-[#202025] rounded-md" />
     </div>
-    <div className="space-y-3">
-      <div className="h-3.5 w-3/4 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
-      <div className="h-3.5 w-1/2 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
-      <div className="h-3.5 w-2/3 bg-zinc-200/60 dark:bg-white/5 rounded-full" />
+    <div className="space-y-2.5">
+      <div className="h-3.5 w-3/4 bg-zinc-200/70 dark:bg-[#202025] rounded-md" />
+      <div className="h-3.5 w-1/2 bg-zinc-200/70 dark:bg-[#202025] rounded-md" />
+      <div className="h-3.5 w-2/3 bg-zinc-200/70 dark:bg-[#202025] rounded-md" />
     </div>
   </div>
 );
@@ -295,12 +313,12 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
     const timing = getMealTiming(title, selectedDay);
 
     return (
-      <div className="rounded-[32px] sm:rounded-[36px] bg-zinc-100/60 dark:bg-white/[0.03] p-6 sm:p-7 transition-all duration-300 hover:bg-zinc-100/80 dark:hover:bg-white/[0.045] flex flex-col group border-none">
+      <div className="rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 p-5 sm:p-6 transition-all duration-200 flex flex-col group shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700/80">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-zinc-200/40 dark:border-white/[0.03]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500 dark:text-orange-400">
-              {React.cloneElement(icon as React.ReactElement, { className: "w-4 h-4" })}
+        <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-zinc-100 dark:border-zinc-800/60">
+          <div className="flex items-center gap-2.5">
+            <div className="text-brand-primary shrink-0 flex items-center justify-center">
+              {React.cloneElement(icon as React.ReactElement, { className: "w-4.5 h-4.5" })}
             </div>
             <div>
               <h4 className="text-sm sm:text-[15px] font-semibold text-zinc-900 dark:text-white tracking-tight">
@@ -309,17 +327,17 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
             </div>
           </div>
           {timing && (
-            <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-200/40 dark:bg-white/[0.04] px-3 py-1 rounded-full border-none">
+            <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 tabular-nums">
               {timing}
             </span>
           )}
         </div>
 
         {/* Dishes list */}
-        <div className="space-y-2.5 flex-1">
+        <div className="space-y-2 flex-1">
           {Object.entries(items).map(([category, dishes]) => (
-            <div key={category} className="group/item flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3.5 py-1">
-              <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 sm:w-28 sm:shrink-0 capitalize">
+            <div key={category} className="group/item flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 py-1">
+              <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 sm:w-24 sm:shrink-0 uppercase tracking-wide">
                 {category.toLowerCase()}
               </span>
               <span className="text-xs sm:text-[13px] font-medium text-zinc-800 dark:text-zinc-200 leading-snug flex-1">
@@ -337,58 +355,51 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       {/* Persistent Header for Hub & Sections */}
       <header className="pt-2 flex items-center justify-between">
         <div className="animate-fade-in">
-          <p className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase mb-0.5 ml-0.5">
-            {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || 'User'}` : 'Campus Life'}
-          </p>
-          <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse inline-block" />
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              {userProfile ? `Welcome, ${userProfile.full_name?.split(' ')[0] || userProfile.name || 'User'}` : 'Campus Life'}
+            </p>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
             {{
               'mess': (
-                <h1 className="flex items-center gap-2.5 text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                  <Utensils className="w-6 h-6 sm:w-7 sm:h-7 text-orange-500 shrink-0" />
-                  <span>Mess Menu</span>
-                </h1>
+                <span className="flex items-center gap-2.5">
+                  <Utensils className="w-6 h-6 text-brand-primary shrink-0" />
+                  <span>Mess <span className="text-brand-primary">Menu</span></span>
+                </span>
               ),
               'map': (
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold tracking-tight">{universityInfo?.shortName || ''} Campus <span className="text-brand-secondary">Map</span></span>
+                <span className="flex items-center gap-2.5">
+                  <span>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Map</span></span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsWalkthroughActive(!isWalkthroughActive);
                     }}
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all border active:scale-95 ${isWalkthroughActive
-                        ? 'bg-brand-primary text-white border-brand-primary shadow-sm'
-                        : 'bg-zinc-100 dark:bg-white/5 border-zinc-200/60 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:border-brand-primary/30'
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all border cursor-pointer active:scale-95 ${isWalkthroughActive
+                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
+                        : 'bg-white dark:bg-[#17171a] border-zinc-200/80 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3">
-                      {isWalkthroughActive ? (
-                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                      ) : (
-                        <>
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </>
-                      )}
-                    </svg>
-                    <span className="text-[9px] font-bold uppercase tracking-tight whitespace-nowrap">
-                      {isWalkthroughActive ? '3D Map' : 'Walkthrough'}
+                    <span className="text-[10px] font-medium">
+                      {isWalkthroughActive ? 'Switch to Map' : '3D Walkthrough'}
                     </span>
                   </button>
-                </div>
+                </span>
               ),
-              'market': <>Nexus <span className="text-blue-500">Market</span></>,
-              'roommate': <>Roommate <span className="text-purple-500">Finder</span></>,
+              'market': <>Nexus <span className="text-brand-primary">Market</span></>,
+              'roommate': <>Roommate <span className="text-brand-primary">Finder</span></>,
               'facilities': <>Campus <span className="text-brand-primary">Facilities</span></>,
               '': <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>
             }[activeTab] || <>{universityInfo?.shortName || ''} Campus <span className="text-brand-primary">Hub</span></>}
-          </div>
+          </h1>
         </div>
 
         {activeTab && (
           <button
             onClick={() => handleTabChange('')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/70 dark:bg-white/[0.04] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] transition-colors border-none cursor-pointer active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all cursor-pointer shadow-xs active:scale-95"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             <span>Campus Hub</span>
@@ -397,106 +408,115 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
       </header>
 
 
-      {/* Aesthetic Hub Cards */}
+      {/* Main Hub Dashboard */}
       {!activeTab && (
-        <div className="space-y-12 pb-20">
-          <div key="hub" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 animate-fade-in">
-            {(availableTabs as ('mess' | 'map' | 'market' | 'roommate' | 'facilities')[]).filter(id => id !== 'facilities').map((tabId) => {
-              const isActive = activeTab === tabId;
-              const config = {
-                mess: {
-                  label: 'Mess Menu',
-                  desc: 'Food & Timing',
-                  icon: <IconMess />,
-                  bgColor: 'from-orange-500/15 via-orange-500/5 to-transparent',
-                  accentColor: 'text-orange-500 dark:text-orange-400',
-                  gradient: 'radial-gradient(circle at center, rgba(249, 115, 22, 0.15), transparent 70%)'
-                },
-                map: {
-                  label: '3D Map',
-                  desc: 'Virtual Tour',
-                  icon: <IconMap />,
-                  bgColor: 'from-emerald-500/15 via-emerald-500/5 to-transparent',
-                  accentColor: 'text-emerald-500 dark:text-emerald-400',
-                  gradient: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.15), transparent 70%)'
-                },
-                market: {
-                  label: 'Nexus Market',
-                  desc: 'Buy & Sell',
-                  icon: <IconMarket />,
-                  bgColor: 'from-blue-500/15 via-blue-500/5 to-transparent',
-                  accentColor: 'text-blue-500 dark:text-blue-400',
-                  gradient: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15), transparent 70%)'
-                },
-                roommate: {
-                  label: 'Roommate',
-                  desc: 'Find Peers',
-                  icon: <IconRoommate />,
-                  bgColor: 'from-purple-500/15 via-purple-500/5 to-transparent',
-                  accentColor: 'text-purple-500 dark:text-purple-400',
-                  gradient: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.15), transparent 70%)'
-                },
-                facilities: {
-                  label: 'Facilities',
-                  desc: 'Shops & Services',
-                  icon: <IconGlobe />,
-                  bgColor: 'from-orange-500/15 via-orange-500/5 to-transparent',
-                  accentColor: 'text-orange-500 dark:text-orange-400',
-                  gradient: 'radial-gradient(circle at center, rgba(249, 115, 22, 0.15), transparent 70%)'
-                }
-              }[tabId];
+        <div className="space-y-6 pb-16">
+          {/* Primary Campus Navigation Cards */}
+          <div key="hub" className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-fade-in">
+            {[
+              {
+                id: 'mess',
+                label: 'Mess Menu',
+                desc: "Today's meals, timings & daily food menu",
+                icon: <Utensils className="w-5 h-5" strokeWidth={2} />,
+              },
+              {
+                id: 'map',
+                label: '3D Campus Map',
+                desc: 'Virtual 3D tour & interactive navigation',
+                icon: <Compass className="w-5 h-5" strokeWidth={2} />,
+              },
+              {
+                id: 'market',
+                label: 'Nexus Market',
+                desc: 'Verified peer marketplace & student gear',
+                icon: <ShoppingBag className="w-5 h-5" strokeWidth={2} />,
+              },
+              {
+                id: 'roommate',
+                label: 'Roommate Finder',
+                desc: 'Hostel matching & verified roommate profiles',
+                icon: <Users className="w-5 h-5" strokeWidth={2} />,
+              },
+            ].map((card) => (
+              <button
+                key={card.id}
+                onClick={() => handleTabChange(card.id as any)}
+                className="relative overflow-hidden group flex items-center justify-between p-4.5 sm:p-5 rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-xs active:scale-[0.99] transition-all text-left cursor-pointer"
+              >
+                {/* Subtle top edge sheen line */}
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/50 dark:via-white/[0.08] to-transparent pointer-events-none" />
 
-              if (!config) return null;
-
-              return (
-                <button
-                  key={tabId}
-                  onClick={() => handleTabChange(tabId)}
-                  className="relative flex flex-col items-start p-5 sm:p-6 rounded-[2.2rem] border-none shadow-none transition-all duration-500 text-left group overflow-hidden active:scale-95 bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:shadow-2xl hover:-translate-y-1.5 cursor-pointer w-full"
-                >
-                  {/* Custom Radial Glow Overlay on Hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: config.gradient }} />
-
-                  {/* Icon container */}
-                  <div className={`relative p-3 sm:p-4 rounded-2xl mb-4 transition-all duration-500 bg-zinc-200/60 dark:bg-[#18181b] border-none shadow-none text-zinc-400 group-hover:${config.accentColor} shadow-sm group-hover:shadow-lg group-hover:scale-110`}>
-                    {React.cloneElement(config.icon as React.ReactElement, { className: 'w-5 h-5 sm:w-6 sm:h-6' })}
+                <div className="flex items-center gap-3.5 min-w-0 relative z-10">
+                  <div className="text-brand-primary shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                    {card.icon}
                   </div>
-
-                  <div className="relative">
-                    <span className="block text-[11px] sm:text-[12px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-500 font-sans">
-                      {config.label}
+                  <div className="min-w-0">
+                    <span className="block text-sm font-semibold text-zinc-900 dark:text-white group-hover:text-brand-primary transition-colors tracking-tight truncate">
+                      {card.label}
                     </span>
-                    <span className="block text-[10px] sm:text-[11px] font-medium mt-1 text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors duration-500">
-                      {config.desc}
+                    <span className="block text-xs text-zinc-500 dark:text-zinc-400 font-normal truncate mt-0.5">
+                      {card.desc}
                     </span>
                   </div>
-                </button>
-              );
-            })}
+                </div>
+
+                <div className="text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all flex-shrink-0 ml-2 relative z-10">
+                  <ChevronRight size={15} />
+                </div>
+              </button>
+            ))}
           </div>
 
-
-
           {/* Hub Section Ad */}
-          <div className="pt-2">
+          <div className="pt-1">
             <NexusAd slot="2912081909" format="horizontal" hideLabel />
           </div>
 
           {/* Student Toolkit Section */}
-          <div className="space-y-6 pt-4 pb-12">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-lg font-bold text-zinc-800 dark:text-white tracking-tight">Student Toolkit</h3>
+          <div className="space-y-3 pt-2 pb-6">
+            <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-[#111113] px-3 py-1.5 rounded-full border-none shadow-none">Essentials</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight">
+                  Student Toolkit
+                </h3>
               </div>
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-normal">
+                Academic utilities
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 divide-y divide-zinc-100 dark:divide-zinc-800/60 overflow-hidden shadow-xs">
               {[
-                { title: 'Freshers Kit', desc: 'Essential guide for newcomers', icon: '🎒', color: 'from-orange-500 to-amber-600', path: '/freshers' },
-                { title: 'CGPA Predictor', desc: 'Calculate your target grades', icon: '📊', color: 'from-blue-500 to-indigo-600', path: '/tools?tab=cgpa' },
-                { title: 'Attendance Aide', desc: 'Track and reach your goals', icon: '🕒', color: 'from-purple-500 to-pink-600', path: '/tools?tab=attendance' },
-                { title: 'Facilities', desc: 'Shops & Services', icon: '🌐', color: 'from-emerald-500 to-teal-600', path: '/campus/facilities' },
+                { 
+                  title: 'Freshers Kit', 
+                  desc: 'Essential guide, onboarding tips & checklist for newcomers', 
+                  category: 'Onboarding',
+                  icon: <Compass className="w-5 h-5" strokeWidth={2} />, 
+                  path: '/freshers' 
+                },
+                { 
+                  title: 'CGPA Predictor', 
+                  desc: 'Calculate target grades, forecast SGPA & track semester milestones', 
+                  category: 'Grades & SGPA',
+                  icon: <Calculator className="w-5 h-5" strokeWidth={2} />, 
+                  path: '/tools?tab=cgpa' 
+                },
+                { 
+                  title: 'Attendance Aide', 
+                  desc: 'Monitor daily attendance margin and safeguard your 75% goal', 
+                  category: '75% Tracker',
+                  icon: <CalendarCheck className="w-5 h-5" strokeWidth={2} />, 
+                  path: '/tools?tab=attendance' 
+                },
+                { 
+                  title: 'Campus Facilities', 
+                  desc: 'Directory of tuck shops, food courts, stationery, ATMs & services', 
+                  category: 'Directory',
+                  icon: <Store className="w-5 h-5" strokeWidth={2} />, 
+                  path: '/campus/facilities' 
+                },
               ].map((tool, idx) => (
                 <button
                   key={idx}
@@ -504,16 +524,29 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     const prefix = uniKey ? `/${uniKey}` : '';
                     navigate(tool.path.startsWith('/') ? `${prefix}${tool.path}` : `${prefix}/${tool.path}`);
                   }}
-                  className="group relative flex flex-col items-start p-6 rounded-[2.2rem] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1.5 hover:shadow-2xl active:scale-95 transition-all duration-500 text-left cursor-pointer w-full"
+                  className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-zinc-50/80 dark:hover:bg-[#1e1e23] transition-all text-left cursor-pointer group"
                 >
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-xl shadow-lg mb-4 group-hover:scale-110 transition-transform duration-500`}>
-                    <span className="filter drop-shadow-md">{tool.icon}</span>
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="text-brand-primary shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      {tool.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-sm font-medium text-zinc-900 dark:text-white group-hover:text-brand-primary transition-colors tracking-tight">
+                        {tool.title}
+                      </span>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal truncate mt-0.5">
+                        {tool.desc}
+                      </p>
+                    </div>
                   </div>
-                  <h4 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 mb-1.5">{tool.title}</h4>
-                  <p className="text-[11px] sm:text-xs text-zinc-500 font-medium leading-relaxed mb-4">{tool.desc}</p>
-                  <div className="mt-auto flex items-center gap-1.5 text-[10px] font-bold text-brand-primary uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-1 group-hover:translate-y-0">
-                    Open Tool
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+
+                  <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+                    <span className="hidden sm:inline text-[11px] text-zinc-400 dark:text-zinc-500 font-normal">
+                      {tool.category}
+                    </span>
+                    <div className="text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 group-hover:translate-x-0.5 transition-all">
+                      <ChevronRight size={15} />
+                    </div>
                   </div>
                 </button>
               ))}
@@ -533,12 +566,12 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
               <div className="space-y-4">
                 {/* Week Segmented Control */}
                 <div className="flex items-center justify-center">
-                  <div className="inline-flex p-1 rounded-full bg-zinc-100/80 dark:bg-white/[0.04] border-none">
+                  <div className="inline-flex p-1 rounded-xl bg-zinc-100 dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80">
                     <button
                       onClick={() => setCurrentWeek(1)}
-                      className={`px-5 sm:px-6 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
+                      className={`px-5 sm:px-6 py-1.5 rounded-lg text-xs transition-all cursor-pointer border-none ${
                         currentWeek === 1
-                          ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                          ? 'bg-white text-zinc-950 dark:bg-[#202025] dark:text-white shadow-xs font-semibold'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
                       }`}
                     >
@@ -546,9 +579,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     </button>
                     <button
                       onClick={() => setCurrentWeek(2)}
-                      className={`px-5 sm:px-6 py-1.5 rounded-full text-xs transition-all cursor-pointer border-none ${
+                      className={`px-5 sm:px-6 py-1.5 rounded-lg text-xs transition-all cursor-pointer border-none ${
                         currentWeek === 2
-                          ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
+                          ? 'bg-white text-zinc-950 dark:bg-[#202025] dark:text-white shadow-xs font-semibold'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
                       }`}
                     >
@@ -557,38 +590,40 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   </div>
                 </div>
 
-                {/* Days of the Week: Centered & Reduced Width */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 max-w-lg sm:max-w-xl mx-auto w-full">
-                  {weekDaysWithDates.map(({ day, dateNumber, isToday }) => {
-                    const isSelected = selectedDay === day;
+                {/* Days of the Week */}
+                <div className="flex items-center justify-center max-w-lg sm:max-w-xl mx-auto w-full">
+                  <div className="w-full flex items-center justify-between p-1 rounded-2xl bg-zinc-100/90 dark:bg-[#151518] border border-zinc-200/80 dark:border-zinc-800/80 gap-1">
+                    {weekDaysWithDates.map(({ day, dateNumber, isToday }) => {
+                      const isSelected = selectedDay === day;
 
-                    return (
-                      <button
-                        key={day}
-                        data-day={day}
-                        onClick={() => setSelectedDay(day)}
-                        className={`
-                          flex-1 max-w-[56px] sm:max-w-[66px] py-2.5 sm:py-3 rounded-2xl sm:rounded-[22px] transition-all duration-200 cursor-pointer border-none flex flex-col items-center justify-center active:scale-95
-                          ${isSelected
-                            ? 'bg-white text-zinc-950 dark:bg-white dark:text-zinc-950 shadow-sm font-semibold'
-                            : 'bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                          }
-                        `}
-                      >
-                        <span className={`text-sm sm:text-base font-bold leading-tight ${isSelected ? 'text-zinc-950 dark:text-zinc-950' : 'text-zinc-800 dark:text-zinc-200'}`}>
-                          {dateNumber}
-                        </span>
-                        <span className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider mt-0.5 ${isSelected ? 'text-orange-500' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                          {day.slice(0, 3)}
-                        </span>
-                        {isToday ? (
-                          <span className={`w-1.5 h-1.5 rounded-full mt-1 bg-orange-500 ${isSelected ? 'shadow-[0_0_6px_rgba(249,115,22,0.7)]' : ''}`} />
-                        ) : (
-                          <span className="w-1.5 h-1.5 mt-1 opacity-0" />
-                        )}
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={day}
+                          data-day={day}
+                          onClick={() => setSelectedDay(day)}
+                          className={`
+                            flex-1 py-2 sm:py-2.5 rounded-xl transition-all duration-150 cursor-pointer flex flex-col items-center justify-center border-none relative
+                            ${isSelected
+                              ? 'bg-white dark:bg-[#202025] text-zinc-950 dark:text-white shadow-xs font-semibold'
+                              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-white/[0.04] bg-transparent'
+                            }
+                          `}
+                        >
+                          <span className={`text-sm sm:text-base font-bold leading-tight ${isSelected ? 'text-zinc-950 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                            {dateNumber}
+                          </span>
+                          <span className={`text-[10px] font-semibold uppercase tracking-wider mt-0.5 ${isSelected ? 'text-brand-primary' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                            {day.slice(0, 3)}
+                          </span>
+                          {isToday ? (
+                            <span className="w-1 h-1 rounded-full mt-1 bg-brand-primary" />
+                          ) : (
+                            <span className="w-1 h-1 mt-1 opacity-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -629,9 +664,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
               <div className="pt-2 flex justify-center pb-12">
                 <button
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100/70 dark:bg-white/[0.035] hover:bg-zinc-200/60 dark:hover:bg-white/[0.06] border-none transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer shadow-xs"
                 >
-                  <IconAlert className="w-3.5 h-3.5" />
+                  <AlertCircle className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Report Outdated Menu</span>
                 </button>
               </div>
@@ -640,11 +675,11 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
           {activeTab === 'map' && (
             <div className="space-y-4">
-              <div className="glass-panel p-1 rounded-[2.5rem] h-[600px] overflow-hidden shadow-2xl relative animate-fade-in border dark:border-white/5 bg-black">
+              <div className="rounded-2xl h-[600px] overflow-hidden shadow-xs relative animate-fade-in border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100 dark:bg-[#17171a] p-1">
                 {isWalkthroughActive ? (
                   <iframe
                     src="https://www.google.com/maps/embed?pb=!4v1777702274105!6m8!1m7!1sPPeXkt5NPYNTeQijNbwYCg!2m2!1d31.2607325620669!2d75.70697036279117!3f237.79!4f0.4200000000000017!5f0.8741376114956905"
-                    className="w-full h-full rounded-[2.2rem]"
+                    className="w-full h-full rounded-xl"
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
@@ -652,9 +687,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     title="Campus Walkthrough"
                   />
                 ) : universityInfo?.campusMapUrl ? (
-                  <iframe src={universityInfo.campusMapUrl} className="w-full h-full rounded-[2.2rem]" frameBorder="0" allowFullScreen title="Map" />
+                  <iframe src={universityInfo.campusMapUrl} className="w-full h-full rounded-xl" frameBorder="0" allowFullScreen title="Map" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-zinc-500 uppercase tracking-widest">Map Protocol Pending...</div>
+                  <div className="w-full h-full flex items-center justify-center text-zinc-500 uppercase tracking-widest text-xs font-medium">Map Protocol Pending...</div>
                 )}
               </div>
             </div>
@@ -670,9 +705,9 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         <button
           onClick={scrollToTop}
           aria-label="Scroll to top"
-          className="fixed bottom-10 right-6 md:right-10 z-[100] w-12 h-12 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-none rounded-full flex items-center justify-center shadow-xl text-zinc-800 dark:text-white hover:scale-105 active:scale-95 transition-all animate-fade-in cursor-pointer"
+          className="fixed bottom-10 right-6 md:right-10 z-[100] w-10 h-10 bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl flex items-center justify-center shadow-md text-zinc-700 dark:text-zinc-200 hover:text-brand-primary active:scale-95 transition-all animate-fade-in cursor-pointer"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><polyline points="18 15 12 9 6 15" /></svg>
+          <ChevronLeft className="w-4 h-4 rotate-90" />
         </button>
       )}
 
@@ -680,19 +715,19 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
         <div className={`modal-overlay ${isClosing ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
-          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 sm:p-7 rounded-[32px] sm:rounded-[36px] border border-zinc-200/80 dark:border-white/[0.08] shadow-[0_25px_70px_rgba(0,0,0,0.4)] bg-white/95 dark:bg-[#121214]/95 backdrop-blur-2xl relative overflow-hidden flex flex-col ${isClosing ? 'closing' : ''}`}>
+          <div ref={reportModalRef} className={`nexus-modal w-full max-w-md p-6 sm:p-7 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl bg-white dark:bg-[#17171a] relative overflow-hidden flex flex-col ${isClosing ? 'closing' : ''}`}>
             {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/[0.06] hover:bg-zinc-200 dark:hover:bg-white/[0.1] text-zinc-400 hover:text-zinc-800 dark:hover:text-white flex items-center justify-center border-none transition-colors cursor-pointer"
+              className="absolute top-5 right-5 w-8 h-8 rounded-xl bg-zinc-100 dark:bg-[#202025] hover:bg-zinc-200 dark:hover:bg-[#2a2a30] text-zinc-400 hover:text-zinc-800 dark:hover:text-white flex items-center justify-center border border-zinc-200/60 dark:border-zinc-700/60 transition-colors cursor-pointer"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              <X className="w-4 h-4" />
             </button>
 
             {/* Header */}
             <header className="mb-5 pr-8">
-              <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                Report <span className="text-orange-500">Issue</span>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">
+                Report Issue
               </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal mt-0.5">
                 Help us keep the mess menu accurate.
@@ -710,7 +745,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   placeholder="e.g. BH-1, GH-4, Sun Hostel"
                   value={reportForm.hostelName}
                   onChange={(e) => setReportForm(prev => ({ ...prev, hostelName: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-2xl bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-100 dark:hover:bg-white/[0.06] focus:bg-white dark:focus:bg-[#18181b] border border-zinc-200/50 dark:border-white/[0.06] focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium text-xs sm:text-sm transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#121215] hover:bg-zinc-100/70 dark:hover:bg-[#161619] focus:bg-white dark:focus:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800/80 focus:border-brand-primary/60 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium text-xs sm:text-sm transition-all"
                   required
                 />
               </div>
@@ -724,7 +759,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   placeholder="e.g. Sunday breakfast items are swapped..."
                   value={reportForm.issueDetails}
                   onChange={(e) => setReportForm(prev => ({ ...prev, issueDetails: e.target.value }))}
-                  className="w-full h-28 px-4 py-3 rounded-2xl bg-zinc-100/80 dark:bg-white/[0.04] hover:bg-zinc-100 dark:hover:bg-white/[0.06] focus:bg-white dark:focus:bg-[#18181b] border border-zinc-200/50 dark:border-white/[0.06] focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium text-xs sm:text-sm transition-all resize-none"
+                  className="w-full h-28 px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-[#121215] hover:bg-zinc-100/70 dark:hover:bg-[#161619] focus:bg-white dark:focus:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800/80 focus:border-brand-primary/60 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium text-xs sm:text-sm transition-all resize-none"
                   required
                 />
               </div>
@@ -741,19 +776,19 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className={`w-full py-5 rounded-2xl border border-dashed transition-all flex flex-col items-center justify-center ${
+                  <div className={`w-full py-5 rounded-xl border border-dashed transition-all flex flex-col items-center justify-center ${
                     reportForm.imageProof 
-                      ? 'border-orange-500/50 bg-orange-500/5' 
-                      : 'border-zinc-300/70 dark:border-white/[0.08] hover:border-orange-500/40 bg-zinc-100/50 dark:bg-white/[0.02] hover:bg-zinc-100/80 dark:hover:bg-white/[0.04]'
+                      ? 'border-brand-primary/50 bg-brand-primary/5' 
+                      : 'border-zinc-200/80 dark:border-zinc-800/80 hover:border-brand-primary/40 bg-zinc-50 dark:bg-[#121215]'
                   }`}>
                     {reportForm.imageProof ? (
                       <div className="flex flex-col items-center">
-                        <img src={reportForm.imageProof} alt="Proof" className="h-14 w-14 object-cover rounded-xl mb-1.5 shadow-sm" />
-                        <span className="text-xs font-medium text-orange-500">Image attached</span>
+                        <img src={reportForm.imageProof} alt="Proof" className="h-14 w-14 object-cover rounded-xl mb-1.5 shadow-xs" />
+                        <span className="text-xs font-medium text-brand-primary">Image attached</span>
                       </div>
                     ) : (
                       <>
-                        <div className="w-8 h-8 rounded-full bg-zinc-200/50 dark:bg-white/[0.06] flex items-center justify-center text-zinc-400 group-hover:text-orange-500 mb-1.5 transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-zinc-200/60 dark:bg-[#202025] flex items-center justify-center text-zinc-400 group-hover:text-brand-primary mb-1.5 transition-colors">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                         </div>
                         <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">Upload photo of menu board</span>
@@ -768,13 +803,13 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-5 py-2.5 rounded-full text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] transition-colors border-none cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-[#202025] hover:bg-zinc-200/70 dark:hover:bg-[#2a2a30] transition-colors border border-zinc-200/60 dark:border-zinc-700/60 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-full text-xs font-semibold text-white bg-orange-500 hover:bg-orange-600 shadow-sm shadow-orange-500/20 active:scale-95 transition-all border-none cursor-pointer text-center"
+                  className="flex-1 py-2 rounded-xl text-xs font-medium text-white bg-brand-primary hover:opacity-90 shadow-xs active:scale-95 transition-all border-none cursor-pointer text-center"
                 >
                   Submit Report
                 </button>

@@ -132,16 +132,15 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={handleToggle}
-                className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] text-zinc-600 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-white transition-all border border-transparent dark:border-white/5 shadow-sm active:scale-90 relative"
+                className="w-10 h-10 rounded-xl bg-white dark:bg-[#17171a] text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 active:scale-95 relative flex items-center justify-center cursor-pointer"
+                aria-label="Notifications"
             >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-[18px] h-[18px]">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-orange-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-black animate-pulse">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-brand-primary rounded-full border-2 border-white dark:border-[#17171a] animate-pulse" />
                 )}
             </button>
             <AnimatePresence>
@@ -150,9 +149,9 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute right-[-10px] sm:right-0 mt-3 w-[280px] sm:w-[300px] bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[28px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_rgba(0,0,0,0.6)] overflow-hidden py-3 z-[60] backdrop-blur-xl"
+                        className="absolute right-[-10px] sm:right-0 mt-2 w-[280px] sm:w-[300px] bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden py-3 z-[60]"
                     >
-                    <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 mb-2 flex items-center justify-between">
+                    <div className="px-5 py-3 border-b border-zinc-100 dark:border-zinc-800/60 mb-2 flex items-center justify-between">
                         <h3 className="text-[11px] font-bold text-zinc-800 dark:text-white tracking-tight">Updates</h3>
                         {unreadCount > 0 && (
                             <button

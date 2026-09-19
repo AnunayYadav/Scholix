@@ -277,7 +277,7 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     if (!isOpen) return null;
 
     const resultsDropdown = (
-      <div className={`${isInline || resultsPortalRef ? 'relative mt-6' : 'absolute top-full left-0 right-0 mt-3 shadow-2xl z-[100]'} bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-[32px] overflow-hidden search-dropdown-anim`}>
+      <div className={`${isInline || resultsPortalRef ? 'relative mt-3' : 'absolute top-full left-0 right-0 mt-2 z-[100]'} bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl overflow-hidden search-dropdown-anim`}>
         <div className={`no-scrollbar p-3 ${(isInline || resultsPortalRef) ? 'max-h-none' : 'max-h-[70vh] overflow-y-auto'}`}>
           {isLoading ? (
             <div className="py-12 flex flex-col items-center justify-center opacity-40">
@@ -292,15 +292,15 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
                   onClick={() => handleSelect(result)}
                   onMouseEnter={() => setSelectedIndex(index)}
                   style={{ animationDelay: `${index * 50}ms` }}
-                  className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-brand-primary' : 'bg-transparent hover:bg-zinc-50 dark:hover:bg-white/5'}`}
+                  className={`w-full text-left p-3.5 rounded-2xl flex items-center gap-4 transition-all border-none group search-result-anim ${selectedIndex === index ? 'bg-brand-primary' : 'bg-transparent hover:bg-zinc-50 dark:hover:bg-[#202025]'}`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-white/40'}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${selectedIndex === index ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-[#202025] text-zinc-500 dark:text-zinc-400'}`}>
                     {result.icon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className={`text-sm font-normal truncate ${selectedIndex === index ? 'text-white' : 'text-zinc-900 dark:text-white'}`}>{result.title}</h4>
-                      <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-zinc-400 dark:text-white/20'}`}>{result.category}</span>
+                      <span className={`text-[8px] font-medium uppercase tracking-widest shrink-0 ${selectedIndex === index ? 'text-white/60' : 'text-zinc-400 dark:text-zinc-500'}`}>{result.category}</span>
                     </div>
                     {result.description && (
                       <p className={`text-[11px] font-light truncate ${selectedIndex === index ? 'text-white/70' : 'text-zinc-500 dark:text-zinc-400'}`}>{result.description}</p>
@@ -316,13 +316,13 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
           ) : (
             <div className="p-4 space-y-4">
               <div className="space-y-2">
-                <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-white/20">Trending Now</h3>
+                <h3 className="text-[9px] font-medium uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Trending Now</h3>
                 <div className="flex flex-wrap gap-1.5">
                   {['Library', 'Quizzes', 'Timetable', 'Market', 'Attendance'].map(s => (
                     <button 
                       key={s} 
                       onClick={() => setQuery(s)}
-                      className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] font-normal text-zinc-500 dark:text-white/60 hover:border-brand-primary/50 hover:text-brand-primary transition-all"
+                      className="px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-[#202025] border border-zinc-200 dark:border-zinc-800/80 text-[10px] font-normal text-zinc-500 dark:text-zinc-400 hover:border-brand-primary/50 hover:text-brand-primary transition-all"
                     >
                       {s}
                     </button>
@@ -334,9 +334,9 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
         </div>
         
         {!(isInline || resultsPortalRef) && (
-          <div className="px-5 py-2.5 bg-zinc-50/50 dark:bg-[#0a0a0a]/40 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
+          <div className="px-5 py-2.5 bg-zinc-50/50 dark:bg-[#121215] border-t border-zinc-200 dark:border-zinc-800/60 flex items-center justify-between">
             <div className="flex gap-3">
-              <span className="text-[9px] font-medium text-zinc-400 dark:text-white/20 tracking-widest cursor-default">ESC TO CLOSE</span>
+              <span className="text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tracking-widest cursor-default">ESC TO CLOSE</span>
             </div>
           </div>
         )}
@@ -354,8 +354,8 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Search Bar Input */}
       <div className={`relative group transition-all duration-300 ${isOpen && !isInline && !resultsPortalRef ? 'z-[60]' : 'z-40'}`}>
-        <div className={`flex items-center gap-3 px-6 h-11 rounded-full bg-zinc-100/80 dark:bg-white/5 transition-all ${isOpen && !isInline && !resultsPortalRef ? 'shadow-2xl shadow-brand-primary/10 bg-white dark:bg-[#0a0a0a]' : 'hover:bg-zinc-200/80 dark:hover:bg-white/10'}`}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`w-4 h-4 transition-colors ${isOpen ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-500'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+        <div className={`flex items-center gap-3 px-5 h-10 rounded-xl sm:rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 transition-all ${isOpen && !isInline && !resultsPortalRef ? 'border-brand-primary/60 dark:border-brand-primary/50' : 'hover:border-zinc-300 dark:hover:border-zinc-700'}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 transition-colors ${isOpen ? 'text-brand-primary' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'}`}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
           <input
             ref={inputRef}
             type="text"
@@ -366,12 +366,12 @@ const UniversalSearch: React.FC<UniversalSearchProps> = ({
               if (!isOpen) setIsOpen(true);
             }}
             onFocus={() => setIsOpen(true)}
-            className="flex-1 bg-transparent border-none outline-none text-sm font-normal text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/20"
+            className="flex-1 bg-transparent border-none outline-none text-sm font-normal text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
           />
           {!isOpen && (
             <div className="flex items-center gap-1 opacity-20 group-hover:opacity-40 transition-all">
-              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">CTRL</span>
-              <span className="px-1 py-0.5 rounded bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/20 text-[9px] font-medium tracking-tighter">K</span>
+              <span className="px-1 py-0.5 rounded bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[9px] font-medium tracking-tighter">CTRL</span>
+              <span className="px-1 py-0.5 rounded bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[9px] font-medium tracking-tighter">K</span>
             </div>
           )}
           {query && (

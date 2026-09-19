@@ -27,7 +27,6 @@ import DegreeGuide from './components/DegreeGuide.tsx';
 import VerifiedBadge from './components/VerifiedBadge.tsx';
 import BuyMeACoffee from './components/BuyMeACoffee.tsx';
 import ScholixLanding from './components/ScholixLanding.tsx';
-import DailyFeed from './components/DailyFeed.tsx';
 import AnnouncementModal from './components/AnnouncementModal.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -37,6 +36,7 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
+  ArrowUpRight,
   CheckCircle2,
   Rocket,
   Briefcase,
@@ -188,10 +188,10 @@ const TypingText: React.FC = React.memo(() => {
 
 const BackgroundEffects: React.FC = React.memo(() => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none bg-white dark:bg-[#030303]">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none bg-white dark:bg-[#0c0c0e]">
       {/* Seamless Merger */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white dark:from-[#030303] via-white/10 dark:via-zinc-900/40 to-transparent h-96 z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-[#030303] via-white/10 dark:via-zinc-900/40 to-transparent w-96 z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white dark:from-[#0c0c0e] via-white/10 dark:via-zinc-900/30 to-transparent h-96 z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-[#0c0c0e] via-white/10 dark:via-zinc-900/30 to-transparent w-96 z-10 pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 blur-[150px] rounded-full translate-x-1/2 translate-y-1/2" />
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-brand-secondary/5 blur-[150px] rounded-full -translate-x-1/2 -translate-y-1/2" />
     </div>
@@ -267,35 +267,36 @@ const TodaysSchedule: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm transition-all duration-500 overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-[#17171a] rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 lg:p-6 transition-all duration-300 overflow-hidden flex flex-col">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-6 lg:mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-              <Calendar size={20} strokeWidth={2.5} />
+            <div className="w-9 h-9 rounded-xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary shrink-0">
+              <Calendar size={18} strokeWidth={1.75} />
             </div>
             <div>
-              <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white tracking-tight leading-tight">
-                Today's <span className="text-brand-primary">Schedule</span>
+              <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight">
+                Today's Schedule
               </h4>
-              <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase opacity-70 mt-0.5">{today}</p>
+              <p className="text-[11px] text-brand-primary font-mono uppercase tracking-wider mt-0.5">{today}</p>
             </div>
           </div>
 
           {activeSlot && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary/5 border border-brand-primary/10 animate-pulse">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-              <span className="text-[9px] font-black text-brand-primary uppercase tracking-tighter">Live</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-mono font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Live</span>
             </div>
           )}
         </div>
 
         {!dayData || sortedSlots.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 py-6 md:py-12 bg-zinc-50/50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-zinc-100 dark:border-white/10">
-            <div className="w-10 h-10 md:w-16 md:h-16 rounded-full border-2 border-dashed border-zinc-100 dark:border-white/10 flex items-center justify-center">
-              <Calendar className="text-zinc-300 dark:text-zinc-700 w-5 h-5 md:w-6 md:h-6" />
+          <div className="flex flex-col items-center justify-center text-center space-y-2.5 py-10 bg-zinc-50/60 dark:bg-[#121215] rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800/80">
+            <div className="w-10 h-10 rounded-xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary">
+              <Calendar size={18} strokeWidth={1.75} />
             </div>
-            <p className="text-[11px] font-bold text-zinc-400">No classes scheduled for today</p>
+            <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">No classes scheduled for today</p>
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500">Enjoy your free time or review your notes</p>
           </div>
         ) : (
           <>
@@ -305,7 +306,7 @@ const TodaysSchedule: React.FC = () => {
                 {/* Timeline Line */}
                 <div className="absolute left-[7px] top-2 bottom-2 w-[1px] bg-dashed border-l border-dashed border-zinc-200 dark:border-white/10" />
 
-                <div className="space-y-5">
+                <div className="space-y-3.5">
                   {sortedSlots.map((slot) => {
                     const start = timeToMinutes(slot.startTime);
                     const end = timeToMinutes(slot.endTime);
@@ -315,44 +316,42 @@ const TodaysSchedule: React.FC = () => {
                     return (
                       <div key={slot.id} className="relative group">
                         {/* Timeline Dot */}
-                        <div className={`absolute -left-[31px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-[#0a0a0a] transition-all duration-500 z-10 flex items-center justify-center
-                          ${isGoingOn ? 'border-brand-primary scale-125 shadow-[0_0_10px_rgba(var(--brand-primary-rgb),0.4)]' : isDone ? 'border-zinc-300 dark:border-white/20' : 'border-zinc-200 dark:border-white/10'}
+                        <div className={`absolute -left-[31px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-[#17171a] transition-all duration-300 z-10 flex items-center justify-center
+                          ${isGoingOn ? 'border-brand-primary scale-110 shadow-sm' : isDone ? 'border-zinc-300 dark:border-zinc-700' : 'border-zinc-200 dark:border-zinc-800'}
                         `}>
-                          {isGoingOn && <div className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-ping" />}
+                          {isGoingOn && <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />}
                         </div>
 
                         <button
                           onClick={() => navigate('/timetable')}
-                          className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all duration-300 text-left
+                          className={`w-full flex items-center gap-3.5 p-3 rounded-xl border transition-all duration-200 text-left
                             ${isGoingOn
-                              ? 'bg-brand-primary/[0.03] border-brand-primary/20 shadow-lg shadow-brand-primary/5 ring-1 ring-brand-primary/5'
-                              : 'bg-white dark:bg-white/[0.02] border-zinc-100 dark:border-white/[0.03] hover:border-zinc-200 dark:hover:border-white/10 hover:shadow-md'
+                              ? 'bg-brand-primary/5 border-brand-primary/30 ring-1 ring-brand-primary/20'
+                              : 'bg-zinc-50/50 dark:bg-[#121215] border-zinc-200/60 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700'
                             }
                           `}
                         >
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-tighter shrink-0 transition-all duration-500
-                            ${isGoingOn ? 'bg-brand-primary text-white scale-105' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500'}
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 transition-colors
+                            ${isGoingOn ? 'bg-brand-primary text-white' : 'bg-zinc-100 dark:bg-[#202025] text-zinc-600 dark:text-zinc-400'}
                           `}>
                             {slot.type?.substring(0, 3)}
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <h5 className={`text-[13px] font-bold truncate transition-colors ${isGoingOn ? 'text-brand-primary' : 'text-zinc-900 dark:text-white'}`}>
+                            <h5 className={`text-[13px] font-medium truncate transition-colors ${isGoingOn ? 'text-brand-primary font-semibold' : 'text-zinc-900 dark:text-zinc-100'}`}>
                               {slot.subject}
                             </h5>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
+                              <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
                                 {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
                               </span>
                               {slot.room && slot.room !== 'N/A' && (
-                                <span className="text-[9px] font-black text-brand-primary/80 px-1.5 py-0.5 bg-brand-primary/5 rounded-md">
+                                <span className="text-[9px] font-mono text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5 bg-zinc-100 dark:bg-[#202025] rounded">
                                   {slot.room}
                                 </span>
                               )}
                             </div>
                           </div>
-
-                          <ArrowRight size={14} className={`text-zinc-300 dark:text-zinc-700 transition-transform ${isGoingOn ? 'translate-x-0.5 text-brand-primary' : 'group-hover:translate-x-0.5'}`} />
                         </button>
                       </div>
                     );
@@ -361,9 +360,9 @@ const TodaysSchedule: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile View: Circular Horizontal Scroll */}
-            <div className="md:hidden">
-              <div className="flex gap-4 overflow-x-auto pb-2 pt-2 -mx-2 px-2 snap-x scrollbar-hide no-scrollbar">
+            {/* Mobile View: Horizontal Scroll */}
+            <div className="md:hidden overflow-x-auto no-scrollbar -mx-5 px-5 pt-1">
+              <div className="flex items-center gap-3 w-max">
                 {sortedSlots.map((slot) => {
                   const start = timeToMinutes(slot.startTime);
                   const end = timeToMinutes(slot.endTime);
@@ -373,30 +372,30 @@ const TodaysSchedule: React.FC = () => {
                     <button
                       key={slot.id}
                       onClick={() => navigate('/timetable')}
-                      className="flex flex-col items-center gap-3 snap-center shrink-0 w-[100px]"
+                      className="flex flex-col items-center gap-2 text-left cursor-pointer group"
                     >
-                      <div className={`relative w-[80px] h-[80px] rounded-full flex flex-col items-center justify-center border-2 transition-all duration-500
+                      <div className={`w-28 h-20 rounded-xl border p-2 flex flex-col justify-between transition-all duration-200 relative
                         ${isGoingOn
-                          ? 'border-brand-primary bg-brand-primary/5 shadow-lg shadow-brand-primary/20 scale-105'
-                          : 'border-zinc-100 dark:border-white/10 bg-zinc-50 dark:bg-white/[0.02]'
+                          ? 'border-brand-primary bg-brand-primary/5 shadow-sm'
+                          : 'border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-[#121215]'
                         }
                       `}>
-                        <span className={`text-[8px] font-black uppercase tracking-[0.2em] mb-1 ${isGoingOn ? 'text-brand-primary' : 'text-zinc-500'}`}>
+                        <span className={`text-[9px] font-mono uppercase tracking-wider mb-0.5 ${isGoingOn ? 'text-brand-primary font-bold' : 'text-zinc-400'}`}>
                           {slot.type}
                         </span>
-                        <span className={`text-[13px] font-black tracking-tight text-center px-2 line-clamp-1 ${isGoingOn ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'}`}>
+                        <span className={`text-[12px] font-medium tracking-tight text-center px-1.5 line-clamp-1 ${isGoingOn ? 'text-zinc-900 dark:text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300'}`}>
                           {slot.subject.split(' ')[0]}
                         </span>
 
                         {isGoingOn && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-brand-primary rounded-full border-2 border-white dark:border-[#0a0a0a] flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                          <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-brand-primary rounded-full border-2 border-white dark:border-[#17171a] flex items-center justify-center">
+                            <div className="w-1 h-1 bg-white rounded-full" />
                           </div>
                         )}
                       </div>
-                      <div className="text-center space-y-0.5">
-                        <p className={`text-[9px] font-bold whitespace-nowrap ${isGoingOn ? 'text-brand-primary' : 'text-zinc-500'}`}>
-                          {slot.startTime.split(' ')[0]} - {slot.endTime.split(' ')[0]}
+                      <div className="text-center">
+                        <p className={`text-[10px] font-mono ${isGoingOn ? 'text-brand-primary font-medium' : 'text-zinc-400'}`}>
+                          {slot.startTime.split(' ')[0]}
                         </p>
                       </div>
                     </button>
@@ -442,8 +441,14 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
 
   const displayName = userProfile?.username || 'Verto';
 
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric'
+  });
+
   return (
-    <div className="w-full pt-6 md:pt-10 pb-6 md:pb-10 relative z-50">
+    <div className="w-full pt-6 md:pt-10 pb-6 md:pb-8 relative z-50">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex flex-col gap-6 md:gap-8">
           {/* Main Header Row */}
@@ -451,12 +456,15 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
             {/* Greeting + Actions */}
             <div className="flex items-center justify-between w-full lg:w-auto gap-4">
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                  {greeting}, <span className="text-brand-primary">{displayName}</span> <span className="text-2xl md:text-3xl animate-bounce-subtle shrink-0">👋</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                  <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                    {dateStr}
+                  </p>
+                </div>
+                <h1 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-0.5">
+                  {greeting}, <span className="text-brand-primary">{displayName}</span>
                 </h1>
-                <p className="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm font-bold opacity-70 mt-1">
-                  Let's make today productive!
-                </p>
               </div>
 
               {/* Actions: Mobile only */}
@@ -464,33 +472,33 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
                 <NotificationBell userProfile={userProfile} />
                 <button
                   onClick={toggleTheme}
-                  className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 active:scale-90 shadow-sm"
+                  className="w-10 h-10 rounded-xl bg-white dark:bg-[#17171a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all border border-zinc-200/80 dark:border-zinc-800/80 active:scale-95 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer"
                   aria-label="Toggle Theme"
                 >
-                  {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                  {isDark ? <Sun size={17} /> : <Moon size={17} />}
                 </button>
               </div>
             </div>
 
             {/* Desktop Search */}
-            <div className="hidden lg:block flex-1 max-w-xl mx-12">
+            <div className="hidden lg:block flex-1 max-w-xl mx-8">
               <UniversalSearch />
             </div>
 
             {/* Desktop Actions */}
-            <div className="hidden lg:flex items-center gap-4 shrink-0">
+            <div className="hidden lg:flex items-center gap-3 shrink-0">
               <NotificationBell userProfile={userProfile} />
               <button
                 onClick={toggleTheme}
-                className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-[#0a0a0a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-brand-primary dark:hover:text-white transition-all border border-transparent dark:border-white/5 active:scale-90 shadow-sm"
+                className="w-10 h-10 rounded-xl bg-white dark:bg-[#17171a] flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all border border-zinc-200/80 dark:border-zinc-800/80 active:scale-95 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer"
                 aria-label="Toggle Theme"
               >
-                {isDark ? <Sun size={22} /> : <Moon size={22} />}
+                {isDark ? <Sun size={17} /> : <Moon size={17} />}
               </button>
             </div>
 
             {/* Mobile Search: Added more horizontal padding */}
-            <div className="lg:hidden w-full px-6 sm:px-8">
+            <div className="lg:hidden w-full px-2">
               <UniversalSearch />
             </div>
           </div>
@@ -500,60 +508,6 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
   );
 });
 
-
-const FeatureCard = React.memo(({ f, navigate }: { f: any, navigate: any }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-
-  return (
-    <button
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={() => navigate()}
-      className={`group relative p-4 bg-white dark:bg-[#0a0a0b] rounded-[24px] border border-zinc-100 dark:border-white/[0.04] text-left cursor-pointer transition-all duration-300 overflow-hidden ${isHovered
-          ? 'shadow-2xl shadow-zinc-200/40 dark:shadow-2xl dark:shadow-black/80 border-zinc-200/50 dark:border-white/10 -translate-y-1'
-          : 'shadow-sm'
-        }`}
-    >
-      {/* Background Gradient - Simplified to remove 'rectangles' */}
-      <div
-        className={`absolute inset-0 opacity-[0.7] dark:opacity-[0.85] group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br ${f.gradient || 'from-brand-primary/10 to-transparent'}`}
-      />
-
-      {/* Top Left Whitish Glow - Radial for maximum smoothness */}
-      <div className="absolute -top-12 -left-12 w-32 h-32 bg-white/10 dark:bg-white/[0.03] blur-[40px] rounded-full pointer-events-none z-0" />
-
-      {/* Action Arrow Button */}
-      <div className={`absolute top-4 right-4 w-7 h-7 rounded-full border border-white/10 flex items-center justify-center transition-all duration-500 z-20 ${isHovered ? 'bg-white dark:bg-zinc-200 text-zinc-900 scale-110 shadow-lg shadow-black/20' : 'bg-white/5 text-white/30'}`}>
-        <ArrowRight size={12} strokeWidth={3} className={`transition-transform duration-500 ${isHovered ? 'translate-x-0.5' : ''}`} />
-      </div>
-
-      {/* Large Outline Background Icon */}
-      <div className={`absolute -bottom-2 -right-2 ${f.iconColor} opacity-[0.05] dark:opacity-[0.08] transform transition-[transform,opacity] duration-700 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:opacity-[0.1]`}>
-        {React.cloneElement(f.icon as React.ReactElement, { size: 72, strokeWidth: 1 })}
-      </div>
-
-      <div className="relative z-10 flex flex-col gap-3">
-        {/* Icon Container */}
-        <div className={`relative w-11 h-11 rounded-2xl ${f.lightColor || 'bg-brand-primary/15'} flex items-center justify-center shrink-0 transition-all duration-500 ${isHovered ? 'scale-110' : ''} border border-white/20 dark:border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden backdrop-blur-md`}>
-          <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-          <div className={`${f.iconColor || 'text-brand-primary'} transition-transform duration-500 z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]`}>
-            {React.cloneElement(f.icon as React.ReactElement, { size: 22, strokeWidth: 2.2 })}
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="space-y-0.5">
-          <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white transition-colors duration-300 leading-tight tracking-tight">
-            {f.name}
-          </h4>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-tight font-medium opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-            {f.desc}
-          </p>
-        </div>
-      </div>
-    </button>
-  );
-});
 
 // TopProgressBar removed
 
@@ -571,42 +525,8 @@ const StaticRedirect: React.FC<{ to: string }> = ({ to }) => {
 const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
   const navigate = useNavigate();
   const { selectedUniversity, universityInfo } = useUniversity();
-  const allFeatures = [
-    { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Track your daily attendance.', icon: <CheckCircle2 />, category: 'Tools', lightColor: 'bg-emerald-500/20', iconColor: 'text-emerald-500', gradient: 'from-emerald-500/20 to-transparent' },
-    { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Find buildings and facilities.', icon: <Map />, category: 'Campus', lightColor: 'bg-blue-500/20', iconColor: 'text-blue-500', gradient: 'from-blue-500/20 to-transparent', customPath: '/campus/map' },
-    { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Plan your grades and GPA.', icon: <Calculator />, category: 'Tools', lightColor: 'bg-purple-500/20', iconColor: 'text-purple-500', gradient: 'from-purple-500/20 to-transparent' },
-    { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'AI feedback on your resume.', icon: <Briefcase />, category: 'Tools', lightColor: 'bg-rose-500/20', iconColor: 'text-rose-500', gradient: 'from-rose-500/20 to-transparent' },
-    { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning.", icon: <Utensils />, category: 'Campus', lightColor: 'bg-orange-500/20', iconColor: 'text-orange-500', gradient: 'from-orange-500/20 to-transparent', customPath: '/campus/mess' },
-    { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Study materials and resources.', icon: <Rocket />, category: 'Study', lightColor: 'bg-indigo-500/20', iconColor: 'text-indigo-500', gradient: 'from-indigo-500/20 to-transparent' },
-    { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice with AI generated quizzes.', icon: <PenTool />, category: 'Study', lightColor: 'bg-cyan-500/20', iconColor: 'text-cyan-500', gradient: 'from-cyan-500/20 to-transparent' },
-    {
-      id: 'degree-guide',
-      name: 'Degree Guide',
-      desc: 'Explore IIT Madras BS degree levels, fees & options.',
-      icon: <BookOpen className="w-5 h-5" />,
-      category: 'Study',
-      lightColor: 'bg-amber-500/20',
-      iconColor: 'text-amber-500',
-      gradient: 'from-amber-500/20 to-transparent',
-      customPath: '/degree-guide'
-    },
-    {
-      id: ModuleType.LECTURES,
-      name: 'YT Lectures',
-      desc: 'Search and watch university lectures inline.',
-      icon: <PlayCircle className="w-5 h-5" />,
-      category: 'Study',
-      lightColor: 'bg-red-500/20',
-      iconColor: 'text-red-500',
-      gradient: 'from-red-500/20 to-transparent',
-      customPath: '/tools?tab=lectures'
-    },
 
-    { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find your perfect roomie.', icon: <User />, category: 'Social', lightColor: 'bg-amber-500/20', iconColor: 'text-amber-500', gradient: 'from-amber-500/20 to-transparent' },
-    { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell student gear.', icon: <ShoppingBag />, category: 'Social', lightColor: 'bg-violet-500/20', iconColor: 'text-violet-500', gradient: 'from-violet-500/20 to-transparent' },
-  ];
-
-  const filteredFeatures = allFeatures.filter(f => {
+  const isFeatureEnabled = (f: { id: string }) => {
     if (!universityInfo) return true;
     if (f.id === 'mess') {
       return universityInfo.features.campusTabs?.includes('mess') ?? false;
@@ -615,43 +535,102 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       return selectedUniversity === 'iitm_bs';
     }
     return universityInfo.features.enabledModules.includes(f.id as ModuleType);
-  });
+  };
+
+  const sections = [
+    {
+      title: 'Academics & Study',
+      items: [
+        { id: ModuleType.ATTENDANCE, name: 'Attendance Tracker', desc: 'Monitor daily attendance and safe bunk margin', icon: <CheckCircle2 /> },
+        { id: ModuleType.CGPA, name: 'CGPA Calculator', desc: 'Predict GPA, calculate TGPA, and plan grade targets', icon: <Calculator /> },
+        { id: ModuleType.LIBRARY, name: 'Content Library', desc: 'Access study materials, notes, and previous year papers', icon: <BookOpen /> },
+        { id: ModuleType.QUIZ, name: 'Quiz Taker', desc: 'Practice questions and test course readiness', icon: <PenTool /> },
+        { id: 'degree-guide', name: 'Degree Guide', desc: 'Explore IIT Madras BS degree levels and requirements', icon: <BookOpen />, customPath: '/degree-guide' },
+      ].filter(isFeatureEnabled)
+    },
+    {
+      title: 'Campus Life',
+      items: [
+        { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning and hostel dining schedule", icon: <Utensils />, customPath: '/campus/mess' },
+        { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Locate university buildings, blocks, and facilities', icon: <Map />, customPath: '/campus/map' },
+        { id: ModuleType.LECTURES, name: 'Lectures Hub', desc: 'Watch university lecture recordings and classes', icon: <PlayCircle />, customPath: '/tools?tab=lectures' },
+      ].filter(isFeatureEnabled)
+    },
+    {
+      title: 'Community & Career',
+      items: [
+        { id: ModuleType.PLACEMENT, name: 'Resume Checker', desc: 'Analyze resume ATS readiness and formatting', icon: <Briefcase /> },
+        { id: ModuleType.ROOMMATE, name: 'Roommate Finder', desc: 'Find and connect with fellow students for housing', icon: <User /> },
+        { id: ModuleType.MARKETPLACE, name: 'Marketplace', desc: 'Buy and sell textbooks, notes, and campus gear', icon: <ShoppingBag /> },
+      ].filter(isFeatureEnabled)
+    },
+  ].filter(s => s.items.length > 0);
 
   return (
-    <div className="w-full min-h-screen pb-32 animate-fade-in relative z-0 bg-[#fbfcfd] dark:bg-[#030303]">
+    <div className="w-full min-h-screen pb-32 animate-fade-in relative z-0 bg-[#fbfcfd] dark:bg-[#0c0c0e] overflow-hidden">
+      {/* Subtle signature brand ambient warmth at top */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[240px] bg-brand-primary/[0.04] dark:bg-brand-primary/[0.03] rounded-full blur-[100px] -z-10" />
+
       <DashboardHeader userProfile={userProfile} />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-start">
 
-          {/* Left Side: Tools */}
-          <div className="lg:col-span-8 order-2 lg:order-1 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <h3 className="text-base md:text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Your <span className="text-brand-primary">Tools</span></h3>
-                <p className="text-[10px] md:text-xs text-zinc-500 font-medium">Quickly access essential features</p>
+          {/* Left Side: Apple Inset Grouped Sections */}
+          <div className="lg:col-span-8 order-2 lg:order-1 space-y-7">
+            {sections.map((section) => (
+              <div key={section.title} className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                  <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                    {section.title}
+                  </h3>
+                </div>
+
+                <div className="bg-white dark:bg-[#17171a] rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/60">
+                  {section.items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => navigate(item.customPath || getPathFromModule(item.id as any, selectedUniversity))}
+                      className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-zinc-50/80 dark:hover:bg-[#1f1f24] transition-colors text-left group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#202025] border border-zinc-200/60 dark:border-zinc-700/60 flex items-center justify-center text-zinc-600 dark:text-zinc-300 group-hover:text-brand-primary group-hover:bg-brand-primary/10 group-hover:border-brand-primary/25 transition-all shrink-0">
+                          {React.cloneElement(item.icon as React.ReactElement, { size: 18, strokeWidth: 1.75 })}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[14px] font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-950 dark:group-hover:text-white transition-colors truncate">
+                            {item.name}
+                          </div>
+                          <div className="text-[12px] text-zinc-500 dark:text-zinc-400 font-normal truncate mt-0.5">
+                            {item.desc}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 pl-3">
+                        <ChevronRight
+                          size={15}
+                          className="text-zinc-300 dark:text-zinc-600 group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all"
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
-              {filteredFeatures.map((f) => (
-                <FeatureCard key={f.id} f={f} navigate={() => navigate(f.customPath || getPathFromModule(f.id as any, selectedUniversity))} />
-              ))}
-            </div>
+            ))}
           </div>
 
-          <div className="lg:col-span-4 order-1 lg:order-2">
+          {/* Right Side: Schedule */}
+          <div className="lg:col-span-4 order-1 lg:order-2 space-y-2">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 px-1">
+              Schedule
+            </h3>
             {selectedUniversity === 'iitm_bs' ? <AcademicCalendar /> : <TodaysSchedule />}
           </div>
         </div>
 
-        {/* Full-Width Scholix Daily Feed */}
-        <div className="mt-10">
-          <DailyFeed userProfile={userProfile} />
-        </div>
-
         <div className="flex flex-col gap-12 md:gap-16 mt-12 md:mt-16">
-
-
           {/* Buy Me A Coffee Section */}
           <div className="w-full">
             <BuyMeACoffee />
@@ -1875,7 +1854,7 @@ const AppContent: React.FC = () => {
   const isSettingsPath = ['/settings', '/profile', '/privacy-policy', '/about-scholix', '/terms', '/contact', '/help'].some(p => location.pathname.includes(p));
 
   return (
-    <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a] text-zinc-900 dark:text-zinc-200 fixed inset-0">
+    <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-white dark:bg-[#0c0c0e] text-zinc-900 dark:text-zinc-200 fixed inset-0">
       <SEOHelmet currentModule={currentModule} />
       <div className="flex flex-1 overflow-hidden relative min-h-0">
         <Sidebar
@@ -1886,7 +1865,7 @@ const AppContent: React.FC = () => {
           userProfile={userProfile}
           onOpenAuth={openAuth}
         />
-        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0a0a0a] md:pl-[60px]">
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative bg-white dark:bg-[#0c0c0e] md:pl-[60px]">
           <BackgroundEffects />
 
           {false && (
@@ -2010,7 +1989,7 @@ const AppContent: React.FC = () => {
               </div>
             </header>
           )}
-          <div id="main-content-area" className={`flex-1 ${isSettingsPath ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${isDashboardPath || isSettingsPath ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} ${isDashboardPath ? 'bg-[#fbfcfd] dark:bg-[#030303]' : isSettingsPath ? 'bg-white dark:bg-dark-950' : 'bg-white dark:bg-[#0a0a0a]'} no-scrollbar`}>
+          <div id="main-content-area" className={`flex-1 ${isSettingsPath ? 'overflow-hidden' : 'overflow-y-auto'} relative scroll-smooth ${isDashboardPath || isSettingsPath ? 'mobile-safe-pt-0 px-0 pb-0 md:p-0' : 'mobile-safe-pt-4 px-4 pb-4 md:p-8'} ${isDashboardPath ? 'bg-[#fbfcfd] dark:bg-[#0c0c0e]' : isSettingsPath ? 'bg-white dark:bg-[#0c0c0e]' : 'bg-white dark:bg-[#0c0c0e]'} no-scrollbar`}>
             <div className={`relative ${isSettingsPath ? 'h-full' : ''} ${isDashboardPath || isSettingsPath ? 'w-full' : 'max-w-7xl mx-auto'}`}>
               <Routes>
                 <Route path="/welcome" element={<ScholixLanding userProfile={userProfile} />} />

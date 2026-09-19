@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Lock, 
+  CheckCircle2, 
+  Clock, 
+  Zap, 
+  Star, 
+  ArrowRight, 
+  X, 
+  Target,
+  Trophy,
+  HelpCircle
+} from 'lucide-react';
 import { ActiveChallenge } from '../../stores/quizStore';
 
 interface ChallengeCardProps {
@@ -52,94 +64,98 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-        whileHover={!isLocked && !isCompleted ? { y: -4, transition: { duration: 0.2 } } : {}}
-        className={`relative overflow-hidden p-5 md:p-6 rounded-[28px] border-none shadow-none transition-all ${
+        transition={{ duration: 0.4, delay: 0.1 + index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={!isLocked && !isCompleted ? { y: -2, transition: { duration: 0.2 } } : {}}
+        className={`relative overflow-hidden p-5 rounded-2xl border transition-all flex flex-col justify-between ${
           isLocked
-            ? 'bg-zinc-100/60 dark:bg-[#111113]/60 opacity-60'
+            ? 'bg-zinc-50/60 dark:bg-[#17171a]/60 border-zinc-200/50 dark:border-zinc-800/50 opacity-70'
             : isCompleted
-            ? 'bg-emerald-500/10'
-            : 'bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618]'
+            ? 'bg-emerald-500/[0.03] border-emerald-500/20'
+            : 'bg-white dark:bg-[#17171a] border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700'
         }`}
       >
         {isLocked && (
-          <div className="absolute inset-0 bg-white/50 dark:bg-dark-950/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-white/5 rounded-xl border border-zinc-200 dark:border-white/10">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-zinc-400">
-                <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm3 8H9V7a3 3 0 0 1 6 0v3z" />
-              </svg>
-              <span className="text-[10px] font-semibold text-zinc-500 tracking-wider">Level {challenge.min_level} Required</span>
+          <div className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center p-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-[#151518] rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm">
+              <Lock className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-300 tracking-wider">Level {challenge.min_level} Required</span>
             </div>
           </div>
         )}
 
-        <div className="space-y-4">
-          {/* Header */}
+        <div className="space-y-3.5">
+          {/* Top Header */}
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-2xl flex-shrink-0">{challenge.emoji}</span>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center flex-shrink-0">
+                <Target className="w-4 h-4" />
+              </div>
               <div className="min-w-0">
                 <h4 className="text-sm font-semibold text-zinc-900 dark:text-white tracking-tight truncate">
                   {challenge.name}
                 </h4>
-                <p className="text-[11px] text-zinc-500 font-medium mt-0.5 line-clamp-1">
+                <p className="text-[11px] text-zinc-400 font-normal mt-0.5 line-clamp-1">
                   {challenge.description}
                 </p>
               </div>
             </div>
 
             {/* XP badge */}
-            <div className="flex-shrink-0 px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-500 dark:text-orange-400">
+            <div className="flex-shrink-0 px-2.5 py-0.5 rounded-lg bg-brand-primary/10 text-brand-primary border border-brand-primary/20 flex items-center gap-1">
+              <Zap className="w-3 h-3 fill-brand-primary" />
               <span className="text-[10px] font-semibold tabular-nums">{challenge.xp_reward} XP</span>
             </div>
           </div>
 
-          {/* Info row */}
-          <div className="flex items-center gap-3 flex-wrap">
+          {/* Info metadata row */}
+          <div className="flex items-center gap-3 flex-wrap text-xs text-zinc-500 dark:text-zinc-400 pt-0.5">
             <div className="flex items-center gap-0.5">
               {Array.from({ length: 3 }).map((_, i) => (
-                <svg key={i} viewBox="0 0 24 24" fill={i < challenge.difficulty ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 ${i < challenge.difficulty ? 'text-amber-500' : 'text-zinc-300 dark:text-white/10'}`}>
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
-                </svg>
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${
+                    i < challenge.difficulty 
+                      ? 'text-amber-500 fill-amber-500' 
+                      : 'text-zinc-300 dark:text-zinc-700'
+                  }`}
+                />
               ))}
             </div>
 
-            <span className="text-[10px] font-semibold text-zinc-400 tabular-nums">
+            <span className="text-[11px] font-medium text-zinc-400 tabular-nums">
               {challenge.question_count} Q • {challenge.time_limit_per_question}s each
             </span>
 
-            <span className="text-[10px] font-semibold text-zinc-400 flex items-center gap-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
-                <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-              </svg>
+            <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1">
+              <Clock className="w-3 h-3 text-zinc-400" />
               {countdown}
             </span>
           </div>
+        </div>
 
-          {/* Action */}
+        {/* Action Button */}
+        <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/[0.05]">
           {isCompleted ? (
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/10 rounded-xl">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-emerald-500">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 tracking-wider">Done</span>
+            <div className="flex items-center justify-center gap-1.5 py-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Challenge Completed</span>
             </div>
           ) : !isLocked ? (
             <motion.button
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setShowModal(true)}
-              className="w-full py-2.5 bg-dark-950 dark:bg-white/[0.06] hover:bg-dark-800 dark:hover:bg-white/10 text-white rounded-xl text-[11px] font-semibold tracking-wider transition-all flex items-center justify-center gap-2 group"
+              className="w-full py-2 bg-zinc-100 dark:bg-white/[0.04] hover:bg-zinc-200/70 dark:hover:bg-white/[0.08] text-zinc-800 dark:text-zinc-200 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>View Details</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 transition-transform group-hover:translate-x-0.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              <ArrowRight className="w-3.5 h-3.5" />
             </motion.button>
           ) : null}
         </div>
-      </motion.div>      {/* ═══════════ Pre-Start Modal ═══════════ */}
+      </motion.div>
+
+      {/* Pre-Start Modal */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {showModal && (
@@ -147,56 +163,57 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="modal-overlay"
-              style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
+              style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
               onClick={() => setShowModal(false)}
             >
               <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                initial={{ scale: 0.96, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full max-w-md bg-white dark:bg-dark-950 rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-white/10"
+                exit={{ scale: 0.96, opacity: 0, y: 10 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
                 onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-2xl space-y-5 relative overflow-hidden"
               >
                 {/* Header */}
-                <div className="p-8 pb-0 text-center space-y-3">
-                  <span className="text-5xl">{challenge.emoji}</span>
-                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-white tracking-tight">
+                <div className="text-center space-y-2 pt-2">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 text-brand-primary flex items-center justify-center mx-auto">
+                    <Target className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
                     {challenge.name}
                   </h3>
-                  <p className="text-sm text-zinc-500 font-medium">
+                  <p className="text-xs text-zinc-500 font-medium">
                     {challenge.description}
                   </p>
                 </div>
 
                 {/* Details Grid */}
-                <div className="p-8 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Subject</p>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{shortName}</p>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200/70 dark:border-white/[0.05] text-center">
+                      <p className="text-[10px] font-medium text-zinc-400 mb-0.5">Subject</p>
+                      <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate">{shortName}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Questions</p>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{challenge.question_count}</p>
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200/70 dark:border-white/[0.05] text-center">
+                      <p className="text-[10px] font-medium text-zinc-400 mb-0.5">Questions</p>
+                      <p className="text-xs font-semibold text-zinc-900 dark:text-white">{challenge.question_count}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Time Limit</p>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{totalMinutes} min</p>
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200/70 dark:border-white/[0.05] text-center">
+                      <p className="text-[10px] font-medium text-zinc-400 mb-0.5">Time Limit</p>
+                      <p className="text-xs font-semibold text-zinc-900 dark:text-white">{totalMinutes} min</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 text-center">
-                      <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1">Per Question</p>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-white">{challenge.time_limit_per_question}s</p>
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200/70 dark:border-white/[0.05] text-center">
+                      <p className="text-[10px] font-medium text-zinc-400 mb-0.5">Per Question</p>
+                      <p className="text-xs font-semibold text-zinc-900 dark:text-white">{challenge.time_limit_per_question}s</p>
                     </div>
                     {challenge.units && challenge.units.length > 0 && (
-                      <div className="col-span-2 p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5">
-                        <p className="text-[9px] font-semibold text-zinc-400 tracking-wider mb-1.5 text-center">Based on Units</p>
-                        <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
-                          {challenge.units.map((unit, i) => (
-                            <span key={unit} className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                      <div className="col-span-2 p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200/70 dark:border-white/[0.05]">
+                        <p className="text-[10px] font-medium text-zinc-400 mb-1 text-center">Based on Units</p>
+                        <div className="flex flex-wrap justify-center gap-1.5">
+                          {challenge.units.map((unit) => (
+                            <span key={unit} className="px-2 py-0.5 rounded-md bg-zinc-200/60 dark:bg-white/[0.04] text-[10px] font-medium text-zinc-700 dark:text-zinc-300">
                               {unit}
-                              {i < challenge.units.length - 1 && <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-white/10" />}
                             </span>
                           ))}
                         </div>
@@ -205,57 +222,61 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
                   </div>
 
                   {/* Difficulty + XP */}
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">Difficulty</span>
+                  <div className="flex items-center justify-between px-2 pt-1 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-medium text-zinc-400">Difficulty</span>
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: 3 }).map((_, i) => (
-                          <svg key={i} viewBox="0 0 24 24" fill={i < challenge.difficulty ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className={`w-4 h-4 ${i < challenge.difficulty ? 'text-amber-500' : 'text-zinc-300 dark:text-white/10'}`}>
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
-                          </svg>
+                          <Star
+                            key={i}
+                            className={`w-3.5 h-3.5 ${
+                              i < challenge.difficulty 
+                                ? 'text-amber-500 fill-amber-500' 
+                                : 'text-zinc-300 dark:text-zinc-700'
+                            }`}
+                          />
                         ))}
                       </div>
                     </div>
-                    <span className="flex items-center gap-1.5 text-orange-500 font-semibold text-sm">
-                      ⚡ {challenge.xp_reward} XP
+                    <span className="flex items-center gap-1 text-brand-primary font-semibold text-xs">
+                      <Zap className="w-3.5 h-3.5 fill-brand-primary" />
+                      {challenge.xp_reward} XP
                     </span>
                   </div>
 
-                  {/* Expires */}
-                  <div className="text-center">
-                    <span className="text-[10px] font-semibold text-zinc-400 flex items-center justify-center gap-1">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
-                        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-                      </svg>
+                  {/* Countdown */}
+                  <div className="text-center pt-1">
+                    <span className="text-[11px] font-medium text-zinc-400 flex items-center justify-center gap-1">
+                      <Clock className="w-3 h-3" />
                       Expires in {countdown}
                     </span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="px-8 pb-8 flex gap-3">
+                <div className="flex gap-2.5 pt-2">
                   <button
+                    type="button"
                     onClick={() => setShowModal(false)}
-                    className="flex-1 py-3 bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-400 rounded-2xl text-sm font-semibold transition-colors"
+                    className="flex-1 py-2.5 bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/70 dark:hover:bg-white/10 text-zinc-600 dark:text-zinc-400 rounded-xl text-xs font-medium transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <motion.button
-                    whileTap={{ scale: 0.97 }}
+                    type="button"
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => { setShowModal(false); onStart(); }}
-                    className="flex-[2] py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold text-sm shadow-xl shadow-orange-500/20 flex items-center justify-center gap-2"
+                    className="flex-[2] py-2.5 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-xl font-medium text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <span>Start challenge</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </motion.button>
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>,
-        document.getElementById('modal-root') || document.body
+        document.body
       )}
     </>
   );

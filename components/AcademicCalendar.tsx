@@ -127,34 +127,34 @@ export const AcademicCalendar: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-[24px] border border-zinc-100/80 dark:border-white/5 p-5 lg:p-6 shadow-sm overflow-hidden flex flex-col h-[480px]">
+      <div className="bg-white dark:bg-[#0c0c0e] rounded-2xl border border-zinc-200/80 dark:border-white/[0.06] p-5 lg:p-6 overflow-hidden flex flex-col h-[480px]">
         
         {/* Header */}
-        <div className="flex items-center gap-3 mb-5 flex-shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-            <Calendar size={20} strokeWidth={2.5} />
+        <div className="flex items-center gap-3 mb-6 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary shrink-0">
+            <Calendar size={18} strokeWidth={1.75} />
           </div>
           <div>
-            <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white tracking-tight leading-tight">
-              Academic <span className="text-brand-primary">Calendar</span>
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight">
+              Academic Calendar
             </h4>
-            <p className="text-[10px] text-zinc-500 font-semibold tracking-wider uppercase mt-0.5">May 2026 Term</p>
+            <p className="text-[11px] text-brand-primary font-mono uppercase tracking-wider mt-0.5">May 2026 Term</p>
           </div>
         </div>
 
         {/* Scrollable Events List */}
-        <div className="flex-1 overflow-y-auto pr-1 space-y-4 no-scrollbar">
+        <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 no-scrollbar">
           {events.map((event, idx) => (
             <div 
               key={idx} 
-              className="flex gap-4 items-start border-b border-zinc-100 dark:border-white/5 pb-3 last:border-none last:pb-0"
+              className="flex gap-3.5 items-start border-b border-zinc-100 dark:border-white/[0.04] pb-3 last:border-none last:pb-0"
             >
               {/* Date Box */}
-              <div className="w-12 flex-shrink-0 text-center flex flex-col items-center bg-zinc-50 dark:bg-white/[0.02] py-2 rounded-xl border border-zinc-200/20 dark:border-white/5">
-                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100 leading-none">
+              <div className="w-11 flex-shrink-0 text-center flex flex-col items-center bg-zinc-50 dark:bg-zinc-800/40 py-1.5 rounded-lg border border-zinc-200/60 dark:border-white/[0.06]">
+                <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200 leading-none">
                   {event.day}
                 </span>
-                <span className="text-[8px] text-zinc-400 font-semibold uppercase mt-1">
+                <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-mono uppercase mt-1">
                   {event.monthYear.split(' ')[0]}
                 </span>
               </div>

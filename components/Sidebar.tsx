@@ -171,8 +171,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
         className={`w-full h-10 flex items-center rounded-2xl transition-colors duration-150 relative group cursor-pointer border-none no-underline ${
           isActive
-            ? 'bg-zinc-100 dark:bg-white/[0.08] text-zinc-900 dark:text-white font-medium'
-            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-white/[0.04]'
+            ? 'bg-zinc-100 dark:bg-[#1c1c20] text-zinc-900 dark:text-white font-medium'
+            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
         }`}
       >
         {/* Icon container: exactly 40px wide, centered inside the 40px rail slot */}
@@ -192,7 +192,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </span>
 
         {/* Tooltip when collapsed */}
-        <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-white/10 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${
+        <div className={`fixed left-[68px] px-2.5 py-1 bg-zinc-900/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-zinc-700/30 dark:border-zinc-800 text-white text-[11.5px] font-medium rounded-lg opacity-0 translate-x-1 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl ${
           !isExpanded ? 'group-hover:opacity-100 group-hover:translate-x-0' : 'hidden'
         }`}>
           {item.label}
@@ -203,6 +203,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
+
+      {/* Main navigation rail - unified backdrop blur and surface */}
+      <div 
+        className={`hidden md:block fixed inset-y-0 left-0 z-[400] transition-opacity duration-200 pointer-events-none ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+
       <FeedbackModal
         isOpen={showFeedbackModal}
         onClose={() => setShowFeedbackModal(false)}
@@ -222,7 +230,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseLeave={() => setIsHovered(false)}
         className={`
           fixed inset-y-0 left-0 z-[410] md:translate-x-0 transform transition-[width] duration-200 ease-out
-          bg-white dark:bg-[#0c0c0e] border-r border-zinc-200/80 dark:border-white/[0.06]
+          bg-white dark:bg-[#0c0c0e] border-r border-zinc-200/80 dark:border-zinc-800/80
           ${isMobileMenuOpen ? 'translate-x-0 w-56' : '-translate-x-full md:translate-x-0'}
           ${isExpanded ? 'w-56 shadow-2xl md:shadow-none' : 'md:w-[60px]'}
           flex flex-col h-full select-none overflow-hidden
@@ -238,29 +246,30 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="w-10 h-10 shrink-0 flex items-center justify-center">
               <img
                 src={universityInfo?.logo || "/Scholix_dark.webp"}
-                alt="Logo"
-                width="28"
-                height="28"
-                className="w-7 h-7 rounded-lg object-contain"
+                alt="Scholix Logo"
+                className="w-7 h-7 object-contain dark:brightness-110"
               />
             </div>
-            <span className={`text-[14px] font-semibold tracking-tight text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden transition-all duration-200 ease-out ${
+            {/* Brand Text on Right: reveals cleanly on expansion */}
+            <div className={`overflow-hidden transition-all duration-200 ease-out flex items-center ${
               isExpanded ? 'max-w-[145px] opacity-100 ml-1' : 'max-w-0 opacity-0 ml-0 pointer-events-none'
             }`}>
-              {shortBrandName}
-            </span>
+              <span className="text-[14.5px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight whitespace-nowrap">
+                Scholix
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Navigation List */}
-        <div className="flex-1 overflow-hidden relative">
-          <nav className="h-full px-2.5 py-1 space-y-1 overflow-y-auto no-scrollbar overflow-x-hidden">
+        {/* Navigation Items */}
+        <div className="flex-1 px-2.5 py-1 space-y-1 overflow-y-auto no-scrollbar">
+          <nav className="space-y-1">
             {filteredPrimary.map(renderNavItem)}
 
             {filteredSecondary.length > 0 && (
               <>
                 <div className="my-2.5 mx-1">
-                  <div className="h-px bg-zinc-200/70 dark:bg-white/[0.06]" />
+                  <div className="h-px bg-zinc-200/70 dark:bg-zinc-800/80" />
                 </div>
                 {filteredSecondary.map(renderNavItem)}
               </>
@@ -269,7 +278,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* User Profile Footer */}
-        <div className="p-2.5 border-t border-zinc-200/70 dark:border-white/[0.06] relative">
+        <div className="p-2.5 border-t border-zinc-200/70 dark:border-zinc-800/80 relative">
           <button
             ref={buttonRef}
             onClick={() => {
@@ -287,8 +296,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             }}
             className={`w-full h-10 flex items-center rounded-2xl transition-colors cursor-pointer border-none relative group ${
               currentModule === ModuleType.PROFILE || showProfileMenu
-                ? 'bg-zinc-100 dark:bg-white/[0.08]'
-                : 'bg-transparent hover:bg-zinc-100/70 dark:hover:bg-white/[0.04]'
+                ? 'bg-zinc-100 dark:bg-[#1c1c20]'
+                : 'bg-transparent hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
             }`}
           >
             {/* Avatar container: exactly 40px wide, identical to icon slots */}

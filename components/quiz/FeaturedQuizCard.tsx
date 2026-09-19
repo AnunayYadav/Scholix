@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Sparkles, Star, Clock, FileText, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { FeaturedQuiz } from '../../stores/quizStore';
 
 interface FeaturedQuizCardProps {
@@ -21,7 +22,6 @@ const FeaturedQuizCard: React.FC<FeaturedQuizCardProps> = ({
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      // Midnight IST = 18:30 UTC of current day
       const istOffset = 5.5 * 60 * 60 * 1000;
       const nowIST = new Date(now.getTime() + istOffset);
       const midnightIST = new Date(nowIST);
@@ -43,113 +43,109 @@ const FeaturedQuizCard: React.FC<FeaturedQuizCardProps> = ({
   const difficultyConfig = {
     easy: { color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', label: 'Easy', stars: 1 },
     medium: { color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', label: 'Medium', stars: 2 },
-    hard: { color: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20', label: 'Hard', stars: 3 },
+    hard: { color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20', label: 'Hard', stars: 3 },
   }[quiz.difficulty];
 
   const estimatedTime = Math.ceil((quiz.questions.length * 45) / 60);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[28px] border-none shadow-none bg-zinc-100 dark:bg-[#111113]"
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="p-6 md:p-7 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80"
     >
-      {/* Decorative gradient blur */}
-      <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
-          {/* Left: Quiz info */}
-          <div className="flex-1 min-w-0 space-y-4">
-            {/* Top label */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-orange-500/10 text-orange-500 text-[10px] font-semibold tracking-wider">
-                <span className="text-sm">⭐</span> Daily Featured
-              </span>
-              <span className={`px-2.5 py-1 rounded-lg border text-[10px] font-semibold tracking-wider ${difficultyConfig.color}`}>
-                {'★'.repeat(difficultyConfig.stars)}{'☆'.repeat(3 - difficultyConfig.stars)} {difficultyConfig.label}
-              </span>
-            </div>
-
-            {/* Quiz name */}
-            <h3 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight leading-tight">
-              {quiz.name}
-            </h3>
-
-            {/* Units */}
-            {quiz.units && quiz.units.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {quiz.units.slice(0, 3).map(unit => (
-                  <span key={unit} className="px-2.5 py-1 rounded-lg bg-zinc-200/60 dark:bg-white/5 text-[10px] font-bold text-zinc-600 dark:text-zinc-400 border-none">
-                    {unit}
-                  </span>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* Left: Quiz info */}
+        <div className="flex-1 min-w-0 space-y-3.5">
+          {/* Top labels */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand-primary/10 text-brand-primary text-[10px] font-semibold tracking-wider">
+              <Sparkles className="w-3 h-3" />
+              <span>Daily Featured</span>
+            </span>
+            <span className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[10px] font-semibold tracking-wider ${difficultyConfig.color}`}>
+              <span className="flex items-center gap-0.5">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Star 
+                    key={i} 
+                    className={`w-2.5 h-2.5 ${i < difficultyConfig.stars ? 'fill-current' : 'opacity-25'}`} 
+                  />
                 ))}
-                {quiz.units.length > 3 && (
-                  <span className="text-[10px] font-bold text-zinc-400 flex items-center">
-                    + {quiz.units.length - 3} More
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Info line */}
-            <div className="flex items-center gap-4 flex-wrap text-[11px] font-semibold text-zinc-500">
-              <span className="flex items-center gap-1.5">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
-                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" />
-                </svg>
-                {quiz.questions.length} Questions
               </span>
-              <span className="flex items-center gap-1.5">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
-                  <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-                </svg>
-                ~{estimatedTime} min
-              </span>
-              <span className="flex items-center gap-1.5 text-orange-500 font-semibold">
-                <span>⚡</span>
-                Up to {quiz.xp_reward} XP
-              </span>
-            </div>
+              <span>{difficultyConfig.label}</span>
+            </span>
           </div>
 
-          {/* Right: Action */}
-          <div className="flex flex-col items-center gap-3 flex-shrink-0">
-            {isCompleted ? (
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-7 h-7 text-emerald-500">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                </div>
-                <span className="text-[10px] font-semibold text-emerald-500 tracking-wider">Completed</span>
+          {/* Quiz title */}
+          <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight leading-snug">
+            {quiz.name}
+          </h3>
+
+          {/* Units */}
+          {quiz.units && quiz.units.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {quiz.units.slice(0, 3).map(unit => (
+                <span 
+                  key={unit} 
+                  className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/70 border border-zinc-200/70 dark:border-zinc-700/60 text-[10px] font-medium text-zinc-600 dark:text-zinc-400"
+                >
+                  {unit}
+                </span>
+              ))}
+              {quiz.units.length > 3 && (
+                <span className="text-[10px] font-medium text-zinc-400 flex items-center px-1">
+                  +{quiz.units.length - 3} More
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Info metadata line */}
+          <div className="flex items-center gap-4 flex-wrap text-xs font-medium text-zinc-500 dark:text-zinc-400 pt-1">
+            <span className="flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-zinc-400" />
+              {quiz.questions.length} Questions
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              ~{estimatedTime} min
+            </span>
+            <span className="flex items-center gap-1 text-brand-primary font-semibold">
+              <Zap className="w-3.5 h-3.5 fill-brand-primary" />
+              Up to {quiz.xp_reward} XP
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Action Button & Countdown */}
+        <div className="flex flex-col items-start md:items-end gap-3 flex-shrink-0">
+          {isCompleted ? (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              <div className="text-left">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">Completed</span>
                 {completedScore !== null && (
-                  <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{completedScore}%</span>
+                  <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Score: {completedScore}%</span>
                 )}
               </div>
-            ) : (
-                <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={onStart}
-                className="px-8 py-3.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold text-sm shadow-xl shadow-orange-500/20 flex items-center gap-2 group"
-              >
-                <span>Start challenge</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 transition-transform group-hover:translate-x-0.5">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </motion.button>
-            )}
-
-            {/* Countdown */}
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
-                <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-              </svg>
-              <span className="tabular-nums font-medium tracking-wide">Resets in {countdown}</span>
             </div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onStart}
+              className="px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-xl font-medium text-xs flex items-center gap-2 transition-all cursor-pointer shadow-none"
+            >
+              <span>Start challenge</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </motion.button>
+          )}
+
+          {/* Countdown timer */}
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400">
+            <Clock className="w-3 h-3 text-zinc-400" />
+            <span className="tabular-nums">Resets in {countdown}</span>
           </div>
         </div>
       </div>
