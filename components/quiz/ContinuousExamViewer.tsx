@@ -93,10 +93,16 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
 
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Automatically mark current question as visited
+  useEffect(() => {
+    setVisitedQuestions(prev => new Set(prev).add(currentQuestionIdx));
+  }, [currentQuestionIdx, setVisitedQuestions]);
+
   // Total Marks Calculation
   const totalExamMarks = useMemo(() => {
     if (activeExamPaper?.total_marks) return activeExamPaper.total_marks;
-    return quizQuestions.reduce((acc, q) => acc + (q.marks || (q.type === 'subjective' ? 10 : 1)), 0);
+    if (!quizQuestions || quizQuestions.length === 0) return 0;
+    return quizQuestions.reduce((acc, q) => acc + (q?.marks || (q?.type === 'subjective' ? 10 : 1)), 0);
   }, [activeExamPaper, quizQuestions]);
 
   // Subject and Paper Metadata
@@ -234,168 +240,196 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
         {/* ══════════════════════════════════════════════════════════════════════════
             LEFT SIDEBAR (STICKY CONTROL PANEL)
             ══════════════════════════════════════════════════════════════════════════ */}
-        <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-4 space-y-3.5 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+        <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-4 space-y-2.5">
           
-          {/* 1. Exam Info Card */}
-          <div className="p-4 rounded-2xl bg-zinc-100/70 dark:bg-[#131316] shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-xs pb-1">
-              <span className="text-zinc-500 font-medium">Exam :</span>
-              <span className="font-bold text-zinc-800 dark:text-zinc-200">{examName}</span>
+          {/* Top Section: Exam Info Card & Mode Selector */}
+          <div className="space-y-2">
+            {/* 1. Exam Info Card */}
+            <div className="p-3 rounded-xl bg-zinc-100/70 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Exam</span>
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">{examName}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Subject</span>
+                <span className="font-semibold text-orange-500">{subjectCode}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Total Marks</span>
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">{totalExamMarks}.00</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Question Paper</span>
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-right truncate max-w-[150px]" title={qpTitle}>
+                  {qpTitle}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs pb-1">
-              <span className="text-zinc-500 font-medium">Subject :</span>
-              <span className="font-bold text-orange-500">{subjectCode}</span>
-            </div>
-            <div className="flex items-center justify-between text-xs pb-1">
-              <span className="text-zinc-500 font-medium">Total Marks :</span>
-              <span className="font-bold text-zinc-800 dark:text-zinc-200">{totalExamMarks}.00</span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-500 font-medium">QP :</span>
-              <span className="font-bold text-zinc-800 dark:text-zinc-200 text-right truncate max-w-[160px]" title={qpTitle}>
-                {qpTitle}
-              </span>
+
+            {/* 2. Mode Selector (Exam Mode vs Learning Mode) */}
+            <div className="p-1 rounded-xl bg-zinc-100/80 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] grid grid-cols-2 gap-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setExamMode('exam')}
+                className={`py-1.5 px-2 rounded-lg transition-all text-center cursor-pointer font-medium ${
+                  examMode === 'exam'
+                    ? 'bg-white dark:bg-[#202024] text-orange-500 shadow-xs font-semibold'
+                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                }`}
+              >
+                Exam Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setExamMode('learning')}
+                className={`py-1.5 px-2 rounded-lg transition-all text-center cursor-pointer font-medium ${
+                  examMode === 'learning'
+                    ? 'bg-white dark:bg-[#202024] text-orange-500 shadow-xs font-semibold'
+                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                }`}
+              >
+                Learning Mode
+              </button>
             </div>
           </div>
 
-          {/* 2. Mode Selector (Exam Mode vs Learning Mode) */}
-          <div className="p-1 rounded-xl bg-zinc-100/80 dark:bg-[#131316] grid grid-cols-2 gap-1 text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setExamMode('exam')}
-              className={`py-2 px-3 rounded-lg transition-all text-center cursor-pointer ${
-                examMode === 'exam'
-                  ? 'bg-white dark:bg-[#202024] text-orange-500 shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-              }`}
-            >
-              Exam Mode
-            </button>
-            <button
-              type="button"
-              onClick={() => setExamMode('learning')}
-              className={`py-2 px-3 rounded-lg transition-all text-center cursor-pointer ${
-                examMode === 'learning'
-                  ? 'bg-white dark:bg-[#202024] text-orange-500 shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-              }`}
-            >
-              Learning Mode
-            </button>
-          </div>
-
-          {/* 3. Question Menu / Navigation Palette */}
-          <div className="p-4 rounded-2xl bg-zinc-100/70 dark:bg-[#131316] shadow-sm space-y-3">
+          {/* 3. Question Menu (Fixed-height Scroll Area so buttons always fit on screen) */}
+          <div className="p-3 rounded-xl bg-zinc-100/70 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                Question Menu
+              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 tracking-wide uppercase">
+                Questions
               </span>
-              <span className="text-[10px] font-bold text-emerald-500">
+              <span className="text-xs font-medium text-emerald-500">
                 {Object.keys(userAnswers).length} / {quizQuestions.length} Answered
               </span>
             </div>
 
-            {/* Questions Grid */}
-            <div className="grid grid-cols-6 gap-2">
-              {quizQuestions.map((q, idx) => {
-                const isAnswered = userAnswers[idx] !== undefined && userAnswers[idx] !== '';
-                const isCurrent = currentQuestionIdx === idx;
-                const isMarked = markedForReview.has(idx);
+            {/* Scrollable Questions Grid: strictly constrained height with squarish tiles */}
+            <div className="max-h-[175px] overflow-y-auto custom-scrollbar pr-1.5">
+              <div className="grid grid-cols-6 gap-1.5 pt-0.5">
+                {quizQuestions.map((q, idx) => {
+                  const isAnswered = userAnswers[idx] !== undefined && userAnswers[idx] !== '';
+                  const isCurrent = currentQuestionIdx === idx;
+                  const isMarked = markedForReview.has(idx);
+                  const isVisited = visitedQuestions.has(idx);
 
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => scrollToQuestion(idx)}
-                    className={`h-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all cursor-pointer relative ${
-                      isCurrent
-                        ? 'ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-[#131316] scale-105 z-10'
-                        : ''
-                    } ${
-                      isAnswered
-                        ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/20'
-                        : isMarked
-                        ? 'bg-purple-600 text-white shadow-sm'
-                        : 'bg-white dark:bg-[#202024] text-zinc-700 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-[#28282e]'
-                    }`}
-                  >
-                    {idx + 1}
-                  </button>
-                );
-              })}
+                  let stateStyle = 'bg-zinc-100 dark:bg-[#1e1e23] text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-white/[0.04] hover:bg-zinc-200 dark:hover:bg-[#282830]';
+                  if (isAnswered) {
+                    stateStyle = 'bg-emerald-500 text-white font-bold shadow-xs';
+                  } else if (isMarked) {
+                    stateStyle = 'bg-purple-600 text-white font-bold shadow-xs';
+                  } else if (isVisited) {
+                    stateStyle = 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/35 font-semibold';
+                  }
+
+                  const activeRing = isCurrent
+                    ? 'ring-2 ring-zinc-900 dark:ring-white z-10 shadow-sm'
+                    : '';
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => scrollToQuestion(idx)}
+                      className={`w-full aspect-square rounded-lg flex items-center justify-center text-xs font-semibold transition-all cursor-pointer relative ${stateStyle} ${activeRing}`}
+                    >
+                      {idx + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Status Legend */}
+            <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1.5 px-0.5 border-t border-zinc-200/40 dark:border-white/[0.04]">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-xs bg-emerald-500 inline-block" />
+                <span>Answered</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-xs bg-amber-500/30 border border-amber-500/50 inline-block" />
+                <span>Visited</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-xs bg-zinc-200 dark:bg-[#1e1e23] border border-zinc-300 dark:border-white/[0.1] inline-block" />
+                <span>Unvisited</span>
+              </span>
             </div>
           </div>
 
-          {/* 4. Timer Card */}
-          <div className="p-4 rounded-2xl bg-zinc-100/70 dark:bg-[#131316] shadow-sm space-y-2 text-center">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">
-              Timer
-            </span>
-            <div className="flex items-center justify-center gap-3">
-              <span className={`text-2xl font-black tabular-nums tracking-wider ${
-                timeLeft < 180 ? 'text-red-500 animate-pulse' : 'text-zinc-900 dark:text-white'
-              }`}>
-                {formatTime(timeLeft)}
-              </span>
+          {/* Bottom Section: Timer + Submit & End Exam Buttons */}
+          <div className="space-y-2 pt-0.5">
+            {/* 4. Timer Card */}
+            <div className="p-2.5 rounded-xl bg-zinc-100/70 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs flex items-center justify-between px-3.5">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Timer</span>
+                <span className={`text-lg font-bold tabular-nums tracking-wide ${
+                  timeLeft < 180 ? 'text-red-500 animate-pulse' : 'text-zinc-900 dark:text-white'
+                }`}>
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
 
-              {/* Pause / Play */}
+              <div className="flex items-center gap-1.5">
+                {/* Pause / Play */}
+                <button
+                  type="button"
+                  onClick={handleToggleTimer}
+                  className="p-1.5 rounded-lg bg-white dark:bg-[#202024] hover:bg-orange-500/10 text-zinc-600 dark:text-zinc-400 hover:text-orange-500 transition-colors cursor-pointer"
+                  title={!timerActive ? 'Resume Timer' : 'Pause Timer'}
+                >
+                  {!timerActive ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-emerald-500">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                      <rect x="6" y="4" width="4" height="16" />
+                      <rect x="14" y="4" width="4" height="16" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Reset */}
+                <button
+                  type="button"
+                  onClick={handleResetTimer}
+                  className="p-1.5 rounded-lg bg-white dark:bg-[#202024] hover:bg-orange-500/10 text-zinc-600 dark:text-zinc-400 hover:text-orange-500 transition-colors cursor-pointer"
+                  title="Reset Timer"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* 5. Action Buttons: Submit Exam & End Exam */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handleToggleTimer}
-                className="p-2 rounded-xl bg-white dark:bg-[#202024] hover:bg-orange-500/10 text-zinc-600 dark:text-zinc-400 hover:text-orange-500 transition-colors cursor-pointer"
-                title={!timerActive ? 'Resume Timer' : 'Pause Timer'}
-              >
-                {!timerActive ? (
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-emerald-500">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                    <rect x="6" y="4" width="4" height="16" />
-                    <rect x="14" y="4" width="4" height="16" />
-                  </svg>
-                )}
-              </button>
-
-              {/* Reset */}
-              <button
-                type="button"
-                onClick={handleResetTimer}
-                className="p-2 rounded-xl bg-white dark:bg-[#202024] hover:bg-orange-500/10 text-zinc-600 dark:text-zinc-400 hover:text-orange-500 transition-colors cursor-pointer"
-                title="Reset Timer"
+                onClick={onCompleteExam}
+                className="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
-                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
+                <span>Submit Exam</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onExitExam}
+                className="py-2.5 px-3 rounded-xl bg-white dark:bg-[#18181c] border border-zinc-200/60 dark:border-white/[0.08] hover:bg-red-500/10 text-zinc-700 dark:text-zinc-300 hover:text-red-500 dark:hover:text-red-400 font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span>End Exam</span>
               </button>
             </div>
-          </div>
-
-          {/* 5. Controls / Submit Exam & Exit Exam */}
-          <div className="space-y-2 pt-1">
-            <button
-              type="button"
-              onClick={onCompleteExam}
-              className="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span>Submit Exam</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onExitExam}
-              className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-[#18181c] hover:bg-red-500/10 dark:hover:bg-red-500/10 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 font-bold text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-              <span>Exit Exam</span>
-            </button>
           </div>
         </aside>
 
@@ -421,14 +455,14 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                 key={idx}
                 id={`exam-question-${idx}`}
                 ref={el => (questionRefs.current[idx] = el)}
-                className="p-6 md:p-8 rounded-3xl bg-zinc-100/70 dark:bg-[#131316] shadow-sm space-y-6 scroll-mt-6 transition-all"
+                className="p-5 sm:p-6 rounded-2xl bg-zinc-100/60 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-4 scroll-mt-6 transition-all"
               >
                 
                 {/* Question Header Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                    <h3 className="text-base font-black text-zinc-900 dark:text-white tracking-tight">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-200/40 dark:border-white/[0.04]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-orange-500" />
+                    <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">
                       Question {idx + 1}
                     </h3>
                   </div>
@@ -438,7 +472,7 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                     <button
                       type="button"
                       onClick={() => toggleSolution(idx)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                         isSolutionVisible
                           ? 'bg-emerald-500/10 text-emerald-500'
                           : 'bg-white dark:bg-[#202024] hover:bg-zinc-200 dark:hover:bg-[#28282e] text-zinc-600 dark:text-zinc-300'
@@ -448,18 +482,20 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                         <circle cx="12" cy="12" r="10" />
                         <polygon points="12 8 8 12 12 16 12 8" />
                       </svg>
-                      <span>View Solutions ({isSolutionVisible ? '1' : '0'})</span>
+                      <span>{isSolutionVisible ? 'Hide Solution' : 'View Solution'}</span>
                     </button>
 
                     {/* Marks & Type Badge */}
-                    <span className="text-[11px] font-medium text-zinc-400 bg-white dark:bg-[#1a1a1e] px-2.5 py-1 rounded-lg">
-                      Total Mark : <strong className="text-zinc-700 dark:text-zinc-200">{questionMarks}.00</strong> | Type : <strong className="text-orange-500 uppercase">{questionTypeLabel}</strong>
+                    <span className="text-[11px] font-medium text-zinc-400 bg-white dark:bg-[#1a1a1e] px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-zinc-200/50 dark:border-white/[0.04]">
+                      <span>{questionMarks}.00 Marks</span>
+                      <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                      <span className="text-orange-500 font-semibold uppercase">{questionTypeLabel}</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Question Description Body */}
-                <div className="text-sm md:text-base font-medium text-zinc-800 dark:text-zinc-200 leading-relaxed space-y-3">
+                <div className="text-sm md:text-[15px] font-normal text-zinc-800 dark:text-zinc-200 leading-relaxed space-y-2">
                   {parseText(q.question)}
                 </div>
 
@@ -469,50 +505,46 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                 
                 {/* 1. MCQ Radio Options */}
                 {!isSubjective && !isCoding && q.options && q.options.length > 0 && (
-                  <div className="space-y-2.5 pt-2">
-                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
-                      Options :
+                  <div className="space-y-2 pt-1">
+                    <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 tracking-wide uppercase block">
+                      Options
                     </span>
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {q.options.map((opt, optIdx) => {
                         const isSelected = userAnswers[idx] === optIdx;
                         const isCorrectAnswer = optIdx === q.correctAnswer;
                         const showFeedback = isSolutionVisible;
 
-                        let cardStyle = "bg-white dark:bg-[#1c1c20] hover:bg-zinc-200/70 dark:hover:bg-[#25252a] text-zinc-800 dark:text-zinc-200";
+                        let rowStyle = "border-zinc-200/60 dark:border-white/[0.06] bg-white/50 dark:bg-white/[0.02] hover:bg-zinc-200/50 dark:hover:bg-white/[0.05] text-zinc-800 dark:text-zinc-200";
                         if (isSelected && !showFeedback) {
-                          cardStyle = "bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/40";
+                          rowStyle = "border-orange-500/40 bg-orange-500/[0.08] dark:bg-orange-500/[0.12] text-orange-600 dark:text-orange-400 font-medium";
                         } else if (showFeedback) {
-                          if (isCorrectAnswer) cardStyle = "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/40";
-                          else if (isSelected && !isCorrectAnswer) cardStyle = "bg-red-500/10 text-red-400 ring-1 ring-red-500/40";
-                          else cardStyle = "bg-white/60 dark:bg-[#18181c]/60 text-zinc-500";
+                          if (isCorrectAnswer) rowStyle = "border-emerald-500/40 bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] text-emerald-600 dark:text-emerald-400 font-medium";
+                          else if (isSelected && !isCorrectAnswer) rowStyle = "border-red-500/40 bg-red-500/[0.08] dark:bg-red-500/[0.12] text-red-600 dark:text-red-400 font-medium";
+                          else rowStyle = "border-transparent bg-transparent opacity-40 text-zinc-400";
                         }
 
                         return (
                           <div
                             key={optIdx}
                             onClick={() => handleSelectOption(idx, optIdx)}
-                            className={`p-3.5 rounded-2xl transition-all cursor-pointer flex items-center gap-3.5 group ${cardStyle}`}
+                            className={`py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl border transition-all cursor-pointer flex items-center gap-3 group ${rowStyle}`}
                           >
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                            <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
                               showFeedback && isCorrectAnswer
-                                ? 'border-emerald-500'
+                                ? 'border-2 border-emerald-500 bg-emerald-500 text-white'
                                 : showFeedback && isSelected && !isCorrectAnswer
-                                ? 'border-red-500'
+                                ? 'border-2 border-red-500 bg-red-500 text-white'
                                 : isSelected
-                                ? 'border-orange-500'
-                                : 'border-zinc-400 dark:border-zinc-600 group-hover:border-orange-400'
+                                ? 'border-2 border-orange-500 bg-orange-500 text-white'
+                                : 'border border-zinc-300 dark:border-zinc-600 group-hover:border-zinc-400 dark:group-hover:border-zinc-500 bg-transparent'
                             }`}>
-                              {showFeedback && isCorrectAnswer ? (
-                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                              ) : showFeedback && isSelected && !isCorrectAnswer ? (
-                                <div className="w-2 h-2 rounded-full bg-red-500" />
-                              ) : isSelected ? (
-                                <div className="w-2 h-2 rounded-full bg-orange-500" />
-                              ) : null}
+                              {(isSelected || (showFeedback && isCorrectAnswer)) && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                              )}
                             </div>
 
-                            <span className="text-xs md:text-sm font-medium leading-normal flex-1">
+                            <span className="text-xs sm:text-sm font-medium leading-relaxed flex-1">
                               {parseText(opt)}
                             </span>
                           </div>
@@ -599,7 +631,7 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                 )}
 
                 {/* Question Footer Action Bar */}
-                <div className="flex items-center justify-between pt-3 text-xs text-zinc-400 flex-wrap gap-2">
+                <div className="flex items-center justify-between pt-3 border-t border-zinc-200/40 dark:border-white/[0.04] text-xs text-zinc-400 flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"

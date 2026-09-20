@@ -1415,6 +1415,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
     const correctCount = Object.entries(userAnswers).reduce((acc, [idx, ans]) => {
       const question = quizQuestions[parseInt(idx)];
+      if (!question) return acc;
       if (question.type === 'subjective') return acc;
       if (question.type === 'coding') {
         return (ans && typeof ans === 'object' && (ans as any).passed) ? acc + 1 : acc;
@@ -1960,8 +1961,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   };
 
   const score = useMemo(() => {
+    if (!quizQuestions || quizQuestions.length === 0) return 0;
     return Object.entries(userAnswers).reduce((acc, [idx, ans]) => {
       const question = quizQuestions[parseInt(idx)];
+      if (!question) return acc;
       if (question.type === 'subjective') return acc;
 
       if (question.type === 'coding') {
@@ -1978,9 +1981,10 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   }, [userAnswers, quizQuestions, negativeMarking]);
 
   const unitAnalysis = useMemo(() => {
-    if (!quizCompleted) return [];
+    if (!quizCompleted || !quizQuestions || quizQuestions.length === 0) return [];
     const stats: Record<number, { correct: number, total: number, subjective: number }> = {};
     quizQuestions.forEach((q, idx) => {
+      if (!q) return;
       if (!stats[q.unit]) stats[q.unit] = { correct: 0, total: 0, subjective: 0 };
       if (q.type === 'subjective') {
         stats[q.unit].subjective++;
@@ -2047,6 +2051,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           onCompleteExam={() => setQuizCompleted(true)}
           onExitExam={() => {
             setQuizQuestions([]);
+            setUserAnswers({});
+            setVisitedQuestions(new Set());
+            setMarkedForReview(new Set());
             setQuizCompleted(false);
             setReviewMode(false);
             setActiveExamPaper(null);
