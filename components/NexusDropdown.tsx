@@ -53,7 +53,7 @@ const NexusDropdown: React.FC<NexusDropdownProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`h-9 inline-flex items-center justify-between gap-2.5 px-3.5 bg-zinc-100 dark:bg-[#18181b] border border-zinc-200/40 dark:border-white/[0.04] rounded-xl text-xs font-semibold text-zinc-900 dark:text-white cursor-pointer select-none transition-all active:scale-[0.98] outline-none hover:bg-zinc-200/60 dark:hover:bg-[#202024] whitespace-nowrap ${isExplicitWidth ? 'w-auto' : 'w-full'} ${buttonClassName}`}
+        className={`h-9 inline-flex items-center justify-between gap-2.5 px-4 bg-zinc-100 dark:bg-[#18181b] border border-zinc-200/40 dark:border-white/[0.04] rounded-full text-xs font-semibold text-zinc-900 dark:text-white cursor-pointer select-none transition-all active:scale-[0.98] outline-none hover:bg-zinc-200/60 dark:hover:bg-[#202024] whitespace-nowrap ${isExplicitWidth ? 'w-auto' : 'w-full'} ${buttonClassName}`}
       >
         <div className="flex items-center gap-2 min-w-0">
           {icon && <span className="text-zinc-500 dark:text-zinc-400 shrink-0">{icon}</span>}

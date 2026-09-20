@@ -25,15 +25,19 @@ interface HistoryItem {
 }
 
 const SubjectSkeleton = () => (
-  <div className="glass-panel p-5 md:p-8 rounded-[32px] md:rounded-[40px] border border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0a0a0a]/40 animate-pulse min-h-[160px]">
-    <div className="flex flex-col items-center mb-6">
-      <div className="h-10 w-24 bg-zinc-200 dark:bg-white/5 rounded-[22px] mb-3 shimmer" />
-      <div className="h-6 w-32 bg-zinc-200 dark:bg-white/5 rounded shimmer" />
+  <div className="p-5 rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] shadow-xs animate-pulse min-h-[160px] space-y-4">
+    <div className="flex justify-between items-start">
+      <div className="space-y-1.5 flex-1">
+        <div className="h-5 w-28 bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
+        <div className="h-4 w-16 bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
+      </div>
+      <div className="h-8 w-16 bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
     </div>
-    <div className="h-3 w-full bg-zinc-200 dark:bg-white/5 rounded-full mb-8 shimmer" />
-    <div className="grid grid-cols-2 gap-4">
-      <div className="h-12 bg-zinc-200 dark:bg-white/5 rounded-[22px] shimmer" />
-      <div className="h-12 bg-zinc-200 dark:bg-white/5 rounded-[22px] shimmer" />
+    <div className="h-1.5 w-full bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
+    <div className="grid grid-cols-3 gap-2">
+      <div className="h-8.5 bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
+      <div className="h-8.5 bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
+      <div className="h-8.5 bg-zinc-200 dark:bg-white/5 rounded-full shimmer" />
     </div>
   </div>
 );
@@ -41,9 +45,10 @@ const SubjectSkeleton = () => (
 interface Props {
   userProfile?: UserProfile | null;
   hideHeader?: boolean;
+  onBack?: () => void;
 }
 
-const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
+const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader, onBack }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
@@ -372,32 +377,47 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in pb-24 px-2 md:px-0">
-      <header className="flex flex-row items-center justify-between gap-4 mb-6 w-full text-left">
+      <header className="flex flex-row items-center justify-between gap-4 pb-2 w-full text-left">
         {!hideHeader && (
-          <div>
-            <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">
-              Attendance <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Tracker</span>
-            </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs mt-1">
-              Log and monitor your daily course attendance
-            </p>
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/60 dark:hover:bg-white/10 border border-zinc-200/30 dark:border-white/[0.03] transition-all cursor-pointer shrink-0 active:scale-95"
+                title="Back to Hub"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+              </button>
+            )}
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-tight">
+                Attendance <span className="text-orange-500">Tracker</span>
+              </h2>
+              <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
+                Log and monitor your daily course attendance
+              </p>
+            </div>
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           {subjects.length > 0 && (
             <div className="relative">
               {wipingAll ? (
-                <div className="flex items-center bg-red-500 rounded-full overflow-hidden animate-fade-in">
+                <div className="flex items-center bg-red-500/10 border border-red-500/20 rounded-full overflow-hidden animate-fade-in h-9 p-0.5">
                   <button
                     onClick={() => setWipingAll(false)}
-                    className="px-4 py-2 text-xs font-bold text-white/80 hover:text-white border-none bg-transparent cursor-pointer"
+                    className="px-3.5 h-full text-xs font-semibold text-zinc-400 hover:text-white transition-colors border-none bg-transparent cursor-pointer rounded-full"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={executeClearAll}
-                    className="px-4 py-2 bg-white text-red-600 font-black text-xs uppercase tracking-wider hover:bg-zinc-50 border-none cursor-pointer"
+                    className="px-3.5 h-full bg-red-500 text-white font-semibold text-xs transition-colors border-none cursor-pointer rounded-full shadow-xs active:scale-95"
                   >
                     Clear All?
                   </button>
@@ -405,9 +425,12 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); setWipingAll(true); }}
-                  className="flex items-center space-x-1.5 px-4 py-2.5 bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/70 dark:hover:bg-[#161618] rounded-full text-xs font-bold text-red-500 transition-all border-none cursor-pointer shadow-none"
+                  className="h-9 px-4 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 text-red-500 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-xs"
+                  title="Clear all subjects"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                    <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
                   <span>Clear All</span>
                 </button>
               )}
@@ -416,22 +439,26 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all border-none cursor-pointer shadow-none ${showArchived
-                ? 'bg-orange-500 text-white'
-                : 'bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/70 dark:hover:bg-[#161618] text-zinc-600 dark:text-zinc-400'
-              }`}
+            className={`h-9 px-4 rounded-full text-xs font-semibold transition-all border flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs ${
+              showArchived
+                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-transparent shadow-xs'
+                : 'bg-zinc-100 hover:bg-zinc-200/80 text-zinc-900 border-zinc-200/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] dark:text-white dark:border-white/[0.08]'
+            }`}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
             <span>{showArchived ? 'Active' : 'Archived'}</span>
           </button>
         </div>
       </header>
 
-      <div className="p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] bg-zinc-100 dark:bg-[#111113] border-none shadow-none relative z-0">
-        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-5 items-end">
-          <div className="col-span-2 md:col-span-3">
-            <label className="block text-[10px] md:text-xs font-bold text-zinc-400 mb-1 ml-1 uppercase tracking-wider">
-              Subject Name <span className="text-brand-secondary">*</span>
+      {/* Input Card */}
+      <div className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] p-4 sm:p-5 shadow-xs">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 items-end">
+          <div className="col-span-2 md:col-span-4">
+            <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">
+              Subject Name <span className="text-orange-500">*</span>
             </label>
             <input
               type="text"
@@ -441,77 +468,99 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                 setNewSub({ ...newSub, name: e.target.value });
                 if (showValidation) setShowValidation(false);
               }}
-              className={`w-full bg-zinc-200/60 dark:bg-[#18181b] border-none rounded-2xl px-5 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none transition-all font-bold text-xs md:text-sm shadow-none ${showValidation && !newSub.name.trim()
-                ? 'ring-2 ring-brand-secondary'
-                : 'focus:ring-2 focus:ring-orange-500'
-                }`}
+              className={`w-full h-9 bg-zinc-100/70 dark:bg-white/[0.04] border rounded-full px-4 text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all ${
+                showValidation && !newSub.name.trim()
+                  ? 'border-red-500/50'
+                  : 'border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30'
+              }`}
             />
           </div>
+
           <div className="col-span-2 md:col-span-3">
-            <label className="block text-[10px] md:text-xs font-bold text-zinc-400 mb-1 ml-1 uppercase tracking-wider">Present / Total</label>
-            <div className="flex items-center space-x-2">
+            <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">
+              Present / Total
+            </label>
+            <div className="flex items-center gap-1.5">
               <input
-                type="number" placeholder="P" value={newSub.present}
+                type="number"
+                placeholder="P"
+                value={newSub.present}
                 onChange={(e) => setNewSub({ ...newSub, present: e.target.value })}
-                className="w-full bg-zinc-200/60 dark:bg-[#18181b] border-none rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all text-xs md:text-sm text-center font-bold shadow-none"
+                className="w-full h-9 bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 rounded-full px-3 text-center text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all"
               />
-              <span className="text-zinc-400 font-black">/</span>
+              <span className="text-zinc-400 text-xs font-bold">/</span>
               <input
-                type="number" placeholder="T" value={newSub.total}
+                type="number"
+                placeholder="T"
+                value={newSub.total}
                 onChange={(e) => setNewSub({ ...newSub, total: e.target.value })}
-                className="w-full bg-zinc-200/60 dark:bg-[#18181b] border-none rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all text-xs md:text-sm text-center font-bold shadow-none"
+                className="w-full h-9 bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 rounded-full px-3 text-center text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all"
               />
             </div>
           </div>
+
           <div className="col-span-1 md:col-span-1">
-            <label className="block text-[10px] md:text-xs font-bold text-zinc-400 mb-1 ml-1 truncate uppercase tracking-wider">DL</label>
+            <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1 truncate">
+              DL
+            </label>
             <input
-              type="number" placeholder="0" value={newSub.dutyLeaves}
+              type="number"
+              placeholder="0"
+              value={newSub.dutyLeaves}
               onChange={(e) => setNewSub({ ...newSub, dutyLeaves: e.target.value })}
-              className="w-full bg-zinc-200/60 dark:bg-[#18181b] border-none rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all text-xs md:text-sm text-center font-bold shadow-none"
+              className="w-full h-9 bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 rounded-full px-2 text-center text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all"
             />
           </div>
+
           <div className="col-span-1 md:col-span-1">
-            <label className="block text-[10px] md:text-xs font-bold text-zinc-400 mb-1 ml-1 truncate uppercase tracking-wider">Goal</label>
+            <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1 truncate">
+              Goal
+            </label>
             <input
-              type="number" placeholder="75" value={newSub.goal}
+              type="number"
+              placeholder="75"
+              value={newSub.goal}
               onChange={(e) => setNewSub({ ...newSub, goal: e.target.value })}
-              className="w-full bg-zinc-200/60 dark:bg-[#18181b] border-none rounded-2xl px-3 py-3.5 md:py-4 text-zinc-800 dark:text-white outline-none focus:ring-2 focus:ring-orange-500 transition-all text-xs md:text-sm text-center font-bold shadow-none"
+              className="w-full h-9 bg-zinc-100/70 dark:bg-white/[0.04] border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 rounded-full px-2 text-center text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all"
             />
           </div>
-          <div className="col-span-2 md:col-span-4 flex items-end gap-2">
+
+          <div className="col-span-2 md:col-span-3 flex items-center gap-2">
             <button
               onClick={addSubject}
-              className="flex-1 w-full bg-orange-500 hover:bg-orange-600 text-white h-12 md:h-14 rounded-full font-bold text-xs md:text-sm tracking-tight transition-all border-none shadow-none active:scale-95 flex items-center justify-center whitespace-nowrap cursor-pointer"
+              className="flex-1 h-9 px-5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 rounded-full text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center justify-center cursor-pointer"
             >
               Track
             </button>
-
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="flex-1 w-full h-12 md:h-14 rounded-full transition-all flex items-center justify-center gap-2 border-none bg-zinc-200/60 dark:bg-[#18181b] text-orange-500 hover:bg-orange-500 hover:text-white active:scale-95 whitespace-nowrap shadow-none cursor-pointer"
+              className="h-9 px-4 bg-zinc-100 hover:bg-zinc-200/80 text-zinc-900 border border-zinc-200/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] dark:text-white dark:border-white/[0.08] rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-xs"
+              title="Upload Timetable / Attendance Sheet"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-              <span className="text-xs md:text-sm font-bold">Upload</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span>Upload</span>
             </button>
           </div>
         </div>
       </div>
 
       {isInitializing ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-          <SubjectSkeleton />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <SubjectSkeleton />
           <SubjectSkeleton />
           <SubjectSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 md:gap-6 relative z-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-0">
           {filteredSubjects.map((sub) => {
             const { percentage, needed, skippable, goal } = calculateStats(sub);
             const isBelowGoal = percentage < goal;
-            const accentColor = isBelowGoal ? 'text-brand-secondary' : 'text-emerald-500';
-            const accentBg = isBelowGoal ? 'bg-brand-secondary/10' : 'bg-emerald-500/10';
+            const accentColor = isBelowGoal ? 'text-orange-500' : 'text-emerald-500';
+            const accentBg = isBelowGoal ? 'bg-orange-500/10' : 'bg-emerald-500/10';
+            const accentBorder = isBelowGoal ? 'border-orange-500/20' : 'border-emerald-500/20';
             const hasHistory = history.some(h => h.id === sub.id);
             const isDeleting = deletingId === sub.id;
 
@@ -519,138 +568,125 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
               <div
                 key={sub.id}
                 className={`
-                  p-5 sm:p-6 md:p-7 rounded-[32px] md:rounded-[36px] border-none transition-all duration-300 group relative overflow-hidden flex flex-col
-                  bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] shadow-none
-                  ${isDeleting ? 'ring-2 ring-brand-secondary scale-[0.98]' : ''}
+                  p-5 rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] shadow-xs flex flex-col justify-between transition-all hover:border-zinc-300 dark:hover:border-white/10
+                  ${isDeleting ? 'ring-2 ring-red-500/50 scale-[0.99]' : ''}
                 `}
               >
                 {/* Top Section: Name and Percentage */}
-                <div className="flex justify-between items-start mb-2.5 min-w-0">
-                  <div className="space-y-0.5 min-w-0 flex-1">
-                    <h3 className="text-[13px] sm:text-lg md:text-xl font-bold text-zinc-800 dark:text-white tracking-tight break-words">
+                <div className="flex justify-between items-start mb-3 min-w-0">
+                  <div className="space-y-1 min-w-0 flex-1 pr-2">
+                    <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white tracking-tight truncate">
                       {sub.name}
                     </h3>
                     <div className="flex items-center gap-1">
-                      <span className="flex items-center gap-1 bg-zinc-200/60 dark:bg-[#18181b] px-2.5 py-1 rounded-full text-[9px] sm:text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                        {sub.present}{sub.dutyLeaves ? `+${sub.dutyLeaves}` : ''}/{sub.total}
+                      <span className="bg-zinc-100 dark:bg-white/[0.06] border border-zinc-200/40 dark:border-white/[0.06] px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">
+                        {sub.present}{sub.dutyLeaves ? `+${sub.dutyLeaves}` : ''} / {sub.total}
                       </span>
                     </div>
                   </div>
 
-                  <div className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl ${accentBg} border-none transition-all`}>
-                    <span className={`${accentColor} text-[13px] sm:text-lg md:text-xl font-black tracking-tight`}>
-                      {percentage.toFixed(1)}
-                      <span className="text-[9px] sm:text-xs opacity-60 ml-0.5 font-medium">%</span>
+                  <div className={`px-3 py-1 rounded-full ${accentBg} border ${accentBorder} shrink-0`}>
+                    <span className={`${accentColor} text-xs sm:text-sm font-bold tracking-tight tabular-nums`}>
+                      {percentage.toFixed(1)}%
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Bar Section */}
                 <div className="mb-4">
-                  <div className="flex justify-between items-center mb-1 px-0.5">
-                    <p className="text-[9px] sm:text-xs font-semibold text-zinc-400">Progress</p>
-                    <p className="text-[9px] sm:text-xs font-semibold text-brand-primary">Goal: {sub.goal}%</p>
+                  <div className="flex justify-between items-center mb-1 text-[10px] font-medium text-zinc-400">
+                    <span>Progress</span>
+                    <span>Goal: {sub.goal}%</span>
                   </div>
-                  <div className="h-1.5 bg-zinc-200/60 dark:bg-white/5 rounded-full overflow-hidden relative">
-                    {/* Goal Marker */}
+                  <div className="h-1.5 bg-zinc-100 dark:bg-white/[0.06] rounded-full overflow-hidden relative">
                     <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-brand-primary/30 z-20 backdrop-blur-md"
-                      style={{ left: `${goal}%` }}
+                      className={`h-full rounded-full transition-all duration-500 ease-out ${
+                        !isBelowGoal ? 'bg-emerald-500' : 'bg-orange-500'
+                      }`}
+                      style={{ width: `${Math.min(100, percentage)}%` }}
                     />
-
-                    <div
-                      className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${!isBelowGoal
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                        : 'bg-brand-gradient opacity-80'
-                        }`}
-                      style={{ width: `${percentage}%` }}
-                    >
-                      <div className="absolute inset-0 bg-white/20 animate-shimmer -skew-x-12 translate-x-[-100%]" />
-                    </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
                 {!showArchived && (
-                  <div className="grid grid-cols-3 gap-1.5 mb-3">
+                  <div className="grid grid-cols-3 gap-2 mb-4">
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'present', e)}
-                      className="group/btn h-8 sm:h-9 bg-white dark:bg-white text-black rounded-full font-bold text-[10px] sm:text-xs hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center justify-center gap-1 border-none px-1 shadow-none cursor-pointer"
+                      className="h-8.5 px-3 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-bold text-xs shadow-xs hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 text-emerald-600"><path d="M20 6L9 17l-5-5" /></svg>
-                      <span className="hidden xs:inline">Present</span>
-                      <span className="xs:hidden">P</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3 text-emerald-500"><path d="M20 6L9 17l-5-5" /></svg>
+                      <span>Present</span>
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'duty', e)}
-                      className="group/btn h-8 sm:h-9 bg-orange-500/10 text-orange-500 rounded-full font-bold text-[10px] sm:text-xs hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center justify-center gap-1 border-none px-1 shadow-none cursor-pointer"
+                      className="h-8.5 px-3 rounded-full bg-orange-500/10 hover:bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/20 font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer shadow-xs"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                      <span className="hidden xs:inline">DL</span>
-                      <span className="xs:hidden">DL</span>
+                      <span>+DL</span>
                     </button>
                     <button
                       onClick={(e) => updateAttendance(sub.id, 'absent', e)}
-                      className="group/btn h-8 sm:h-9 bg-zinc-200/60 dark:bg-[#18181b] text-zinc-600 dark:text-zinc-400 rounded-full font-bold text-[10px] sm:text-xs hover:bg-zinc-300 dark:hover:bg-[#222226] hover:scale-[1.03] active:scale-[0.97] transition-all border-none flex items-center justify-center gap-1 px-1 shadow-none cursor-pointer"
+                      className="h-8.5 px-3 rounded-full bg-zinc-100 dark:bg-white/[0.06] hover:bg-zinc-200/70 dark:hover:bg-white/[0.1] border border-zinc-200/60 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400 font-semibold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer shadow-xs"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-2.5 h-2.5 opacity-50"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                      <span className="hidden xs:inline">Absent</span>
-                      <span className="xs:hidden">A</span>
+                      <span>Absent</span>
                     </button>
                   </div>
                 )}
 
                 {/* Footer Analysis */}
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-white/5">
+                <div className="mt-auto flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-white/[0.04]">
                   <div className={`
-                    px-3 py-1 rounded-full text-[9px] sm:text-xs font-bold flex items-center gap-1.5
-                    ${isBelowGoal ? 'bg-brand-secondary/5 text-brand-secondary' : 'bg-emerald-500/5 text-emerald-500'}
+                    px-3 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1.5 border
+                    ${isBelowGoal ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'}
                   `}>
-                    <div className={`w-1 h-1 rounded-full ${isBelowGoal ? 'bg-brand-secondary' : 'bg-emerald-500'} animate-pulse`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${isBelowGoal ? 'bg-orange-500' : 'bg-emerald-500'}`} />
                     {isBelowGoal ? (
-                      <span>{needed >= 999 ? '∞' : needed} more</span>
+                      <span>{needed >= 999 ? '∞' : needed} more needed</span>
                     ) : (
-                      <span>{skippable >= 999 ? '∞' : skippable} skips</span>
+                      <span>{skippable >= 999 ? '∞' : skippable} safe skips</span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-1">
                     {isDeleting ? (
-                      <div className="flex items-center gap-1 animate-fade-in">
+                      <div className="flex items-center gap-1.5 animate-fade-in">
                         <button
                           onClick={(e) => { e.stopPropagation(); setDeletingId(null); }}
-                          className="px-2.5 py-1.5 bg-zinc-100 dark:bg-white/5 text-[11px] sm:text-xs font-medium text-zinc-400 rounded-full hover:text-white transition-colors border-none cursor-pointer"
+                          className="h-6 px-2.5 bg-zinc-100 dark:bg-white/5 text-[10px] font-medium text-zinc-400 rounded-full hover:text-white transition-colors cursor-pointer active:scale-95"
                         >
-                          No
+                          Cancel
                         </button>
                         <button
                           onClick={executeDelete}
-                          className="px-2.5 py-1.5 bg-brand-secondary text-[11px] sm:text-xs font-medium text-white rounded-full shadow-md hover:opacity-90 transition-colors border-none cursor-pointer"
+                          className="h-6 px-2.5 bg-red-500 text-[10px] font-semibold text-white rounded-full hover:bg-red-600 transition-colors cursor-pointer active:scale-95"
                         >
-                          Del
+                          Delete
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center bg-zinc-200/60 dark:bg-[#18181b] border-none rounded-full p-1">
+                      <div className="flex items-center gap-1">
                         {hasHistory && (
                           <button
                             onClick={(e) => undoSubjectLastAction(sub.id, e)}
-                            className="p-1.5 text-zinc-400 hover:text-brand-primary transition-all border-none bg-transparent cursor-pointer"
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-all cursor-pointer active:scale-95"
+                            title="Undo"
                           >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 10h10a5 5 0 0 1 0 10H11" /><polyline points="8 5 3 10 8 15" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M3 10h10a5 5 0 0 1 0 10H11" /><polyline points="8 5 3 10 8 15" /></svg>
                           </button>
                         )}
                         <button
                           onClick={(e) => handleEdit(sub, e)}
-                          className="p-1.5 text-zinc-400 hover:text-brand-primary transition-all border-none bg-transparent cursor-pointer"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/10 transition-all cursor-pointer active:scale-95"
+                          title="Edit"
                         >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                         </button>
                         <button
                           onClick={(e) => confirmDelete(sub.id, e)}
-                          className="p-1.5 text-zinc-400 hover:text-brand-secondary transition-all border-none bg-transparent cursor-pointer"
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all cursor-pointer active:scale-95"
+                          title="Delete"
                         >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                         </button>
                       </div>
                     )}
@@ -663,10 +699,18 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
       )}
 
       {!isInitializing && filteredSubjects.length === 0 && (
-        <div className="text-center py-20 md:py-24 bg-zinc-50 dark:bg-white/5 rounded-[32px] md:rounded-[48px] border-4 border-dashed border-zinc-200 dark:border-white/5">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 text-zinc-200 dark:text-zinc-800"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
-          <p className="font-bold text-zinc-400 tracking-tight text-[11px] sm:text-xs">
-            {showArchived ? 'Archive is empty' : 'No subjects added yet.'}
+        <div className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] py-16 px-4 text-center shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-white/[0.04] flex items-center justify-center mx-auto mb-3 text-zinc-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
+          </div>
+          <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
+            {showArchived ? 'Archive is empty' : 'No subjects added yet'}
+          </p>
+          <p className="text-[11px] text-zinc-400 font-medium">
+            {showArchived ? 'Archived subjects will appear here.' : 'Add a subject above or upload a screenshot to track your attendance.'}
           </p>
         </div>
       )}
@@ -677,80 +721,85 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
         >
-          <div ref={editModalRef} className={`bg-white dark:bg-[#0a0a0a] rounded-[32px] md:rounded-[40px] w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-zinc-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
-            <div className="bg-black p-6 md:p-7 text-white relative rounded-t-[32px] md:rounded-t-[40px] flex-shrink-0">
-              <button onClick={handleClose} className="absolute top-5 right-5 md:top-6 md:right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          <div ref={editModalRef} className={`bg-white dark:bg-[#151518] rounded-3xl w-full max-w-sm shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-zinc-200/50 dark:border-white/[0.08] relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
+            <div className="p-5 sm:p-6 border-b border-zinc-100 dark:border-white/[0.06] relative flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">Modify Entry</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium mt-0.5">Update subject details</p>
+              </div>
+              <button
+                onClick={handleClose}
+                className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
-              <h3 className="text-lg md:text-xl font-bold tracking-tight leading-none mb-1">Modify Entry</h3>
-              <p className="text-white/60 text-[11px] sm:text-xs font-medium">Update subject details</p>
             </div>
 
-            <div className="p-6 md:p-7 space-y-4 md:space-y-5">
+            <div className="p-5 sm:p-6 space-y-4">
               <div>
-                <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Subject Name</label>
+                <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">Subject Name</label>
                 <input
                   type="text"
                   value={editingSubject.name}
                   onChange={(e) => setEditingSubject({ ...editingSubject, name: e.target.value })}
-                  className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white"
+                  className="w-full h-10 bg-zinc-100/70 dark:bg-white/[0.04] px-4 rounded-full text-xs font-semibold outline-none border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 text-zinc-900 dark:text-white"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Present</label>
+                  <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">Present</label>
                   <input
                     type="number"
                     value={editingSubject.present}
                     onChange={(e) => setEditingSubject({ ...editingSubject, present: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
+                    className="w-full h-10 bg-zinc-100/70 dark:bg-white/[0.04] px-3 rounded-full text-xs font-semibold outline-none border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 text-zinc-900 dark:text-white text-center"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Total</label>
+                  <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">Total</label>
                   <input
                     type="number"
                     value={editingSubject.total}
                     onChange={(e) => setEditingSubject({ ...editingSubject, total: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
+                    className="w-full h-10 bg-zinc-100/70 dark:bg-white/[0.04] px-3 rounded-full text-xs font-semibold outline-none border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 text-zinc-900 dark:text-white text-center"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Duty Leaves</label>
+                  <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">Duty Leaves</label>
                   <input
                     type="number"
                     value={editingSubject.dutyLeaves || 0}
                     onChange={(e) => setEditingSubject({ ...editingSubject, dutyLeaves: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
+                    className="w-full h-10 bg-zinc-100/70 dark:bg-white/[0.04] px-3 rounded-full text-xs font-semibold outline-none border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 text-zinc-900 dark:text-white text-center"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] sm:text-xs font-medium text-zinc-400 mb-2 ml-1">Target (%)</label>
+                  <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 ml-1">Target (%)</label>
                   <input
                     type="number"
                     value={editingSubject.goal}
                     onChange={(e) => setEditingSubject({ ...editingSubject, goal: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-zinc-100 dark:bg-[#0a0a0a] p-3.5 md:p-4 rounded-xl md:rounded-2xl text-sm font-bold outline-none border border-transparent focus:ring-2 focus:ring-brand-primary shadow-inner dark:text-white text-center"
+                    className="w-full h-10 bg-zinc-100/70 dark:bg-white/[0.04] px-3 rounded-full text-xs font-semibold outline-none border border-zinc-200/40 dark:border-white/[0.06] focus:border-zinc-400 dark:focus:border-white/30 text-zinc-900 dark:text-white text-center"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 md:gap-4 pt-2">
+              <div className="flex gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 py-3.5 md:py-4 text-[11px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent"
+                  className="flex-1 h-10 rounded-full text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.06] transition-colors border-none bg-transparent cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={saveEdit}
-                  className="flex-[2] bg-brand-primary text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-bold text-[11px] sm:text-xs tracking-wide shadow-xl active:scale-95 transition-all border-none"
+                  className="flex-[2] h-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 font-bold text-xs shadow-xs active:scale-95 transition-all border-none cursor-pointer"
                 >
                   Save Changes
                 </button>
@@ -766,31 +815,36 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
           style={{ backdropFilter: 'blur(30px) saturate(180%)', WebkitBackdropFilter: 'blur(30px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget && !isAiProcessing) setIsUploadModalOpen(false); }}
         >
-          <div className={`bg-white dark:bg-[#0a0a0a] rounded-[40px] w-full max-w-lg shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-zinc-200 dark:border-white/10 relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
-            <div className="bg-black p-7 text-white relative flex-shrink-0">
+          <div className={`bg-white dark:bg-[#151518] rounded-3xl w-full max-w-lg shadow-[0_32px_128px_rgba(0,0,0,0.8)] border border-zinc-200/50 dark:border-white/[0.08] relative overflow-hidden flex flex-col animate-slide-up ${isClosing ? 'closing' : ''}`}>
+            <div className="p-6 border-b border-zinc-100 dark:border-white/[0.06] relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">Smart Batch Upload</h3>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium mt-0.5">Extract attendance from screenshots instantly</p>
+                </div>
+              </div>
               {!isAiProcessing && (
-                <button onClick={() => setIsUploadModalOpen(false)} className="absolute top-6 right-6 p-2 text-white/50 hover:text-white transition-colors border-none bg-transparent">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <button
+                  onClick={() => setIsUploadModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center cursor-pointer border-none"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               )}
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 bg-brand-primary/20 rounded-xl">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-brand-primary"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                </div>
-                <h3 className="text-xl font-bold tracking-tight leading-none">Smart Batch Upload</h3>
-              </div>
-              <p className="text-white/60 text-xs font-medium ml-10">Extract attendance from multiple screenshots instantly</p>
             </div>
 
-            <div className="p-7 space-y-6">
+            <div className="p-6 space-y-5">
               {/* Dropzone */}
               <div
                 onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                 onDragLeave={() => setDragActive(false)}
                 onDrop={(e) => { e.preventDefault(); setDragActive(false); handleFiles(e.dataTransfer.files); }}
                 className={`
-                  relative border-2 border-dashed rounded-[32px] p-10 transition-all flex flex-col items-center justify-center text-center gap-5
-                  ${dragActive ? 'border-brand-primary bg-brand-primary/5 scale-[0.98]' : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-white/5'}
+                  relative border border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center text-center gap-3
+                  ${dragActive ? 'border-orange-500 bg-orange-500/5 scale-[0.99]' : 'border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/[0.02]'}
                   ${isAiProcessing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
@@ -803,24 +857,19 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   className="hidden"
                 />
 
-                <div className="relative">
-                  <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white dark:bg-[#0a0a0a] rounded-full border border-zinc-200 dark:border-white/10 flex items-center justify-center shadow-sm">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-brand-primary"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                  </div>
+                <div className="w-12 h-12 bg-zinc-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center text-zinc-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
                 </div>
 
-                <div className="space-y-1">
-                  <p className="text-base font-bold text-zinc-800 dark:text-white">Drag & Drop screenshots</p>
-                  <p className="text-xs text-zinc-400 font-medium">LPU portal attendance reports work best</p>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-zinc-800 dark:text-white">Drag & drop screenshots</p>
+                  <p className="text-[11px] text-zinc-400 font-medium">LPU portal attendance reports work best</p>
                 </div>
 
                 {!isAiProcessing && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="mt-2 px-6 py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-primary/20 hover:opacity-90 active:scale-95 transition-all border-none"
+                    className="mt-1 px-5 h-8.5 rounded-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 text-xs font-bold shadow-xs active:scale-95 transition-all border-none cursor-pointer"
                   >
                     Browse Files
                   </button>
@@ -829,19 +878,19 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
               {/* File List */}
               {selectedFiles.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <div className="flex justify-between items-center px-1">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2">
-                      <span className="w-1 h-1 bg-brand-primary rounded-full" />
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
                       Queue ({selectedFiles.length})
                     </p>
                     {selectedFiles.length > 0 && !isAiProcessing && (
-                      <button onClick={() => setSelectedFiles([])} className="text-[10px] font-bold text-brand-secondary hover:underline bg-transparent border-none p-0">Clear Queue</button>
+                      <button onClick={() => setSelectedFiles([])} className="text-[11px] font-semibold text-red-500 hover:underline bg-transparent border-none p-0 cursor-pointer">Clear Queue</button>
                     )}
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2.5 max-h-[160px] overflow-y-auto pr-1">
                     {selectedFiles.map((file, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-zinc-200 dark:border-white/10 shadow-sm">
+                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-zinc-200/60 dark:border-white/10 shadow-xs">
                         <img
                           src={URL.createObjectURL(file)}
                           className="w-full h-full object-cover"
@@ -850,19 +899,19 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                         {!isAiProcessing && (
                           <button
                             onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
-                            className="absolute top-1.5 right-1.5 bg-black/60 text-white p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity border-none backdrop-blur-md"
+                            className="absolute top-1 right-1 bg-black/70 text-white w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
                           >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                           </button>
                         )}
                         {processingIndex === idx && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
-                            <div className="w-7 h-7 border-3 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                            <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                           </div>
                         )}
                         {processingIndex > idx && (
                           <div className="absolute inset-0 bg-emerald-500/60 flex items-center justify-center backdrop-blur-[2px]">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-7 h-7 text-white"><path d="M20 6L9 17l-5-5" /></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-5 h-5 text-white"><path d="M20 6L9 17l-5-5" /></svg>
                           </div>
                         )}
                       </div>
@@ -873,21 +922,16 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
 
               {/* Progress and Submit */}
               {isAiProcessing ? (
-                <div className="space-y-4 pt-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex flex-col">
-                      <p className="text-xs font-bold text-brand-primary">Scanning Document {processingIndex + 1} of {selectedFiles.length}</p>
-                      <p className="text-[10px] text-zinc-400 font-medium">Please wait, performing local OCR...</p>
-                    </div>
-                    <p className="text-sm font-black text-brand-primary">{ocrProgress}%</p>
+                <div className="space-y-3 pt-1">
+                  <div className="flex justify-between items-center text-xs">
+                    <p className="font-semibold text-zinc-800 dark:text-white">Scanning {processingIndex + 1} of {selectedFiles.length}</p>
+                    <p className="font-bold text-orange-500">{ocrProgress}%</p>
                   </div>
-                  <div className="h-2.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-1.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-brand-primary transition-all duration-300 relative overflow-hidden"
+                      className="h-full bg-orange-500 rounded-full transition-all duration-300"
                       style={{ width: `${ocrProgress}%` }}
-                    >
-                      <div className="absolute inset-0 bg-white/20 animate-shimmer" />
-                    </div>
+                    />
                   </div>
                 </div>
               ) : (
@@ -895,12 +939,12 @@ const AttendanceTracker: React.FC<Props> = ({ userProfile, hideHeader }) => {
                   disabled={selectedFiles.length === 0}
                   onClick={processAllFiles}
                   className={`
-                    w-full py-4.5 rounded-[20px] md:rounded-[24px] font-bold text-sm tracking-wide transition-all shadow-xl active:scale-[0.98] border-none flex items-center justify-center gap-2
-                    ${selectedFiles.length > 0 ? 'bg-brand-primary text-white shadow-brand-primary/30' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed'}
+                    w-full h-11 rounded-full font-bold text-xs tracking-wide transition-all shadow-xs active:scale-95 border-none flex items-center justify-center gap-2 cursor-pointer
+                    ${selectedFiles.length > 0 ? 'bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed'}
                   `}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                  Process All Screenshots
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  <span>Process All Screenshots</span>
                 </button>
               )}
             </div>

@@ -334,7 +334,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
             </div>
           </div>
         </div>
-      ) : activeTab !== 'cgpa' ? (
+      ) : activeTab !== 'cgpa' && activeTab !== 'attendance' && activeTab !== 'placement' ? (
         <div className="max-w-5xl mx-auto px-4 sm:px-0">
           <div className="flex flex-col gap-4 mb-4">
             <button 
@@ -355,11 +355,12 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
 
       <div className="relative">
         <div className="transition-all duration-500 transform">
-          {activeTab === 'attendance' && <AttendanceTracker userProfile={userProfile} hideHeader={false} />}
+          {activeTab === 'attendance' && <AttendanceTracker userProfile={userProfile} onBack={() => navigate(prefix + '/tools')} hideHeader={false} />}
           {activeTab === 'cgpa' && <CGPACalculator userProfile={userProfile} onBack={() => navigate(prefix + '/tools')} />}
           {activeTab === 'placement' && (
             <PlacementPrefect 
               userProfile={userProfile} 
+              onBack={() => navigate(prefix + '/tools')}
               hideHeader={false} 
               reportIdOverride={new URLSearchParams(location.search).get('id') || undefined} 
             />
