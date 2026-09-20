@@ -82,10 +82,10 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#17171a] hover:border-zinc-300 dark:hover:border-zinc-700 text-left transition-all flex items-center justify-between gap-2 cursor-pointer border ${
+        className={`w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-white/[0.04] hover:border-zinc-300 dark:hover:border-white/20 text-left transition-all flex items-center justify-between gap-2 cursor-pointer border ${
           isOpen
-            ? 'border-brand-primary/50 ring-2 ring-brand-primary/10 shadow-sm'
-            : 'border-zinc-200/80 dark:border-zinc-800/80'
+            ? 'border-zinc-400 dark:border-white/30 ring-2 ring-black/5 dark:ring-white/10 shadow-xs'
+            : 'border-zinc-200/80 dark:border-white/[0.08]'
         }`}
       >
         <span className="text-xs font-medium text-zinc-900 dark:text-white truncate">
@@ -108,11 +108,11 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.12 }}
-            className="absolute left-0 right-0 top-full mt-1.5 z-50 p-1.5 rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/90 dark:border-zinc-800/80 shadow-lg overflow-hidden"
+            className="absolute left-0 right-0 top-full mt-1.5 z-50 p-1.5 rounded-2xl bg-white dark:bg-[#141416] border border-zinc-200/90 dark:border-white/[0.1] shadow-2xl overflow-hidden backdrop-blur-xl"
           >
             {/* Search Input Box */}
             {searchable && (
-              <div className="p-1 pb-1.5 border-b border-zinc-100 dark:border-zinc-800/60">
+              <div className="p-1 pb-1.5 border-b border-zinc-100 dark:border-white/[0.06]">
                 <div className="relative flex items-center">
                   <Search className="w-3.5 h-3.5 absolute left-2.5 text-zinc-400 pointer-events-none" />
                   <input
@@ -121,7 +121,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full pl-8 pr-7 py-1.5 bg-zinc-50 dark:bg-[#121215] border border-zinc-200/60 dark:border-zinc-800/80 rounded-lg text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium focus:outline-none focus:border-brand-primary/50"
+                    className="w-full pl-8 pr-7 py-1.5 bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200/60 dark:border-white/[0.06] rounded-lg text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium focus:outline-none focus:border-zinc-400 dark:focus:border-white/30"
                   />
                   {searchQuery && (
                     <button
@@ -152,20 +152,20 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                       }}
                       className={`w-full px-3 py-2 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between gap-2 cursor-pointer ${
                         isSelected
-                          ? 'bg-brand-primary/10 text-brand-primary font-semibold'
-                          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#202025]'
+                          ? 'bg-zinc-100 dark:bg-white/[0.08] text-zinc-900 dark:text-white font-semibold'
+                          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.04]'
                       }`}
                     >
                       <div className="truncate">
                         <span className="block truncate">{opt.label}</span>
                         {opt.subLabel && (
-                          <span className={`block text-[10px] truncate ${isSelected ? 'text-brand-primary/80' : 'text-zinc-400'}`}>
+                          <span className={`block text-[10px] truncate ${isSelected ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-400'}`}>
                             {opt.subLabel}
                           </span>
                         )}
                       </div>
                       {isSelected && (
-                        <Check className="w-3.5 h-3.5 flex-shrink-0 text-brand-primary" />
+                        <Check className="w-3.5 h-3.5 flex-shrink-0 text-zinc-900 dark:text-white" />
                       )}
                     </button>
                   );

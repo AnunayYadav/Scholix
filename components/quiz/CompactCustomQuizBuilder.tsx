@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowLeft, Play, FileText, Check } from 'lucide-react';
 import CustomDropdown, { DropdownOption } from './CustomDropdown.tsx';
 import { getSubjectCurriculum } from '../../data/subjectCatalog.ts';
 
@@ -102,50 +102,63 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
         label,
       };
     });
-  }, [subjects]);
-
-  return (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-fade-in pb-12">
+  }, [subjects]);  return (
+    <div className="w-full max-w-xl mx-auto space-y-3.5 animate-fade-in pb-8">
       
       {/* Top Header */}
-      <div className="flex items-center gap-3 pt-1">
-        {onBackToDashboard && (
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex items-center gap-2.5">
+          {onBackToDashboard && (
+            <button
+              type="button"
+              onClick={onBackToDashboard}
+              className="w-7 h-7 rounded-full border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all flex items-center justify-center cursor-pointer"
+              title="Back to Dashboard"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <div>
+            <h1 className="text-base font-semibold text-zinc-900 dark:text-white tracking-tight">
+              Custom Assessment
+            </h1>
+            <p className="text-[11px] text-zinc-400 font-normal">Configure parameters for a personalized test</p>
+          </div>
+        </div>
+
+        {onSwitchToOfficialPapers && (
           <button
             type="button"
-            onClick={onBackToDashboard}
-            className="w-9 h-9 rounded-xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all flex items-center justify-center cursor-pointer"
-            title="Back to Dashboard"
+            onClick={onSwitchToOfficialPapers}
+            className="h-7 px-3 rounded-full border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <FileText className="w-3 h-3 text-zinc-400" />
+            <span>Official Papers</span>
           </button>
         )}
-        <div>
-          <h1 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">
-            Custom Assessment
-          </h1>
-          <p className="text-xs text-zinc-400">Configure parameters for a personalized test</p>
-        </div>
       </div>
 
-      {/* Main Settings Card */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 space-y-4.5">
+      {/* Unified Settings Container */}
+      <div className="rounded-2xl bg-white dark:bg-[#111113] border border-zinc-200/80 dark:border-white/[0.08] divide-y divide-zinc-100 dark:divide-white/[0.04] overflow-hidden shadow-xs">
         
-        {/* 1. Course Dropdown */}
-        <CustomDropdown
-          label="Course"
-          value={selectedSubject?.id || ''}
-          options={subjectOptions}
-          onChange={(val) => {
-            const sub = subjects.find(s => s.id === val);
-            if (sub) onSelectSubject(sub);
-          }}
-          placeholder="Select course..."
-          searchPlaceholder="Search course code or title..."
-          searchable={true}
-        />
+        {/* 1. Course Selection */}
+        <div className="px-4 py-3 sm:px-4.5 sm:py-3">
+          <CustomDropdown
+            label="Target Course"
+            value={selectedSubject?.id || ''}
+            options={subjectOptions}
+            onChange={(val) => {
+              const sub = subjects.find(s => s.id === val);
+              if (sub) onSelectSubject(sub);
+            }}
+            placeholder="Select course..."
+            searchPlaceholder="Search course code or title..."
+            searchable={true}
+          />
+        </div>
 
-        {/* 2. Units Selector - Compact Segmented Chips */}
-        <div className="space-y-1.5">
+        {/* 2. Target Units */}
+        <div className="px-4 py-3 sm:px-4.5 sm:py-3 space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 block px-0.5">
               Target Units
@@ -153,7 +166,7 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
             <button
               type="button"
               onClick={onSelectAllUnits}
-              className="text-[11px] font-medium text-brand-primary hover:underline cursor-pointer"
+              className="text-[11px] text-zinc-400 hover:text-zinc-900 dark:hover:text-white font-medium transition-colors cursor-pointer"
             >
               {allUnitsSelected ? 'Deselect All' : 'Select All'}
             </button>
@@ -170,12 +183,12 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
                   type="button"
                   disabled={!isAvailable}
                   onClick={() => onToggleUnit(u)}
-                  className={`py-1.5 rounded-lg text-xs font-medium transition-all text-center cursor-pointer border ${
+                  className={`py-1.5 rounded-lg text-xs font-medium transition-all text-center cursor-pointer ${
                     !isAvailable
-                      ? 'opacity-30 bg-zinc-50 dark:bg-zinc-800/20 border-zinc-200/40 dark:border-zinc-800/40 text-zinc-400 cursor-not-allowed'
+                      ? 'opacity-25 bg-zinc-50 dark:bg-white/[0.02] border border-transparent text-zinc-400 cursor-not-allowed'
                       : isSelected
-                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
-                        : 'bg-zinc-50 dark:bg-[#202025] border-zinc-200/80 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold shadow-xs'
+                        : 'bg-zinc-100 dark:bg-white/[0.05] border border-zinc-200/60 dark:border-white/[0.06] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                   }`}
                 >
                   Unit {u}
@@ -185,12 +198,12 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
           </div>
         </div>
 
-        {/* 3. Difficulty Level - Apple Segmented Bar */}
-        <div className="space-y-1.5">
+        {/* 3. Difficulty Level */}
+        <div className="px-4 py-3 sm:px-4.5 sm:py-3 space-y-1.5">
           <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 block px-0.5">
-            Difficulty
+            Difficulty Level
           </label>
-          <div className="bg-zinc-100 dark:bg-[#0c0c0e] p-1 rounded-xl flex gap-1 border border-zinc-200/60 dark:border-zinc-800/80">
+          <div className="grid grid-cols-3 gap-2">
             {[
               { id: 'easy', label: 'Easy (L1)', dot: 'bg-emerald-500' },
               { id: 'medium', label: 'Medium (L2)', dot: 'bg-amber-500' },
@@ -202,13 +215,17 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
                   key={lvl.id}
                   type="button"
                   onClick={() => onToggleDifficulty(lvl.id)}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`py-2 px-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
                     isSelected
-                      ? 'bg-white dark:bg-[#202025] text-zinc-900 dark:text-white shadow-xs'
-                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-xs font-semibold'
+                      : 'bg-zinc-100 dark:bg-white/[0.05] border-zinc-200/60 dark:border-white/[0.06] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-white/10'
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${lvl.dot}`} />
+                  {isSelected ? (
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                  ) : (
+                    <span className={`w-1.5 h-1.5 rounded-full ${lvl.dot}`} />
+                  )}
                   <span>{lvl.label}</span>
                 </button>
               );
@@ -216,26 +233,59 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
           </div>
         </div>
 
-        {/* 4. Questions & Timer Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          {/* Question Count */}
-          {hasMCQs && (
-            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#121215] border border-zinc-200/70 dark:border-zinc-800/80 space-y-1.5">
+        {/* 4. Questions & Duration Row */}
+        <div className="px-4 py-3 sm:px-4.5 sm:py-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+            {/* MCQ Count */}
+            {hasMCQs && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">MCQ Questions</span>
+                  <div className="flex items-center gap-1">
+                    {[10, 20, 30].map(cnt => (
+                      <button
+                        key={cnt}
+                        type="button"
+                        onClick={() => setNumMCQ(cnt)}
+                        className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md cursor-pointer transition-colors ${
+                          numMCQ === cnt 
+                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' 
+                            : 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10'
+                        }`}
+                      >
+                        {cnt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={numMCQ}
+                  onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
+                  className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] rounded-xl text-xs font-semibold text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-400 dark:focus:border-white/20 transition-colors"
+                />
+              </div>
+            )}
+
+            {/* Time Limit */}
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">MCQ Questions</span>
+                <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Duration (Minutes)</span>
                 <div className="flex items-center gap-1">
-                  {[10, 20, 30].map(cnt => (
+                  {[15, 30, 60].map(mins => (
                     <button
-                      key={cnt}
+                      key={mins}
                       type="button"
-                      onClick={() => setNumMCQ(cnt)}
-                      className={`text-[10px] font-medium px-2 py-0.5 rounded-md cursor-pointer transition-colors ${
-                        numMCQ === cnt 
-                          ? 'bg-brand-primary text-white' 
-                          : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700'
+                      onClick={() => setTimerMinutes(mins)}
+                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md cursor-pointer transition-colors ${
+                        timerMinutes === mins 
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' 
+                          : 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10'
                       }`}
                     >
-                      {cnt}
+                      {mins}m
                     </button>
                   ))}
                 </div>
@@ -243,102 +293,71 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
               <input
                 type="number"
                 min="1"
-                max="100"
-                value={numMCQ}
-                onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                className="w-full px-2.5 py-1 bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-lg text-xs font-semibold text-brand-primary focus:outline-none focus:border-brand-primary/50"
+                max="180"
+                value={timerMinutes}
+                onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
+                className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] rounded-xl text-xs font-semibold text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-400 dark:focus:border-white/20 transition-colors"
               />
             </div>
-          )}
-
-          {/* Time Limit */}
-          <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#121215] border border-zinc-200/70 dark:border-zinc-800/80 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Timer (Minutes)</span>
-              <div className="flex items-center gap-1">
-                {[15, 30, 60].map(mins => (
-                  <button
-                    key={mins}
-                    type="button"
-                    onClick={() => setTimerMinutes(mins)}
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-md cursor-pointer transition-colors ${
-                      timerMinutes === mins 
-                        ? 'bg-brand-primary text-white' 
-                        : 'bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300/70 dark:hover:bg-zinc-700'
-                    }`}
-                  >
-                    {mins}m
-                  </button>
-                ))}
-              </div>
-            </div>
-            <input
-              type="number"
-              min="1"
-              max="180"
-              value={timerMinutes}
-              onChange={(e) => setTimerMinutes(parseInt(e.target.value) || 0)}
-              className="w-full px-2.5 py-1 bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 rounded-lg text-xs font-semibold text-brand-primary focus:outline-none focus:border-brand-primary/50"
-            />
           </div>
         </div>
 
         {/* 5. Apple Settings List (Toggles) */}
-        <div className="rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#121215] divide-y divide-zinc-100 dark:divide-zinc-800/60 overflow-hidden">
+        <div className="divide-y divide-zinc-100 dark:divide-white/[0.04]">
           {/* Practice Mode */}
           <div 
             onClick={() => setIsPracticeMode(!isPracticeMode)}
-            className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-[#1a1a1f] transition-colors"
+            className="px-4 py-2.5 sm:px-4.5 sm:py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-50/80 dark:hover:bg-white/[0.02] transition-colors"
           >
-            <div>
+            <div className="pr-3">
               <span className="text-xs font-medium block text-zinc-900 dark:text-white">Practice Mode</span>
-              <span className="text-[11px] text-zinc-400">Show instant answers and explanations after each question</span>
+              <span className="text-[11px] text-zinc-400 font-normal">Instant answers & explanations after each question</span>
             </div>
-            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ml-3 ${isPracticeMode ? 'bg-brand-primary' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-              <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all ${isPracticeMode ? 'right-0.5' : 'left-0.5'}`} />
+            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ${isPracticeMode ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+              <div className={`w-3.5 h-3.5 rounded-full transition-all absolute top-0.5 ${isPracticeMode ? 'right-0.5 bg-white dark:bg-zinc-900' : 'left-0.5 bg-white'}`} />
             </div>
           </div>
 
           {/* Negative Marking */}
           <div 
             onClick={() => setNegativeMarking(!negativeMarking)}
-            className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-[#1a1a1f] transition-colors"
+            className="px-4 py-2.5 sm:px-4.5 sm:py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-50/80 dark:hover:bg-white/[0.02] transition-colors"
           >
-            <div>
+            <div className="pr-3">
               <span className="text-xs font-medium block text-zinc-900 dark:text-white">Negative Marking</span>
-              <span className="text-[11px] text-zinc-400">Apply -0.25 mark penalty for wrong answers</span>
+              <span className="text-[11px] text-zinc-400 font-normal">Apply -0.25 mark penalty for incorrect answers</span>
             </div>
-            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ml-3 ${negativeMarking ? 'bg-rose-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-              <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all ${negativeMarking ? 'right-0.5' : 'left-0.5'}`} />
+            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ${negativeMarking ? 'bg-rose-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+              <div className={`w-3.5 h-3.5 rounded-full bg-white transition-all absolute top-0.5 ${negativeMarking ? 'right-0.5' : 'left-0.5'}`} />
             </div>
           </div>
 
           {/* Include Solved */}
           <div 
             onClick={() => setIncludeSolved(!includeSolved)}
-            className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-[#1a1a1f] transition-colors"
+            className="px-4 py-2.5 sm:px-4.5 sm:py-2.5 flex items-center justify-between cursor-pointer hover:bg-zinc-50/80 dark:hover:bg-white/[0.02] transition-colors"
           >
-            <div>
-              <span className="text-xs font-medium block text-zinc-900 dark:text-white">Include Solved</span>
-              <span className="text-[11px] text-zinc-400">Include previously mastered questions ({solvedCount} mastered)</span>
+            <div className="pr-3">
+              <span className="text-xs font-medium block text-zinc-900 dark:text-white">Include Mastered Questions</span>
+              <span className="text-[11px] text-zinc-400 font-normal">Include {solvedCount} previously completed questions</span>
             </div>
-            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ml-3 ${includeSolved ? 'bg-brand-primary' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-              <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-all ${includeSolved ? 'right-0.5' : 'left-0.5'}`} />
+            <div className={`w-8 h-4.5 rounded-full relative transition-colors flex-shrink-0 ${includeSolved ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+              <div className={`w-3.5 h-3.5 rounded-full transition-all absolute top-0.5 ${includeSolved ? 'right-0.5 bg-white dark:bg-zinc-900' : 'left-0.5 bg-white'}`} />
             </div>
           </div>
         </div>
 
-        {/* 6. Start Button */}
-        <div className="pt-2">
+        {/* 6. Start Button Action Area */}
+        <div className="p-3 sm:p-3.5 bg-zinc-50/50 dark:bg-white/[0.01]">
           <button
             type="button"
             onClick={onStartQuiz}
             disabled={isLoading || totalSelectedQuestions === 0 || selectedUnits.length === 0}
-            className="w-full py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary/90 disabled:opacity-40 text-white font-medium text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            className="w-full py-2.5 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-30 transition-all font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
-            <Play className="w-3.5 h-3.5 fill-white" />
+            <Play className="w-3 h-3 fill-current" />
             <span>
-              {isLoading ? 'Preparing assessment...' : `Start Custom Quiz (${totalSelectedQuestions} Qs • ${timerMinutes}m)`}
+              {isLoading ? 'Preparing assessment...' : `Start Custom Assessment (${totalSelectedQuestions} Qs • ${timerMinutes}m)`}
             </span>
           </button>
         </div>

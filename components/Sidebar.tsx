@@ -170,14 +170,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           if (window.innerWidth < 768) toggleMobileMenu();
         }}
         className={`w-full h-10 flex items-center rounded-2xl transition-colors duration-150 relative group cursor-pointer border-none no-underline ${isActive
-            ? 'bg-zinc-100 dark:bg-[#1c1c20] text-zinc-900 dark:text-white font-medium'
-            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
+          ? 'bg-zinc-100 dark:bg-[#1c1c20] text-zinc-900 dark:text-white font-medium'
+          : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
           }`}
       >
         {/* Icon container: exactly 40px wide, centered inside the 40px rail slot */}
         <div className={`w-10 h-10 shrink-0 flex items-center justify-center transition-colors duration-150 ${isActive
-            ? 'text-zinc-900 dark:text-white'
-            : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300'
+          ? 'text-zinc-900 dark:text-white'
+          : 'text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300'
           }`}>
           {item.icon}
         </div>
@@ -289,8 +289,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               }
             }}
             className={`w-full h-10 flex items-center rounded-2xl transition-colors cursor-pointer border-none relative group ${currentModule === ModuleType.PROFILE || showProfileMenu
-                ? 'bg-zinc-100 dark:bg-[#1c1c20]'
-                : 'bg-transparent hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
+              ? 'bg-zinc-100 dark:bg-[#1c1c20]'
+              : 'bg-transparent hover:bg-zinc-100/70 dark:hover:bg-[#17171a]'
               }`}
           >
             {/* Avatar container: exactly 40px wide, identical to icon slots */}

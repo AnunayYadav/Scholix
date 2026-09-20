@@ -14,7 +14,7 @@ import html2canvas from 'html2canvas';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
-import { Trophy, Flame, ArrowLeft, CheckCircle2, Clock, Sparkles, X, ChevronRight, Award } from 'lucide-react';
+import { Trophy, Flame, ArrowLeft, CheckCircle2, Clock, Sparkles, X, ChevronRight, Award, Lock, Sprout, BookOpen, Star, Crown, Medal, Check } from 'lucide-react';
 
 import { SYLLABUS_DATA } from '../data/syllabusData.ts';
 import { findSubjectMetadata } from '../data/curriculumData.ts';
@@ -32,6 +32,7 @@ import HistorySection from './quiz/HistorySection.tsx';
 import OfficialExamPapersExplorer from './quiz/OfficialExamPapersExplorer.tsx';
 import CompactCustomQuizBuilder from './quiz/CompactCustomQuizBuilder.tsx';
 import ContinuousExamViewer from './quiz/ContinuousExamViewer.tsx';
+import QuizDashboardView from './quiz/QuizDashboardView.tsx';
 
 
 // Dashboard hooks & store
@@ -278,6 +279,85 @@ interface SubjectWithSyllabus {
   syllabusFile: LibraryFile;
 }
 
+const getTierLucideIcon = (lvl: number, isUnlocked = true, className = "w-4.5 h-4.5") => {
+  const colorClass = isUnlocked
+    ? lvl === 1 ? "text-emerald-500"
+      : lvl === 2 ? "text-blue-500"
+      : lvl === 3 ? "text-amber-400"
+      : lvl === 4 ? "text-orange-500"
+      : lvl === 5 ? "text-amber-500"
+      : lvl === 6 ? "text-amber-500"
+      : lvl === 7 ? "text-rose-500"
+      : "text-purple-400"
+    : "text-zinc-400 dark:text-zinc-600";
+
+  const fullClass = `${className} ${colorClass}`;
+
+  switch (lvl) {
+    case 1:
+      // Solid Sprout / Leaf
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M13 21v-7c0-2.2 1.8-4 4-4h3c0-3.9-3.1-7-7-7-2.3 0-4.3 1.1-5.6 2.8C6.9 5.3 6.5 5 6 5c-2.2 0-4 1.8-4 4 0 3.3 2.7 6 6 6h1v6h4z" />
+        </svg>
+      );
+    case 2:
+      // Solid Open Book with spine cutout
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M12 6.5c-2.2-1.6-4.9-2.5-8-2.5v13c3.1 0 5.8.9 8 2.5 2.2-1.6 4.9-2.5 8-2.5V4c-3.1 0-5.8.9-8 2.5zm0 11.5c-1.8-1.2-4-2-6.5-2H4V6h1.5c2.5 0 4.7.8 6.5 2v10zm8-2h-1.5c-2.5 0-4.7.8-6.5 2V8c1.8-1.2 4-2 6.5-2H20v10z" />
+        </svg>
+      );
+    case 3:
+      // Solid Star
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M12 2.5l2.9 6.2 6.8.9-5 4.7 1.2 6.7-5.9-3.2-5.9 3.2 1.2-6.7-5-4.7 6.8-.9L12 2.5z" />
+        </svg>
+      );
+    case 4:
+      // Solid Flame with inner flame cutout
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M12 2c-3.5 4-6 7.5-6 11.5 0 3.59 2.69 6.5 6 6.5s6-2.91 6-6.5C18 9.5 15.5 6 12 2zm0 15c-1.66 0-3-1.34-3-3 0-1.8 1.5-3.5 3-5 1.5 1.5 3 3.2 3 5 0 1.66-1.34 3-3 3z" />
+        </svg>
+      );
+    case 5:
+      // Solid Crown
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M5 16h14l1.5-9-4.5 4-4-6-4 6-4.5-4L5 16zm-2 2h18v2H3v-2z" />
+        </svg>
+      );
+    case 6:
+      // Solid Trophy with handles and pedestal
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V18H8v2h8v-2h-3v-2.1c1.92-.4 3.44-1.92 3.61-3.96C19.08 11.63 21 9.55 21 7V6c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
+        </svg>
+      );
+    case 7:
+      // Solid Medal with ribbon and white star
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M8.5 2l3.5 6 3.5-6h3.5L14 11.5a6 6 0 0 1-4 0L5 2h3.5z" opacity="0.85" />
+          <circle cx="12" cy="16" r="5.5" />
+          <path d="M12 12.8l.8 1.6 1.8.3-1.3 1.3.3 1.8-1.6-.8-1.6.8.3-1.8-1.3-1.3 1.8-.3z" fill={isUnlocked ? "#ffffff" : "#18181b"} />
+        </svg>
+      );
+    case 8:
+      // Solid Sparkles
+      return (
+        <svg viewBox="0 0 24 24" className={fullClass} fill="currentColor">
+          <path d="M12 2c.5 4.5 4.5 8.5 9 9-4.5.5-8.5 4.5-9 9-.5-4.5-4.5-8.5-9-9 4.5-.5 8.5-4.5 9-9z" />
+          <path d="M19 15c.3 1.5 1.5 2.7 3 3-1.5.3-2.7 1.5-3 3-.3-1.5-1.5-2.7-3-3 1.5-.3 2.7-1.5 3-3z" />
+        </svg>
+      );
+    default:
+      return <Award className={fullClass} />;
+  }
+};
+
 const RewardItemCard: React.FC<{
   tier: any;
   isRewardUnlocked: boolean;
@@ -289,32 +369,24 @@ const RewardItemCard: React.FC<{
   frameConfig: any;
 }> = ({ tier, isRewardUnlocked, isCollected, userQuizProfile, userProfile, updateUserQuizProfile, userId, frameConfig }) => {
   return (
-    <div className="flex flex-col items-center gap-2 group/reward relative">
-      <div className={`relative w-12 h-12 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl border border-white/10 shadow-lg shadow-black/20 ${isRewardUnlocked && !isCollected ? 'ring-2 ring-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : ''
-        }`}>
+    <div className="flex flex-col items-center gap-1.5 group/reward relative flex-shrink-0">
+      <div className={`relative w-9 h-9 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl border border-zinc-200/80 dark:border-white/10 bg-zinc-100 dark:bg-zinc-800/60 ${
+        isRewardUnlocked && !isCollected ? 'ring-1 ring-zinc-900/20 dark:ring-white/30 shadow-sm' : ''
+      }`}>
         {/* Shine Animation for available collection */}
         {isRewardUnlocked && !isCollected && (
           <motion.div
             animate={{
               x: ['-100%', '200%'],
-              opacity: [0, 0.5, 0]
+              opacity: [0, 0.4, 0]
             }}
             transition={{
-              duration: 2,
+              duration: 2.2,
               repeat: Infinity,
               ease: "easeInOut",
-              repeatDelay: 1
+              repeatDelay: 1.5
             }}
-            className="absolute inset-0 z-30 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
-          />
-        )}
-
-        {/* Pulsing Glow for available collection */}
-        {isRewardUnlocked && !isCollected && (
-          <motion.div
-            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 z-20 bg-orange-500/20 blur-xl pointer-events-none"
+            className="absolute inset-0 z-30 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 pointer-events-none"
           />
         )}
 
@@ -323,12 +395,12 @@ const RewardItemCard: React.FC<{
           <img
             src={`/Rarity/${tier.rarity}.png`}
             alt={tier.rarity}
-            className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover/reward:scale-110 transition-transform duration-500"
+            className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover/reward:scale-105 transition-transform duration-300"
           />
         )}
 
         {/* Frame Asset */}
-        <div className="relative w-[60%] h-[60%] flex items-center justify-center z-10">
+        <div className="relative w-[65%] h-[65%] flex items-center justify-center z-10">
           <img
             src={`/Nexus-Journey/${tier.rewardFrame}`}
             alt="Reward Frame"
@@ -343,8 +415,8 @@ const RewardItemCard: React.FC<{
 
         {/* Status Overlay */}
         {!isRewardUnlocked && (
-          <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-[1px] flex items-center justify-center z-20">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5 text-white/50"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center z-20">
+            <Lock className="w-3 h-3 text-white/70" />
           </div>
         )}
       </div>
@@ -352,9 +424,9 @@ const RewardItemCard: React.FC<{
       <div className="w-full flex justify-center">
         {isRewardUnlocked ? (
           isCollected ? (
-            <div className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[5.5px] font-black uppercase tracking-[0.2em] rounded-full flex items-center gap-1 border border-emerald-500/20">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="w-1.5 h-1.5"><polyline points="20 6 9 17 4 12" /></svg>
-              OWNED
+            <div className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[8px] font-semibold rounded-full flex items-center gap-0.5 border border-emerald-500/20">
+              <CheckCircle2 className="w-2 h-2" />
+              Claimed
             </div>
           ) : (
             <button
@@ -374,15 +446,15 @@ const RewardItemCard: React.FC<{
                   showToast("Something went wrong.", "error");
                 }
               }}
-              className="px-2 py-0.5 bg-gradient-to-r from-orange-500 to-orange-400 text-white hover:brightness-110 active:scale-95 text-[6px] font-black uppercase tracking-widest rounded-md shadow-md transition-all z-20 shadow-orange-500/20"
+              className="px-2 py-0.5 bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 active:scale-95 text-[8px] font-medium rounded-full shadow-sm transition-all z-20"
             >
-              Collect
+              Claim
             </button>
           )
         ) : (
-          <div className="text-[5.5px] font-black text-zinc-500 dark:text-zinc-500 uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded-full border border-zinc-200 dark:border-white/5">
-            LOCKED
-          </div>
+          <span className="text-[8px] text-zinc-400 dark:text-zinc-500 font-medium">
+            Locked
+          </span>
         )}
       </div>
     </div>
@@ -2010,58 +2082,58 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     const totalTimeTaken = timeAllocated - timeLeft;
     const avgTimePerQuestion = quizQuestions.length > 0 ? totalTimeTaken / quizQuestions.length : 0;
 
-    const allMilestones = [
-      // COMMON 🟤
-      { label: 'Beginner', rarity: 'common', icon: 'seedling', condition: percentage >= 5 },
-      { label: 'First Step', rarity: 'common', icon: 'footsteps', condition: percentage >= 20 },
-      { label: 'Participant', rarity: 'common', icon: 'badge', condition: percentage >= 35 },
-      { label: 'Getting Started', rarity: 'common', icon: 'flag', condition: percentage >= 45 },
-      { label: 'Rookie', rarity: 'common', icon: 'star', condition: percentage >= 55 },
-
-      // UNCOMMON 🔵
-      { label: 'Learner', rarity: 'uncommon', icon: 'book', condition: percentage >= 65 },
-      { label: 'Improving', rarity: 'uncommon', icon: 'chart', condition: percentage >= 72 },
-      { label: 'Halfway Hero', rarity: 'uncommon', icon: 'hero', condition: percentage >= 75 && quizQuestions.length > 10 },
-      { label: 'Quick Thinker', rarity: 'uncommon', icon: 'bolt', condition: totalTimeTaken < timeAllocated * 0.55 && percentage >= 60 },
-      { label: 'Rising Star', rarity: 'uncommon', icon: 'upward', condition: percentage >= 78 },
-
-      // RARE 🟢
-      { label: 'Sharp Mind', rarity: 'rare', icon: 'brain', condition: percentage >= 82 },
-      { label: 'Brainiac', rarity: 'rare', icon: 'flask', condition: percentage >= 86 },
-      { label: 'Speed Runner', rarity: 'rare', icon: 'run', condition: totalTimeTaken < timeAllocated * 0.35 && percentage >= 75 },
-      { label: 'Accuracy Pro', rarity: 'rare', icon: 'target', condition: percentage >= 90 },
-      { label: 'Consistent', rarity: 'rare', icon: 'check', condition: percentage >= 80 && percentage <= 94 },
-
-      // EPIC 🟣
-      { label: 'Quiz Master', rarity: 'epic', icon: 'trophy', condition: percentage >= 94 },
-      { label: 'Knowledge Ninja', rarity: 'epic', icon: 'ninja', condition: percentage >= 97 },
-      { label: 'Precision Pro', rarity: 'epic', icon: 'bullseye', condition: percentage === 100 && totalAuto >= 10 },
-      { label: 'Lightning Fast', rarity: 'epic', icon: 'zap', condition: totalTimeTaken < timeAllocated * 0.22 && percentage >= 85 },
-      { label: 'Dominator', rarity: 'epic', icon: 'sword', condition: percentage >= 98 && totalAuto >= 20 },
-
-      // LEGENDARY 🟠
-      { label: 'Perfect Score', rarity: 'legendary', icon: 'perfect', condition: percentage === 100 && totalAuto >= 20 },
-      { label: 'Speed Demon', rarity: 'legendary', icon: 'fire', condition: totalTimeTaken < timeAllocated * 0.12 && percentage >= 90 },
-      { label: 'Quiz God', rarity: 'legendary', icon: 'crown', condition: percentage === 100 && totalTimeTaken < timeAllocated * 0.25 },
-      { label: 'Unstoppable', rarity: 'legendary', icon: 'shield', condition: percentage >= 98 && totalAuto >= 30 },
-      { label: 'Mind King', rarity: 'legendary', icon: 'throne', condition: percentage === 100 && totalAuto >= 40 }
-    ];
-
-    const rarityStyles: Record<string, string> = {
-      common: 'bg-zinc-50 border-zinc-200 dark:bg-zinc-800/40 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 shadow-sm shadow-zinc-200/5',
-      uncommon: 'bg-blue-50 border-blue-200 dark:bg-blue-500/5 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shadow-lg shadow-blue-500/5',
-      rare: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/5',
-      epic: 'bg-indigo-50 border-indigo-200 dark:bg-indigo-500/5 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-xl shadow-indigo-500/10',
-      legendary: 'bg-orange-50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-500 dark:text-orange-400 shadow-2xl shadow-orange-500/15'
+    const formatAvgTime = (secs: number) => {
+      const s = Math.max(0, Math.round(secs));
+      if (s < 60) return `${s}s`;
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
     };
 
-    const activeMilestones = allMilestones
-      .filter(m => m.condition)
-      .sort((a, b) => {
-        const order = { legendary: 4, epic: 3, rare: 2, uncommon: 1, common: 0 };
-        return order[b.rarity as keyof typeof order] - order[a.rarity as keyof typeof order];
-      })
-      .slice(0, 4);
+    const allMilestones = [
+      // COMMON 🟤
+      { label: 'Beginner', desc: 'Started your quiz journey', rarity: 'common', icon: 'seedling', condition: percentage >= 5 },
+      { label: 'First Step', desc: 'Answered your first questions', rarity: 'common', icon: 'footsteps', condition: percentage >= 20 },
+      { label: 'Participant', desc: 'Engaged through the quiz', rarity: 'common', icon: 'badge', condition: percentage >= 35 },
+      { label: 'Getting Started', desc: 'Building solid foundation', rarity: 'common', icon: 'flag', condition: percentage >= 45 },
+      { label: 'Rookie', desc: 'Surpassed 50% threshold', rarity: 'common', icon: 'star', condition: percentage >= 55 },
+
+      // UNCOMMON 🔵
+      { label: 'Learner', desc: 'Scored 65%+ on this test', rarity: 'uncommon', icon: 'book', condition: percentage >= 65 },
+      { label: 'Improving', desc: 'Strong grasp of fundamentals', rarity: 'uncommon', icon: 'chart', condition: percentage >= 72 },
+      { label: 'Halfway Hero', desc: 'Conquered 10+ questions', rarity: 'uncommon', icon: 'hero', condition: percentage >= 75 && quizQuestions.length > 10 },
+      { label: 'Quick Thinker', desc: 'Finished under 55% time', rarity: 'uncommon', icon: 'bolt', condition: totalTimeTaken < timeAllocated * 0.55 && percentage >= 60 },
+      { label: 'Rising Star', desc: 'Near mastery at 78%+', rarity: 'uncommon', icon: 'upward', condition: percentage >= 78 },
+
+      // RARE 🟢
+      { label: 'Sharp Mind', desc: 'High accuracy over 80%', rarity: 'rare', icon: 'brain', condition: percentage >= 82 },
+      { label: 'Brainiac', desc: 'Mastered tough topics (86%+)', rarity: 'rare', icon: 'flask', condition: percentage >= 86 },
+      { label: 'Speed Runner', desc: 'Swift & accurate (under 35% time)', rarity: 'rare', icon: 'run', condition: totalTimeTaken < timeAllocated * 0.35 && percentage >= 75 },
+      { label: 'Accuracy Pro', desc: '90%+ precision achieved', rarity: 'rare', icon: 'target', condition: percentage >= 90 },
+      { label: 'Consistent', desc: 'Dependable strong result', rarity: 'rare', icon: 'check', condition: percentage >= 80 && percentage <= 94 },
+
+      // EPIC 🟣
+      { label: 'Quiz Master', desc: 'Outstanding 94%+ performance', rarity: 'epic', icon: 'trophy', condition: percentage >= 94 },
+      { label: 'Knowledge Ninja', desc: 'Elite score of 97%+', rarity: 'epic', icon: 'ninja', condition: percentage >= 97 },
+      { label: 'Precision Pro', desc: '100% flawless on 10+ items', rarity: 'epic', icon: 'bullseye', condition: percentage === 100 && totalAuto >= 10 },
+      { label: 'Lightning Fast', desc: 'Sub-22% time with 85%+ score', rarity: 'epic', icon: 'zap', condition: totalTimeTaken < timeAllocated * 0.22 && percentage >= 85 },
+      { label: 'Dominator', desc: '98%+ on 20+ comprehensive items', rarity: 'epic', icon: 'sword', condition: percentage >= 98 && totalAuto >= 20 },
+
+      // LEGENDARY 🟠
+      { label: 'Perfect Score', desc: '100% flawless on 20+ items', rarity: 'legendary', icon: 'perfect', condition: percentage === 100 && totalAuto >= 20 },
+      { label: 'Speed Demon', desc: 'Sub-12% time with 90%+ score', rarity: 'legendary', icon: 'fire', condition: totalTimeTaken < timeAllocated * 0.12 && percentage >= 90 },
+      { label: 'Quiz God', desc: '100% score in record time', rarity: 'legendary', icon: 'crown', condition: percentage === 100 && totalTimeTaken < timeAllocated * 0.25 },
+      { label: 'Unstoppable', desc: 'Mastery on 30+ items', rarity: 'legendary', icon: 'shield', condition: percentage >= 98 && totalAuto >= 30 },
+    ];
+
+    const earnedMilestones = allMilestones.filter(m => m.condition);
+    const sortedMilestones = [...allMilestones].sort((a, b) => {
+      // Milestones earned in this test first
+      if (a.condition && !b.condition) return -1;
+      if (!a.condition && b.condition) return 1;
+      const order = { legendary: 4, epic: 3, rare: 2, uncommon: 1, common: 0 };
+      return order[b.rarity as keyof typeof order] - order[a.rarity as keyof typeof order];
+    });
 
     const getMilestoneIcon = (icon: string) => {
       const getIconColor = (type: string) => {
@@ -2097,14 +2169,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       const props = {
         viewBox: "0 0 24 24",
-        width: "24",
-        height: "24",
+        width: "20",
+        height: "20",
         fill: "none",
         stroke: "currentColor",
-        strokeWidth: "2.5",
+        strokeWidth: "2",
         strokeLinecap: "round" as const,
         strokeLinejoin: "round" as const,
-        className: `w-7 h-7 transition-all duration-300 group-hover:scale-110 ${getIconColor(icon)}`
+        className: `w-4 h-4 ${getIconColor(icon)}`
       };
 
       switch (icon) {
@@ -2197,7 +2269,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         );
         case 'star': return (
           <svg {...props}>
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
           </svg>
         );
         case 'book': return (
@@ -2229,7 +2301,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         );
         case 'hero': return (
           <svg {...props}>
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
             <path d="M12 11v4" />
           </svg>
         );
@@ -2243,7 +2315,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         case 'sword': return (
           <svg {...props}>
             <path d="m14.5 4 5.5 5.5L7 22.5l-5.5-5.5L14.5 4Z" />
-            <path d="m5 16 3 3" />
+            <path d="M5 16 3 3" />
           </svg>
         );
         case 'shield': return (
@@ -2276,155 +2348,153 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       }
     };
 
-
     return (
       <div className="font-sans text-zinc-900 dark:text-white selection:bg-orange-500/30 transition-all duration-300" ref={resultRef} id="quiz-result">
-        <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-fade-in">
+        <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 space-y-7 animate-fade-in">
 
           {/* Centered Results Header */}
-          <div className="text-center space-y-6">
-            <div className="relative inline-block">
-              <div className="absolute inset-0 bg-orange-500/10 blur-[40px] rounded-full animate-pulse" />
-              <div className="relative w-14 h-14 mx-auto bg-transparent flex items-center justify-center shadow-lg">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-orange-500">
-                  <path d="M6 9l6 6 6-6" className="transform rotate-180 origin-center" /><path d="M12 15V3" className="transform rotate-180 origin-center" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" className="transform rotate-180 origin-center" />
-                </svg>
-                <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5 text-white"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                </div>
-              </div>
-            </div>
+          <div className="text-center space-y-2 max-w-xl mx-auto">
 
-            <div className="space-y-3">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-                <span className="text-orange-500">{percentage}%</span> <span className="text-zinc-300">/</span> <span className="text-zinc-900 dark:text-white">
-                  {percentage >= 90 ? 'Outstanding!' : percentage >= 80 ? 'Great job!' : percentage >= 60 ? 'Good Effort!' : 'Keep Pushing!'}
-                </span>
+            <div className="space-y-1.5">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                <span className="text-orange-500">{percentage}%</span> <span className="text-zinc-300 dark:text-zinc-700">·</span> {percentage >= 90 ? 'Outstanding!' : percentage >= 80 ? 'Great job!' : percentage >= 60 ? 'Good Effort!' : 'Keep Pushing!'}
               </h1>
-              <p className="text-zinc-500 dark:text-zinc-400 font-medium text-sm max-w-xl mx-auto leading-relaxed">
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
                 {percentage >= 80
-                  ? `You've outperformed ${Math.min(99, 70 + Math.floor(percentage / 4))}% of users in ${selectedSubject?.name}. Mastery achieved.`
-                  : `Steady progress in ${selectedSubject?.name}. Review the detailed breakdown below to polish your skills.`}
+                  ? `You outperformed ${Math.min(99, 70 + Math.floor(percentage / 4))}% of peers in ${selectedSubject?.name || 'this subject'}. Mastery achieved.`
+                  : `Steady progress in ${selectedSubject?.name || 'this subject'}. Review your question breakdown below to master weak spots.`}
               </p>
             </div>
           </div>
 
-          {/* Statistics Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-3 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M20 6L9 17l-5-5" /></svg>
-              </div>
-              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Correct</span>
-              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{score}/{totalAuto}</p>
+          {/* Clean horizontal stats with thin dividers - NO separate boxes */}
+          <div className="flex items-center justify-between max-w-2xl mx-auto py-4 px-2 border-y border-zinc-200/80 dark:border-white/[0.08]">
+            <div className="flex-1 text-center">
+              <span className="text-[11px] font-medium text-zinc-400 block mb-0.5">Correct</span>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                {score}<span className="text-zinc-500 text-sm font-normal">/{totalAuto}</span>
+              </p>
             </div>
-
-            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </div>
-              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Incorrect</span>
-              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{totalAuto - score}</p>
+            <div className="h-8 w-px bg-zinc-200 dark:bg-white/10 shrink-0" />
+            <div className="flex-1 text-center">
+              <span className="text-[11px] font-medium text-zinc-400 block mb-0.5">Incorrect</span>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                {totalAuto - score}
+              </p>
             </div>
-
-            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-              </div>
-              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Avg Speed</span>
-              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{Math.round(avgTimePerQuestion)}s <span className="text-[10px] text-zinc-400">/ Q</span></p>
+            <div className="h-8 w-px bg-zinc-200 dark:bg-white/10 shrink-0" />
+            <div className="flex-1 text-center">
+              <span className="text-[11px] font-medium text-zinc-400 block mb-0.5">Avg Speed</span>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                {formatAvgTime(avgTimePerQuestion)}
+              </p>
             </div>
-
-            <div className="flex flex-col items-center text-center group hover:scale-[1.05] transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-              </div>
-              <span className="text-[10px] font-semibold text-zinc-400 tracking-wider mb-1">Time Taken</span>
-              <p className="text-3xl font-bold text-zinc-900 dark:text-white">{formatTime(totalTimeTaken)}</p>
+            <div className="h-8 w-px bg-zinc-200 dark:bg-white/10 shrink-0" />
+            <div className="flex-1 text-center">
+              <span className="text-[11px] font-medium text-zinc-400 block mb-0.5">Time Taken</span>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                {formatTime(totalTimeTaken)}
+              </p>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex flex-col items-center gap-6">
+          {/* Quick Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => document.getElementById('question-review-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full max-w-lg py-5 bg-orange-500 hover:bg-orange-700 text-white rounded-2xl font-bold text-base shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+              className="px-6 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 rounded-full font-semibold text-sm shadow-sm transition-all flex items-center gap-2 active:scale-95"
             >
-              <span>Review Results</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              <span>Review Questions</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M19 9l-7 7-7-7" /></svg>
             </button>
-
-            <div className="flex gap-4 w-full max-w-lg">
-              <button
-                onClick={handleGenerate}
-                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-500 transition-colors"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
-                Retake Quiz
-              </button>
-              <button
-                onClick={handleBackToDashboard}
-                className="flex-1 py-4 bg-transparent hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl font-bold text-xs text-zinc-600 dark:text-zinc-400 transition-all flex items-center justify-center gap-2 group border-none"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400 dark:text-zinc-500 group-hover:text-orange-500 transition-colors"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
-                Dashboard
-              </button>
-            </div>
+            <button
+              onClick={handleGenerate}
+              className="px-5 py-2.5 rounded-full font-medium text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all flex items-center gap-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+              <span>Retake Quiz</span>
+            </button>
+            <button
+              onClick={handleBackToDashboard}
+              className="px-5 py-2.5 rounded-full font-medium text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all flex items-center gap-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-zinc-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
+              <span>Dashboard</span>
+            </button>
           </div>
 
-          {/* Achievements / Milestones */}
-          {activeMilestones.length > 0 && (
-            <div className="pt-8">
-              <div className="flex items-center mb-6">
-                <span className="text-[10px] font-semibold text-zinc-400 tracking-wider transition-all duration-500 opacity-60">Achievements Unlocked</span>
+          {/* Achievements - Scrollable container with earned badges highlighted */}
+          <div className="max-w-2xl mx-auto rounded-2xl border border-zinc-200/80 dark:border-white/[0.08] bg-white dark:bg-[#111113] overflow-hidden">
+            <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-zinc-900 dark:text-white tracking-tight">Achievements</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                  {earnedMilestones.length} Earned
+                </span>
               </div>
+              <span className="text-[11px] text-zinc-400 font-medium">
+                {allMilestones.length} Total Badges
+              </span>
+            </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
-                {activeMilestones.map((m, idx) => (
+            {/* Scrollable list instead of full length */}
+            <div className="max-h-64 sm:max-h-72 overflow-y-auto divide-y divide-zinc-100 dark:divide-white/[0.04] overscroll-contain">
+              {sortedMilestones.map((m, idx) => {
+                const isEarned = m.condition;
+                return (
                   <div
                     key={idx}
-                    className="flex flex-col items-center text-center gap-3 transition-all duration-300 hover:scale-105 group relative"
+                    className={`px-5 py-3 flex items-center justify-between gap-4 transition-colors ${
+                      isEarned
+                        ? 'bg-orange-500/[0.03] dark:bg-orange-500/[0.06]'
+                        : 'opacity-40 hover:opacity-70'
+                    }`}
                   >
-                    {/* Background Glow for High Rarity */}
-                    {(m.rarity === 'epic' || m.rarity === 'legendary') && (
-                      <div className={`absolute -inset-2 opacity-0 group-hover:opacity-10 blur-xl rounded-full transition-opacity duration-500 ${m.rarity === 'legendary' ? 'bg-orange-500' : 'bg-indigo-500'
-                        }`} />
-                    )}
-
-                    <div className="relative p-1 transition-transform duration-500 group-hover:-translate-y-1">
-                      {getMilestoneIcon(m.icon || '')}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                          isEarned
+                            ? 'bg-orange-500/10 border-orange-500/20 text-orange-500'
+                            : 'bg-zinc-100 dark:bg-white/[0.04] border-zinc-200/50 dark:border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {getMilestoneIcon(m.icon || '')}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-xs font-semibold truncate ${isEarned ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                            {m.label}
+                          </p>
+                          {isEarned && (
+                            <span className="px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider rounded bg-orange-500/15 text-orange-600 dark:text-orange-400">
+                              Unlocked
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-zinc-400 truncate">{(m as any).desc || 'Achievement'}</p>
+                      </div>
                     </div>
-
-                    <div className="relative space-y-0.5">
-                      <p className="text-[12px] font-bold tracking-tight leading-none text-zinc-800 dark:text-zinc-300">{m.label}</p>
-                      <p className={`text-[8px] font-bold tracking-wider ${m.rarity === 'legendary' ? 'text-orange-500' :
-                          m.rarity === 'epic' ? 'text-indigo-500' :
-                            m.rarity === 'rare' ? 'text-emerald-500' :
-                              m.rarity === 'uncommon' ? 'text-blue-500' :
-                                'text-zinc-500'
-                        }`}>{m.rarity}</p>
-                    </div>
+                    <span className={`text-[10px] uppercase font-semibold shrink-0 ${isEarned ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-400/60'}`}>
+                      {m.rarity}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-
-        {/* Question Review Section (ID for scrolling) */}
-        <div id="question-review-section" className="max-w-4xl mx-auto py-16 px-6 space-y-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Question Review</h3>
-              <p className="text-xs font-medium text-zinc-500 mt-0.5">Evaluation of your performance per question</p>
-            </div>
-            <div className="px-3 py-1.5 bg-zinc-100 dark:bg-dark-800/50 rounded-lg border border-zinc-200 dark:border-dark-800/50 inline-flex items-center gap-2">
-              <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 tracking-wider">{quizQuestions.length} Items Total</span>
+                );
+              })}
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-4">
+        {/* Question Review Section - Single container separator list */}
+        <div id="question-review-section" className="max-w-2xl mx-auto pt-6 pb-12 px-4 sm:px-6 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60 dark:border-white/[0.06]">
+            <div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">Question Review</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Evaluation of your performance per question</p>
+            </div>
+            <span className="text-xs font-medium text-zinc-400">{quizQuestions.length} Questions</span>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-200/80 dark:border-white/[0.08] bg-white dark:bg-[#111113] divide-y divide-zinc-100 dark:divide-white/[0.04] overflow-hidden">
             {quizQuestions.map((q, i) => {
               const isSubjective = q.type === 'subjective';
               const isCoding = q.type === 'coding';
@@ -2437,164 +2507,89 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               const struggleMultiplier = q.difficulty === 'Easy' ? 1.25 : q.difficulty === 'Hard' ? 2.0 : 1.5;
               const isStruggle = timeSpent > avgTimePerQuestion * struggleMultiplier;
 
-              const statusColorOptions = isSubjective
-                ? 'bg-orange-50/50 border-orange-200 dark:bg-orange-500/5 dark:border-orange-500/20 text-orange-500 dark:text-orange-400'
-                : isCorrect
-                  ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-500/5 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-red-50/50 border-red-200 dark:bg-red-500/5 dark:border-red-500/20 text-red-600 dark:text-red-400';
-
-              const badgeColors = isSubjective
-                ? 'bg-orange-100/50 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 border-orange-200 dark:border-orange-500/30'
-                : isCorrect
-                  ? 'bg-emerald-100/50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
-                  : 'bg-red-100/50 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30';
-
               const label = isCoding ? (isCorrect ? 'Tests Passed' : 'Tests Failed') : (isSubjective ? 'Subjective' : (isCorrect ? 'Correct' : 'Incorrect'));
 
               return (
-                <div key={i} className={`p-5 md:p-6 rounded-[24px] border shadow-sm transition-all ${statusColorOptions}`}>
-                  <div className="flex flex-col space-y-4">
-
-                    {/* Header Row */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-semibold tracking-wider border ${badgeColors}`}>
+                <div key={i} className="p-4 sm:p-5 space-y-2.5">
+                  {/* Metadata Row */}
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-zinc-900 dark:text-white">Q{i + 1}</span>
+                      <span className={`text-[11px] font-semibold ${isCorrect ? 'text-emerald-600 dark:text-emerald-400' : isSubjective ? 'text-orange-500' : 'text-red-500'}`}>
                         {label}
                       </span>
                       {isStruggle && (
-                        <span className="px-2 py-0.5 bg-rose-500 text-white rounded-md text-[9px] font-bold tracking-wider animate-pulse shadow-sm border-none shadow-rose-500/20">
-                          Struggle Area
-                        </span>
+                        <span className="text-[10px] text-rose-500 font-medium">· Struggle Area</span>
                       )}
-                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider flex items-center gap-1.5">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5 opacity-60"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-                        {timeSpent}s
-                      </span>
-                      <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider">
-                        Unit 0{q.unit}
-                      </span>
-                      {q.difficulty && (
-                        <span className="px-2 py-0.5 bg-white/50 dark:bg-white/5 rounded-md text-[9px] font-semibold text-zinc-500 border border-zinc-200/50 dark:border-white/10 tracking-wider">
-                          {q.difficulty}
-                        </span>
-                      )}
-                      {q.questionType && (
-                        <span className="px-2 py-0.5 bg-zinc-100/50 dark:bg-white/10 rounded-md text-[9px] font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-200/50 dark:border-white/10 tracking-wider">
-                          {q.questionType}
-                        </span>
-                      )}
-
-                      <button
-                        onClick={() => toggleBookmark(q.id || '')}
-                        className={`ml-auto p-1 transition-all active:scale-90 ${bookmarkedIds.has(q.id || '')
-                            ? 'text-blue-500'
-                            : 'text-zinc-300 dark:text-zinc-600 hover:text-blue-400'
-                          }`}
-                        title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
-                      >
-                        <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
-                        </svg>
-                      </button>
+                      <span className="text-zinc-400">· {formatAvgTime(timeSpent)}</span>
+                      <span className="text-zinc-400">· Unit 0{q.unit}</span>
+                      {q.difficulty && <span className="text-zinc-400">· {q.difficulty}</span>}
+                      {q.questionType && <span className="text-zinc-400">· {q.questionType}</span>}
                     </div>
 
-                    {/* Question Text */}
-                    <h4 className="text-sm md:text-base font-bold text-zinc-800 dark:text-zinc-100 leading-relaxed">
-                      {parseText(q.question)}
-                    </h4>
-
-                    {/* Options/Answers Row */}
-                    {isCoding ? (
-                      <div className="space-y-4">
-                        <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5">
-                          <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1.5 tracking-wider text-[10px]">Submitted Code</span>
-                          <pre className="font-mono text-xs bg-zinc-900/50 p-4 rounded-xl overflow-auto dark:text-zinc-300">
-                            {ansObj?.code || '# No code submitted'}
-                          </pre>
-                        </div>
-
-                        {ansObj?.results && ansObj.results.length > 0 && (
-                          <div className="space-y-2">
-                            <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1 tracking-wider text-[10px]">Test Results</span>
-                            <div className="grid grid-cols-1 gap-2">
-                              {ansObj.results.map((res: any, idx: number) => (
-                                <div key={idx} className={`p-3 rounded-xl border text-[11px] flex items-center justify-between ${res.passed ? 'bg-emerald-500/5 border-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/5 border-red-500/10 text-red-600 dark:text-red-400'}`}>
-                                  <div className="flex items-center gap-3">
-                                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${res.passed ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
-                                      {res.passed ? '✓' : '✗'}
-                                    </span>
-                                    <span className="font-mono">Case {idx + 1}</span>
-                                  </div>
-                                  <div className="text-[10px] opacity-70 italic truncate flex gap-4 ml-4">
-                                    {res.isHidden ? (
-                                      <span className="text-zinc-500">[Hidden Test Case]</span>
-                                    ) : (
-                                      <>
-                                        <span className="text-zinc-500">Exp: {(res.output || res.out || "").trim()}</span>
-                                        <span className={res.passed ? "text-emerald-500" : "text-red-500"}>Got: {res.actual || 'None'}</span>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className={`p-4 rounded-2xl border text-xs font-semibold tracking-wider flex items-center gap-2 ${isCorrect ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
-                          {isCorrect ? (
-                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg> All validation tests passed</>
-                          ) : (
-                            <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg> Some tests failed</>
-                          )}
-                        </div>
-                      </div>
-                    ) : !isSubjective ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                        <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 text-zinc-800 dark:text-zinc-200">
-                          <span className="text-zinc-500 dark:text-zinc-400 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 6L9 17l-5-5" /></svg>
-                            Your Answer
-                          </span>
-                          <span className={`font-semibold text-sm ${isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                            {userAnswers[i] !== undefined ? parseText(q.options?.[userAnswers[i]]) : 'Skipped'}
-                          </span>
-                        </div>
-                        {!isCorrect && (
-                          <div className="p-4 bg-emerald-50/50 dark:bg-emerald-500/10 rounded-2xl border border-emerald-100 dark:border-emerald-500/20 text-zinc-800 dark:text-zinc-200">
-                            <span className="text-emerald-600/70 dark:text-emerald-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
-                              Correct Solution
-                            </span>
-                            <span className="font-semibold text-sm text-emerald-700 dark:text-emerald-400">
-                              {parseText(q.options?.[q.correctAnswer ?? 0])}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-white/60 dark:bg-black/20 rounded-2xl border border-white/50 dark:border-white/5 mt-2">
-                        <span className="text-orange-500/70 dark:text-orange-400/70 font-semibold block mb-1.5 tracking-wider text-[10px] flex items-center gap-1">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                          Feedback
-                        </span>
-                        <span className="font-semibold text-sm text-orange-700 dark:text-orange-400">
-                          Self-evaluated model answer check.
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Explanation Box */}
-                    <div className="mt-4 p-5 md:p-6 bg-white dark:bg-white/[0.02] rounded-2xl border border-zinc-100 dark:border-white/5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                      <div className="flex items-center gap-2 mb-3">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-zinc-400"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
-                        <span className="text-[11px] font-semibold text-zinc-500 tracking-wider">Explanation</span>
-                      </div>
-                      <div className="text-sm text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed">
-                        {parseText(q.explanation)}
-                      </div>
-                    </div>
-
+                    <button
+                      onClick={() => toggleBookmark(q.id || '')}
+                      className={`p-1 transition-all active:scale-90 ${bookmarkedIds.has(q.id || '')
+                          ? 'text-amber-500'
+                          : 'text-zinc-400 hover:text-amber-500'
+                        }`}
+                      title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
+                    >
+                      <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+                      </svg>
+                    </button>
                   </div>
+
+                  {/* Question Text */}
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">
+                    {parseText(q.question)}
+                  </p>
+
+                  {/* Answers Comparison */}
+                  {isCoding ? (
+                    <div className="space-y-2 pt-1 text-xs">
+                      <pre className="font-mono text-xs bg-zinc-900/60 p-3 rounded-xl overflow-auto text-zinc-300 max-h-36">
+                        {ansObj?.code || '# No code submitted'}
+                      </pre>
+                      {ansObj?.results && ansObj.results.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {ansObj.results.map((res: any, idx: number) => (
+                            <span key={idx} className={`px-2 py-0.5 rounded text-[10px] font-mono ${res.passed ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                              Case {idx + 1}: {res.passed ? '✓' : '✗'}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : !isSubjective ? (
+                    <div className="text-xs space-y-1 pt-0.5">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-zinc-400 font-medium shrink-0">Your Answer:</span>
+                        <span className={isCorrect ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-red-500 font-medium"}>
+                          {userAnswers[i] !== undefined ? parseText(q.options?.[userAnswers[i]]) : 'Skipped'}
+                        </span>
+                      </div>
+                      {!isCorrect && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-zinc-400 font-medium shrink-0">Correct:</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            {parseText(q.options?.[q.correctAnswer ?? 0])}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-zinc-400 pt-0.5">Self-evaluated model answer check completed.</p>
+                  )}
+
+                  {/* Explanation */}
+                  {q.explanation && (
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed pt-1.5 border-t border-zinc-100 dark:border-white/[0.04]">
+                      <span className="text-zinc-400 font-medium">Explanation: </span>
+                      {parseText(q.explanation)}
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -2613,398 +2608,300 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
       <StreakToast />
       {renderModals()}
 
-
-    </>
-  );
-
-  // ═══════════ Dashboard View ═══════════
-  if (quizQuestions.length === 0 && !quizCompleted && !reviewMode && dashboardView === 'dashboard') {
-    return (
-      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-0">
-        {globalOverlays}
-
-        {/* Header */}
-        <header className="text-center space-y-2 pt-2">
-          <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">
-            Quiz <span className="text-brand-primary">Taker</span>
-          </h2>
-          <p className="text-zinc-500 font-medium text-xs">Your personal assessment dashboard</p>
-        </header>
-
-        {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center space-y-2 animate-fade-in">
-            <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500">
-              <X className="w-4 h-4" />
-            </div>
-            <h4 className="text-xs font-semibold text-red-500">Protocol Interrupted</h4>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400">{error}</p>
-            <button onClick={() => setError(null)} className="text-[10px] font-medium text-zinc-400 hover:text-brand-primary transition-colors cursor-pointer">Dismiss</button>
-          </div>
-        )}
-
-
-        {/* Quick Start Bar */}
-        <div className="space-y-3">
-          <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Quick Start</h3>
-          <QuickStartBar
-            onOfficialPapers={() => {
-              setShowCustomQuizBuilder(false);
-              setDashboardView('official');
-            }}
-            onCustomQuiz={() => {
-              setShowCustomQuizBuilder(true);
-              setDashboardView('custom');
-            }}
-            onMyHistory={() => setDashboardView('history')}
-          />
-        </div>
-
-
-        {/* XP & Streak Stats Refined Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.6fr] gap-4 mb-4">
-          {/* XP & Level Card - Clickable Progress Modal Trigger */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={() => setShowProgressModal(true)}
-            className="bg-white dark:bg-[#17171a] hover:border-zinc-300 dark:hover:border-zinc-700 p-6 rounded-2xl sm:rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-none relative overflow-hidden group transition-all flex flex-col justify-between cursor-pointer"
-          >
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">Level {level.level}</p>
-                <h3 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-none">{level.title}</h3>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 text-brand-primary flex items-center justify-center">
-                <Trophy className="w-6 h-6" />
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-4">
-              <div className="flex items-baseline justify-between">
-                <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Total Experience</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-zinc-900 dark:text-white tabular-nums leading-none">
-                    {totalXP}
-                  </span>
-                  <span className="text-[11px] font-semibold text-brand-primary">XP</span>
-                </div>
-              </div>
-
-              {/* High Contrast Progress Line */}
-              <div className="space-y-1.5">
-                <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${level.progress}%` }}
-                    transition={{ duration: 1.2, ease: "circOut" }}
-                    viewport={{ once: true }}
-                    className="h-full bg-brand-primary rounded-full"
-                  />
-                </div>
-                {level.nextLevel && (
-                  <p className="text-[10px] font-medium text-zinc-400">
-                    Need <span className="font-semibold text-zinc-700 dark:text-zinc-200">{level.nextLevel!.minXP - totalXP} more</span> to reach {level.nextLevel!.title}
-                  </p>
-                )}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Streak Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.05 }}
-            className="bg-white dark:bg-[#17171a] p-6 rounded-2xl sm:rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-none relative overflow-hidden flex flex-col items-center justify-between transition-all"
-          >
-            <div className="flex flex-col items-center w-full">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Flame className="w-7 h-7 text-brand-primary fill-brand-primary" />
-                <h4 className="text-4xl font-black text-zinc-900 dark:text-white tabular-nums leading-none">
-                  {currentStreak}
-                </h4>
-              </div>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Day Streak</p>
-
-              <div className="px-2.5 py-0.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 mb-3">
-                <p className="text-[9px] font-semibold text-brand-primary uppercase tracking-wider leading-none">Best: {longestStreak}</p>
-              </div>
-            </div>
-
-            <div className="w-full pt-1">
-              <div className="flex justify-between items-center px-1">
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((label, i) => {
-                  const day = streakCalendar.slice(-7)[i];
-                  const isCompleted = day?.completed;
-                  return (
-                    <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
-                      <span className={`text-[9px] font-medium ${isCompleted ? 'text-brand-primary' : 'text-zinc-400'}`}>{label}</span>
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-brand-primary text-white' : 'bg-zinc-100 dark:bg-zinc-800/60'}`}>
-                        {isCompleted && <CheckCircle2 className="w-3 h-3 text-white" />}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ═══════════ Progress Timeline Modal ═══════════ */}
-        {typeof document !== 'undefined' && createPortal(
-          <AnimatePresence>
-            {showProgressModal && (
+      {/* ═══════════ Progress Timeline Modal ═══════════ */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showProgressModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="modal-overlay"
+              style={{ backdropFilter: 'blur(20px) saturate(180%)', zIndex: 60 }}
+              onClick={() => setShowProgressModal(false)}
+            >
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="modal-overlay"
-                style={{ backdropFilter: 'blur(24px) saturate(180%)', zIndex: 60 }}
-                onClick={() => setShowProgressModal(false)}
+                initial={{ scale: 0.96, opacity: 0, y: 16 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.96, opacity: 0, y: 16 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="w-[92vw] max-w-4xl bg-white/95 dark:bg-[#121214]/95 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-zinc-200/80 dark:border-white/[0.08] relative backdrop-blur-xl flex flex-col max-h-[88vh]"
+                onClick={(e) => e.stopPropagation()}
               >
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0, y: 30 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.95, opacity: 0, y: 30 }}
-                  className="w-[95vw] max-w-6xl bg-white/90 dark:bg-dark-950/90 rounded-[48px] shadow-2xl overflow-hidden border border-zinc-200 dark:border-white/10 relative"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {/* Close button */}
-                  <button
-                    onClick={() => setShowProgressModal(false)}
-                    className="absolute top-4 right-4 p-2.5 rounded-2xl bg-white/50 dark:bg-black/50 hover:bg-zinc-100 dark:hover:bg-white/10 backdrop-blur-sm transition-all z-50 group border border-zinc-200 dark:border-white/10"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4 text-zinc-400 group-hover:text-orange-500 group-hover:rotate-90 transition-all duration-300">
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                  </button>
+                {/* Header */}
+                <div className="p-5 sm:p-6 border-b border-zinc-100 dark:border-white/[0.06] flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-semibold tracking-tight text-zinc-900 dark:text-white">
+                        {shortBrandName} Journey
+                      </h2>
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-white/[0.06]">
+                        Tier {level.level} of {LEVEL_THRESHOLDS.length}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      Track your academic progress, level up, and unlock exclusive rewards.
+                    </p>
+                  </div>
 
-                  <div className="p-6 md:p-10 overflow-y-auto max-h-[90vh] custom-scrollbar">
-                    {/* Header & Rank Row */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 border-b border-zinc-100 dark:border-white/5 pb-8 relative pr-16">
-                      <div className="text-left space-y-1">
-                        <h2 className="text-3xl md:text-4xl font-black flex items-center gap-3">
-                          <span className="text-zinc-800 dark:text-white uppercase tracking-tighter">{shortBrandName}</span>
-                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-400 uppercase tracking-tighter">Journey</span>
-                        </h2>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-lg leading-relaxed">
-                          Track your academic progress, level up, and unlock exclusive rewards.
-                        </p>
-                      </div>
-
-                      <div className="p-3 md:p-4 rounded-[24px] bg-gradient-to-br from-orange-500/[0.08] to-orange-500/[0.08] border border-orange-500/15 backdrop-blur-md relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-3 opacity-20 transform translate-x-1 translate-y--1 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 text-orange-500"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>
-                        </div>
-                        <div className="flex items-center gap-5 relative z-10">
-                          <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center text-white">
-                            <Trophy className="w-5 h-5 text-white" />
-                          </div>
-                          <div className="text-left">
-                            <p className="text-[10px] font-black text-orange-500 dark:text-orange-400 uppercase tracking-widest mb-0.5 whitespace-nowrap">Account Rank</p>
-                            <div className="flex items-baseline gap-1.5 leading-none">
-                              <span className="text-xl font-black text-zinc-800 dark:text-white">{userQuizProfile.total_xp}</span>
-                              <span className="text-[9px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">Total XP</span>
-                            </div>
-                          </div>
-                        </div>
+                  <div className="flex items-center gap-2.5">
+                    {/* Account Rank / Total XP Pill */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50 dark:bg-white/[0.03]">
+                      <Trophy className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+                      <div className="flex items-baseline gap-1 text-xs">
+                        <span className="font-semibold text-zinc-900 dark:text-white">
+                          {userQuizProfile.total_xp?.toLocaleString?.() ?? userQuizProfile.total_xp}
+                        </span>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">XP</span>
                       </div>
                     </div>
 
-                    {/* Timeline Items Container */}
-                    <div className="md:overflow-x-auto md:snap-x md:snap-mandatory pb-6 pt-2 scrollbar-hide">
-                      <div className="flex flex-col md:flex-row gap-4 pb-4 pt-4 px-4 md:px-0">
-                        {LEVEL_THRESHOLDS.map((tier, index) => {
-                          const nextTier = LEVEL_THRESHOLDS[index + 1];
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setShowProgressModal(false)}
+                      className="w-8 h-8 rounded-full border border-zinc-200/80 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
+                      aria-label="Close"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Body Content */}
+                <div className="p-5 sm:p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5">
+                  {/* Current Level Progress Banner */}
+                  {level.nextLevel && (
+                    <div className="p-3.5 rounded-xl bg-zinc-50/80 dark:bg-white/[0.02] border border-zinc-200/60 dark:border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="font-semibold text-zinc-900 dark:text-white flex items-center gap-1.5">
+                          {getTierLucideIcon(level.level, true, "w-4 h-4")}
+                          <span>{level.title}</span>
+                        </span>
+                        <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                        <span className="text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                          {getTierLucideIcon(level.nextLevel.level, true, "w-4 h-4")}
+                          <span>{level.nextLevel.title}</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 flex-1 sm:max-w-xs">
+                        <div className="flex-1 h-1.5 bg-zinc-200/80 dark:bg-white/10 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${level.progress}%` }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="h-full bg-zinc-900 dark:bg-white rounded-full"
+                          />
+                        </div>
+                        <span className="text-[11px] font-mono font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                          {level.progress}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Horizontal Timeline Map (Circles in a line, no boxes) */}
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                      <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                        Journey Timeline
+                      </span>
+                      <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                        {level.level} of {LEVEL_THRESHOLDS.length} Tiers Unlocked
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto pb-6 pt-4 px-2 custom-scrollbar">
+                      <div className="relative min-w-[760px] flex items-start justify-between">
+                        {/* Continuous timeline connecting line behind the circles */}
+                        <div className="absolute top-5 left-7 right-7 h-0.5 bg-zinc-200 dark:bg-white/10 z-0">
+                          {/* Filled progress bar */}
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{
+                              width: `${Math.min(100, Math.max(0, ((level.level - 1) / (LEVEL_THRESHOLDS.length - 1)) * 100))}%`
+                            }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="h-full bg-zinc-900 dark:bg-white"
+                          />
+                        </div>
+
+                        {LEVEL_THRESHOLDS.map((tier) => {
                           const isRewardUnlocked = userQuizProfile.total_xp >= tier.minXP;
                           const isCurrent = level.level === tier.level;
-                          const isCollected = false;
+                          const isCollected = Array.isArray(userQuizProfile?.unlocked_frames)
+                            ? userQuizProfile.unlocked_frames.includes(tier.rewardFrame)
+                            : false;
                           const frameConfig = null;
 
-                          // Calculate exact progress to next level for the connector
-                          const connectorProgress = nextTier
-                            ? Math.max(0, Math.min(1, (userQuizProfile.total_xp - tier.minXP) / (nextTier.minXP - tier.minXP)))
-                            : (userQuizProfile.total_xp >= tier.minXP ? 1 : 0);
-
                           return (
-                            <motion.div
+                            <div
                               key={tier.level}
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="flex-shrink-0 w-full md:w-[260px] relative pb-6 snap-center group/card"
+                              className="flex flex-col items-center text-center relative z-10 w-24 flex-shrink-0 group"
                             >
-                              {/* Connector - Improved with exact progress */}
-                              {index < LEVEL_THRESHOLDS.length - 1 && (
-                                <div className="absolute left-1/2 md:left-auto md:top-[38px] md:right-[-32px] w-2 md:w-[64px] h-[40px] md:h-[4px] z-0 bottom-[-20px] md:bottom-auto translate-x-[-50%] md:translate-x-0 overflow-hidden bg-zinc-100 dark:bg-white/5 rounded-full border border-zinc-200/50 dark:border-white/5 shadow-inner">
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${connectorProgress * 100}%` }}
-                                    transition={{ duration: 1, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-orange-500 to-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.5)]"
-                                  />
-                                </div>
-                              )}
-
-                              <div className={`relative z-10 p-5 rounded-[32px] border transition-all duration-500 overflow-hidden ${isCurrent
-                                  ? 'bg-gradient-to-br from-white to-orange-50/30 dark:from-dark-900 dark:to-orange-500/5 border-orange-500/30 shadow-2xl shadow-orange-500/10 scale-105'
-                                  : isRewardUnlocked
-                                    ? 'bg-white/80 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:border-orange-500/20'
-                                    : 'bg-zinc-50/50 dark:bg-white/[0.02] border-zinc-200/50 dark:border-white/5 opacity-80'
-                                }`}>
-                                {/* Active Glow for Current Level */}
-                                {isCurrent && (
-                                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-orange-500/10 blur-3xl animate-pulse" />
+                              {/* Circle Node on the line */}
+                              <div
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 relative ${
+                                  isCurrent
+                                    ? 'bg-white shadow-md ring-4 ring-zinc-300 dark:ring-white/20 scale-110'
+                                    : isRewardUnlocked
+                                      ? 'bg-white shadow-sm'
+                                      : 'bg-zinc-100 text-zinc-400 dark:bg-[#18181b] dark:text-zinc-500 border border-zinc-200/80 dark:border-white/10'
+                                }`}
+                              >
+                                {getTierLucideIcon(
+                                  tier.level,
+                                  isRewardUnlocked,
+                                  isCurrent ? "w-5 h-5" : "w-4.5 h-4.5"
                                 )}
 
-                                <div className="space-y-5">
-                                  {/* Level Badge Header */}
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black transition-all duration-500 ${isRewardUnlocked
-                                          ? 'bg-gradient-to-br from-orange-500 to-orange-500 text-white shadow-xl shadow-orange-500/30 ring-4 ring-orange-500/10 rotate-3 group-hover/card:rotate-0'
-                                          : 'bg-zinc-200 dark:bg-white/10 text-zinc-400 dark:text-zinc-600 border border-zinc-300 dark:border-white/10'
-                                        }`}>
-                                        {tier.level}
-                                      </div>
-                                      <div>
-                                        <h4 className={`text-base font-black uppercase tracking-tight leading-none mb-1 flex items-center gap-2 ${isRewardUnlocked ? 'text-zinc-800 dark:text-white' : 'text-zinc-400'
-                                          }`}>
-                                          {tier.title} <span className="text-lg">{tier.icon}</span>
-                                        </h4>
-                                        <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-                                          {tier.minXP}{tier.maxXP === Infinity ? '+' : ` - ${tier.maxXP}`} XP
-                                        </p>
-                                      </div>
-                                    </div>
-                                    {isCurrent && (
-                                      <div className="px-2 py-0.5 bg-orange-500 text-white text-[8px] font-black uppercase tracking-[0.1em] rounded-md shadow-lg shadow-orange-500/30 animate-bounce">
-                                        Active
-                                      </div>
-                                    )}
+                                {/* Checkmark badge for completed past tiers */}
+                                {isRewardUnlocked && !isCurrent && (
+                                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white dark:ring-[#121214]">
+                                    <Check className="w-2 h-2 stroke-[3]" />
                                   </div>
-
-                                  {/* Collectible Section - Integrated */}
-                                  <div className={`p-4 rounded-2xl border transition-all duration-500 ${isRewardUnlocked
-                                      ? 'bg-zinc-50 dark:bg-black/20 border-zinc-100 dark:border-white/5'
-                                      : 'bg-transparent border-dashed border-zinc-200 dark:border-white/10'
-                                    }`}>
-                                    <div className="flex items-center gap-4">
-                                      {tier.rewardFrame ? (
-                                        <RewardItemCard
-                                          tier={tier}
-                                          isRewardUnlocked={isRewardUnlocked}
-                                          isCollected={isCollected}
-                                          userQuizProfile={userQuizProfile}
-                                          userProfile={userProfile}
-                                          updateUserQuizProfile={updateUserQuizProfile}
-                                          userId={userId}
-                                          frameConfig={frameConfig}
-                                        />
-                                      ) : (
-                                        <div className="flex-1 flex flex-col items-center justify-center py-4 text-center">
-                                          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1 italic">No Reward</div>
-                                          <div className="text-[8px] text-zinc-500">Keep climbing!</div>
-                                        </div>
-                                      )}
-
-                                      {tier.rewardFrame && (
-                                        <div className="flex-1 space-y-1">
-                                          <p className="text-[8px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Collectible</p>
-                                          <p className={`text-[10px] font-bold ${isRewardUnlocked ? 'text-zinc-700 dark:text-white' : 'text-zinc-400'}`}>
-                                            {tier.rarity} Frame
-                                          </p>
-                                          <div className={`text-[8px] leading-tight ${isRewardUnlocked ? 'text-zinc-500' : 'text-zinc-400/60'}`}>
-                                            {isRewardUnlocked
-                                              ? 'Unlocked and ready for your profile.'
-                                              : `Reach ${tier.title} to unlock this frame.`}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
+                                )}
                               </div>
-                            </motion.div>
+
+                              {/* Details below node - Clean typography, no box */}
+                              <div className="mt-3 flex flex-col items-center">
+                                <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                                  Tier {tier.level}
+                                </span>
+                                <span className={`text-xs mt-0.5 whitespace-nowrap ${
+                                  isCurrent
+                                    ? 'font-bold text-zinc-900 dark:text-white'
+                                    : isRewardUnlocked
+                                      ? 'font-semibold text-zinc-800 dark:text-zinc-200'
+                                      : 'font-medium text-zinc-400 dark:text-zinc-500'
+                                }`}>
+                                  {tier.title}
+                                </span>
+                                <span className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 whitespace-nowrap">
+                                  {tier.minXP.toLocaleString()} XP
+                                </span>
+
+                                {/* Status indicator */}
+                                {isCurrent ? (
+                                  <span className="mt-2 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
+                                    Current
+                                  </span>
+                                ) : isRewardUnlocked ? (
+                                  <span className="mt-2 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                    Unlocked
+                                  </span>
+                                ) : (
+                                  <span className="mt-2 text-[10px] text-zinc-400 dark:text-zinc-600 flex items-center gap-0.5">
+                                    <Lock className="w-2.5 h-2.5" /> Locked
+                                  </span>
+                                )}
+
+                                {/* Collectible Frame if available */}
+                                {tier.rewardFrame && (
+                                  <div className="mt-3 flex flex-col items-center">
+                                    <RewardItemCard
+                                      tier={tier}
+                                      isRewardUnlocked={isRewardUnlocked}
+                                      isCollected={isCollected}
+                                      userQuizProfile={userQuizProfile}
+                                      userProfile={userProfile}
+                                      updateUserQuizProfile={updateUserQuizProfile}
+                                      userId={userId}
+                                      frameConfig={frameConfig}
+                                    />
+                                    <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-medium mt-1">
+                                      {tier.rarity || 'Exclusive'} Frame
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
-            )}
-          </AnimatePresence>,
-          document.getElementById('modal-root') || document.body
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.getElementById('modal-root') || document.body
+      )}
+    </>
+  );
 
-
-
-
-
-
-
-        {/* Featured Quiz of the Day */}
-        {featuredQuiz && (
-          <div className="space-y-3">
-            <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Today's Featured</h3>
-            <FeaturedQuizCard
-              quiz={featuredQuiz}
-              isCompleted={featuredCompleted}
-              completedScore={featuredScore}
-              onStart={handleStartFeaturedQuiz}
-            />
-          </div>
-        )}
-
-        {/* Active Challenges */}
-        {activeChallenges.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-[10px] font-semibold text-zinc-400 tracking-wider px-1">Active Challenges</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeChallenges.map((challenge, i) => (
-                <ChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  isCompleted={completedChallengeIds.has(challenge.id)}
-                  userLevel={level.level}
-                  onStart={() => handleStartChallenge(challenge)}
-                  index={i}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
+  // ═══════════ Reimagined Dashboard View ═══════════
+  if (quizQuestions.length === 0 && !quizCompleted && !reviewMode && dashboardView === 'dashboard') {
+    return (
+      <div className="w-full">
+        {globalOverlays}
+        <QuizDashboardView
+          userProfile={userProfile}
+          userQuizProfile={userQuizProfile}
+          totalXP={totalXP}
+          level={level}
+          currentStreak={currentStreak}
+          longestStreak={longestStreak}
+          streakCalendar={streakCalendar}
+          isStreakAtRisk={isStreakAtRisk}
+          featuredQuiz={featuredQuiz}
+          featuredCompleted={featuredCompleted}
+          featuredScore={featuredScore}
+          activeChallenges={activeChallenges}
+          completedChallengeIds={completedChallengeIds}
+          subjectsWithSyllabi={subjectsWithSyllabi}
+          onStartFeaturedQuiz={handleStartFeaturedQuiz}
+          onStartChallenge={handleStartChallenge}
+          onLaunchOfficialPapers={(sub) => {
+            if (sub) {
+              handleSubjectChange(sub);
+              setSelectedUnits([]);
+            }
+            setShowCustomQuizBuilder(false);
+            setDashboardView('official');
+          }}
+          onLaunchCustomBuilder={(sub) => {
+            if (sub) {
+              handleSubjectChange(sub);
+              setSelectedUnits([]);
+            }
+            setShowCustomQuizBuilder(true);
+            setDashboardView('custom');
+          }}
+          onLaunchHistory={() => setDashboardView('history')}
+          onOpenProgressModal={() => setShowProgressModal(true)}
+          shortBrandName={shortBrandName}
+          fullBrandName={fullBrandName}
+          isLPU={isLPU}
+          error={error}
+          onDismissError={() => setError(null)}
+        />
       </div>
     );
   }
 
+
   // ═══════════ History View ═══════════
   if (dashboardView === 'history' && quizQuestions.length === 0 && !quizCompleted && !reviewMode) {
     return (
-      <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-0">
         {globalOverlays}
 
-        {/* Header with Back Button */}
-        <div className="flex items-center gap-3 pt-1">
+        {/* Header with Apple-Style Back Button */}
+        <div className="flex items-center gap-3.5 pt-2 pb-1">
           <button
             type="button"
             onClick={() => setDashboardView('dashboard')}
-            className="w-9 h-9 rounded-xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all flex items-center justify-center cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-[#111113] border border-zinc-200/80 dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-white/[0.15] text-zinc-700 dark:text-white transition-all flex items-center justify-center cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
             title="Back to Dashboard"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Quiz History
             </h2>
-            <p className="text-xs text-zinc-400">Review your past performance and answers</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Review your past performance, scores, and answers</p>
           </div>
         </div>
 

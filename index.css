@@ -172,6 +172,24 @@
   animation: pulseGentle 2s ease-in-out infinite;
 }
 
+@keyframes highlightReveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+    opacity: 1;
+  }
+}
+
+.animate-highlight-reveal {
+  animation: highlightReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
 .active-icon-glow {
   filter: drop-shadow(0 0 8px var(--brand-glow));
 }
