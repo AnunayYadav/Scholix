@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Calculator, Briefcase, PlayCircle } from 'lucide-react';
+import { CheckCircle2, Calculator, Briefcase } from 'lucide-react';
 import AttendanceTracker from './AttendanceTracker';
 import CGPACalculator from './CGPACalculator';
 import PlacementPrefect from './PlacementPrefect';
-import LecturesHub from './LecturesHub';
 import { UserProfile, ModuleType } from '../types';
 import { useUniversity } from '../hooks/useUniversity';
 import NexusAd from './NexusAd';
@@ -195,12 +194,6 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
       name: 'Placement', 
       icon: <Briefcase className="w-5 h-5" />,
       module: ModuleType.PLACEMENT
-    },
-    { 
-      id: 'lectures', 
-      name: 'YT Lectures', 
-      icon: <PlayCircle className="w-5 h-5" />,
-      module: ModuleType.LECTURES
     }
   ];
 
@@ -224,12 +217,6 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
       color: 'text-blue-500 dark:text-blue-400 bg-blue-500/10',
       hoverBorder: 'hover:border-blue-500/30',
       glow: 'rgba(59, 130, 246, 0.15)'
-    },
-    lectures: {
-      desc: 'Browse and watch university lectures inline without distraction.',
-      color: 'text-red-500 dark:text-red-400 bg-red-500/10',
-      hoverBorder: 'hover:border-red-500/30',
-      glow: 'rgba(239, 68, 68, 0.15)'
     }
   };
 
@@ -246,7 +233,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
             </h1>
           </header>
           
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-4xl">
             {visibleTabs.map(tab => {
               const detail = cardDetails[tab.id];
 
@@ -344,20 +331,6 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
                   </p>
                 </div>
               </div>
-
-              {/* Feature 4 */}
-              <div className="group relative p-5 rounded-[24px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200/60 dark:hover:bg-[#161618] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer">
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-2xl font-black text-red-500/90 dark:text-red-400/90 tracking-tighter font-mono w-8 group-hover:scale-105 transition-transform duration-300">04</span>
-                  <span className="text-[8px] font-extrabold bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:scale-105 transition-transform duration-300">Stream</span>
-                </div>
-                <div className="space-y-1 flex-1">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-300">Ad-Free YouTube Lectures</h4>
-                  <p className="text-[10.5px] text-zinc-500 dark:text-zinc-400 leading-normal font-medium">
-                    Browse and stream curriculum-mapped lectures inline with a distraction-free, ad-free video player to keep your study sessions focused.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -371,7 +344,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
               Back to Hub
             </button>
-            {activeTab !== 'cgpa' && activeTab !== 'attendance' && activeTab !== 'placement' && activeTab !== 'lectures' && (
+            {activeTab !== 'cgpa' && activeTab !== 'attendance' && activeTab !== 'placement' && (
               <div>
                 <h1 className="text-2xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-2">
                 </h1>
@@ -399,7 +372,6 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
               reportIdOverride={new URLSearchParams(location.search).get('id') || undefined} 
             />
           )}
-          {activeTab === 'lectures' && <LecturesHub userProfile={userProfile} />}
         </div>
       </div>
 

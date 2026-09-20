@@ -589,7 +589,6 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
       items: [
         { id: 'mess', name: 'Mess Menu', desc: "Today's meal planning and hostel dining schedule", icon: <Utensils />, customPath: '/campus/mess' },
         { id: ModuleType.CAMPUS, name: 'Campus Map', desc: 'Locate university buildings, blocks, and facilities', icon: <Map />, customPath: '/campus/map' },
-        { id: ModuleType.LECTURES, name: 'Lectures Hub', desc: 'Watch university lecture recordings and classes', icon: <PlayCircle />, customPath: '/tools?tab=lectures' },
       ].filter(isFeatureEnabled)
     },
     {
@@ -2130,7 +2129,7 @@ const FeatureRoutes: React.FC<{
       <Route path="/attendance" element={<FeatureGuard module={ModuleType.ATTENDANCE}><Navigate to="/tools?tab=attendance" replace /></FeatureGuard>} />
       <Route path="/cgpa" element={<FeatureGuard module={ModuleType.CGPA}><Navigate to="/tools?tab=cgpa" replace /></FeatureGuard>} />
       <Route path="/degree-guide" element={<FeatureGuard module={ModuleType.DEGREE_GUIDE}><DegreeGuide /></FeatureGuard>} />
-      <Route path="/lectures" element={<FeatureGuard module={ModuleType.LECTURES}><Navigate to="/tools?tab=lectures" replace /></FeatureGuard>} />
+      <Route path="/lectures" element={<Navigate to="/tools" replace />} />
 
 
       <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />

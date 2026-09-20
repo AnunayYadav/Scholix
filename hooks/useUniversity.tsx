@@ -53,8 +53,7 @@ export const UNIVERSITIES: University[] = [
         ModuleType.HELP,
         ModuleType.ABOUT,
         ModuleType.TIMETABLE,
-        ModuleType.FRESHERS,
-        ModuleType.LECTURES
+        ModuleType.FRESHERS
       ],
       campusTabs: ['mess', 'map']
     }
@@ -81,8 +80,7 @@ export const UNIVERSITIES: University[] = [
         ModuleType.HELP,
         ModuleType.ABOUT,
         ModuleType.TIMETABLE,
-        ModuleType.FRESHERS,
-        ModuleType.LECTURES
+        ModuleType.FRESHERS
       ],
       campusTabs: []
     }
