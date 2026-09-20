@@ -274,9 +274,10 @@ const simplifySubjectTitle = (code: string, originalTitle: string): string => {
 interface CGPACalculatorProps {
   userProfile?: UserProfile | null;
   hideHeader?: boolean;
+  onBack?: () => void;
 }
 
-const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader }) => {
+const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader, onBack }) => {
   const { universityInfo, shortBrandName, selectedUniversity, uniSlug } = useUniversity();
   const [inputMode, setInputMode] = useState<'marks' | 'grades'>('marks');
   const [currentSemester, setCurrentSemester] = useState<number>(1);
@@ -333,25 +334,6 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
     setManualAdjustments({});
     setCourses([]);
   }, [defaultProgram]);
-
-  useEffect(() => {
-    if (ignoreAutoPopulateRef.current) {
-      ignoreAutoPopulateRef.current = false;
-      return;
-    }
-    const defaultSubjects = activeProgramSubjects[currentSemester] || [];
-    if (defaultSubjects.length > 0) {
-      setCourses(defaultSubjects.map(sub => ({
-        id: Math.random().toString(36).substr(2, 9),
-        name: sub.name,
-        credits: sub.credits,
-        grade: selectedUniversity === 'iitm_bs' ? 'U' : 'F',
-        marks: 0
-      })));
-    } else {
-      setCourses([]);
-    }
-  }, [currentSemester, activeProgramSubjects, selectedUniversity]);
 
   // Flattened list for autocomplete lookup
   const allProgramSubjects = useMemo(() => {
@@ -624,104 +606,190 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   };
 
   const courseEntriesEl = (
-    <div className="p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] space-y-6 border-none shadow-none bg-zinc-100 dark:bg-[#111113] relative z-20">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-[11px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider">Course entries</h3>
+    <div className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] shadow-xs overflow-hidden">
+      {/* Card Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100/70 dark:border-white/[0.02]">
+        <div className="flex items-center gap-2.5">
+          <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">
+            Course Entries
+          </h3>
           {courses.length > 0 && (
-            <span className="text-[9px] sm:text-[10px] font-bold bg-brand-primary/10 text-brand-primary px-2.5 py-0.5 rounded-full">
+            <span className="text-[11px] font-medium bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md">
               {courses.length} {courses.length === 1 ? 'subject' : 'subjects'}
             </span>
           )}
         </div>
-        <button onClick={addCourse} className="text-[11px] sm:text-xs font-bold text-brand-primary bg-brand-primary/10 hover:bg-brand-primary/20 px-6 py-2.5 rounded-full transition-all border-none shadow-none cursor-pointer">+ Add field</button>
+        <button
+          onClick={addCourse}
+          className="text-xs font-medium text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Add Subject
+        </button>
       </div>
 
       {courses.length === 0 ? (
-        <div className="py-16 text-center bg-white dark:bg-[#18181b] rounded-[28px] opacity-60 text-[11px] sm:text-xs text-zinc-400 border-none shadow-none">No courses added yet</div>
+        <div className="py-14 text-center px-4">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-3">
+            No subjects added yet. Add a subject or load the default curriculum.
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={addCourse}
+              className="text-xs font-semibold text-white bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Add Subject
+            </button>
+            <button
+              onClick={() => {
+                const defaultSubjects = activeProgramSubjects[currentSemester] || [];
+                setCourses(defaultSubjects.map(sub => ({
+                  id: Math.random().toString(36).substr(2, 9),
+                  name: sub.name,
+                  credits: sub.credits,
+                  grade: selectedUniversity === 'iitm_bs' ? 'U' : 'F',
+                  marks: 0
+                })));
+              }}
+              className="text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/70 dark:hover:bg-white/10 px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer border border-zinc-200/60 dark:border-white/[0.06]"
+            >
+              Load Default Subjects
+            </button>
+          </div>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {courses.map((c) => {
-            const query = (c.name || '').trim().toLowerCase();
-            const filtered = query
-              ? allProgramSubjects.filter(s => s.name.toLowerCase().includes(query))
-              : (activeProgramSubjects[currentSemester] || []);
-            return (
-              <div key={c.id} className="flex flex-col md:flex-row items-center gap-4 bg-white dark:bg-[#18181b] p-4 sm:p-5 rounded-[28px] border-none shadow-none transition-all">
-                <div className="flex-1 w-full relative">
-                  <input
-                    type="text"
-                    placeholder="Course Name"
-                    value={c.name}
-                    onFocus={() => setFocusedCourseId(c.id)}
-                    onBlur={() => setTimeout(() => setFocusedCourseId(null), 150)}
-                    onChange={(e) => updateCourse(c.id, { name: e.target.value })}
-                    className="w-full bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-5 py-3.5 text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-brand-primary/50"
-                  />
-                  <div className={`absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-[#111113] border-none rounded-[28px] shadow-2xl max-h-64 overflow-y-auto z-50 py-2 custom-scrollbar transition-all duration-100 ease-out origin-top ${focusedCourseId === c.id && filtered.length > 0
-                      ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
-                      : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
-                    }`}>
-                    {filtered.map((sub, idx) => (
-                      <div
-                        key={idx}
-                        onMouseDown={() => {
-                          updateCourse(c.id, { name: sub.name, credits: sub.credits });
-                          setFocusedCourseId(null);
-                        }}
-                        className="px-5 py-2.5 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-brand-primary/10 hover:text-brand-primary cursor-pointer font-semibold transition-colors text-left"
-                      >
-                        {sub.name} <span className="opacity-50 font-normal ml-1">({sub.credits} Credits)</span>
-                      </div>
-                    ))}
+        <div>
+          {/* Table Header (Desktop) */}
+          <div className="hidden sm:grid grid-cols-12 gap-3 px-5 py-2.5 bg-zinc-50/70 dark:bg-white/[0.02] border-b border-zinc-100 dark:border-white/[0.04] text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+            <div className="col-span-7">Course / Subject</div>
+            <div className="col-span-2 text-center">Credits</div>
+            <div className="col-span-2 text-center">{inputMode === 'marks' ? 'Marks' : 'Grade'}</div>
+            <div className="col-span-1 text-right"></div>
+          </div>
+
+          {/* Rows */}
+          <div className="divide-y divide-zinc-100 dark:divide-white/[0.04]">
+            {courses.map((c) => {
+              const query = (c.name || '').trim().toLowerCase();
+              const filtered = query
+                ? allProgramSubjects.filter(s => s.name.toLowerCase().includes(query))
+                : (activeProgramSubjects[currentSemester] || []);
+              return (
+                <div
+                  key={c.id}
+                  className="px-5 py-3 flex flex-col sm:grid sm:grid-cols-12 gap-3 items-center hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] transition-colors"
+                >
+                  {/* Course Name with Autocomplete */}
+                  <div className="col-span-7 w-full relative">
+                    <input
+                      type="text"
+                      placeholder="Course name or code..."
+                      value={c.name}
+                      onFocus={() => setFocusedCourseId(c.id)}
+                      onBlur={() => setTimeout(() => setFocusedCourseId(null), 150)}
+                      onChange={(e) => updateCourse(c.id, { name: e.target.value })}
+                      className="w-full bg-zinc-100/70 dark:bg-white/[0.04] border border-transparent focus:border-zinc-300 dark:focus:border-white/20 rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-900 dark:text-white placeholder-zinc-400 outline-none transition-all"
+                    />
+                    <div
+                      className={`absolute left-0 right-0 top-full mt-1.5 bg-white/95 dark:bg-[#18181c]/95 backdrop-blur-xl border border-zinc-200/80 dark:border-white/[0.08] rounded-xl shadow-xl max-h-60 overflow-y-auto z-50 py-1.5 custom-scrollbar transition-all duration-150 ease-out origin-top ${
+                        focusedCourseId === c.id && filtered.length > 0
+                          ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
+                          : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
+                      }`}
+                    >
+                      {filtered.map((sub, idx) => (
+                        <div
+                          key={idx}
+                          onMouseDown={() => {
+                            updateCourse(c.id, { name: sub.name, credits: sub.credits });
+                            setFocusedCourseId(null);
+                          }}
+                          className="px-3.5 py-2 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-orange-500/10 hover:text-orange-500 cursor-pointer font-medium transition-colors text-left flex items-center justify-between"
+                        >
+                          <span className="truncate">{sub.name}</span>
+                          <span className="text-[10px] text-zinc-400 shrink-0 ml-2 font-normal">
+                            {sub.credits} Cr
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="space-y-1">
-                    <p className="text-[11px] sm:text-xs text-zinc-400 text-center font-bold">Credits</p>
+
+                  {/* Credits */}
+                  <div className="col-span-2 w-full sm:w-auto flex items-center justify-between sm:justify-center gap-2">
+                    <span className="text-[11px] font-medium text-zinc-400 sm:hidden">Credits:</span>
                     <input
                       type="number"
                       min="0"
                       max="20"
                       value={c.credits}
                       onChange={(e) => updateCourse(c.id, { credits: parseInt(e.target.value) || 0 })}
-                      className="w-16 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-3.5 text-xs text-center font-bold dark:text-white outline-none"
+                      className="w-16 bg-zinc-100/70 dark:bg-white/[0.04] border border-transparent focus:border-zinc-300 dark:focus:border-white/20 rounded-xl px-2 py-2 text-xs text-center font-semibold text-zinc-900 dark:text-white outline-none transition-all"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[11px] sm:text-xs text-zinc-400 text-center font-bold">{inputMode === 'marks' ? 'Marks' : 'Grade'}</p>
+
+                  {/* Marks / Grade */}
+                  <div className="col-span-2 w-full sm:w-auto flex items-center justify-between sm:justify-center gap-2">
+                    <span className="text-[11px] font-medium text-zinc-400 sm:hidden">{inputMode === 'marks' ? 'Marks:' : 'Grade:'}</span>
                     {inputMode === 'marks' ? (
-                      <input type="number" min="0" max="100" value={c.marks} onChange={(e) => updateCourse(c.id, { marks: parseInt(e.target.value) || 0 })} className="w-20 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-3.5 text-xs text-center font-bold dark:text-white outline-none" />
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={c.marks}
+                        onChange={(e) => updateCourse(c.id, { marks: parseInt(e.target.value) || 0 })}
+                        className="w-20 bg-zinc-100/70 dark:bg-white/[0.04] border border-transparent focus:border-zinc-300 dark:focus:border-white/20 rounded-xl px-2 py-2 text-xs text-center font-semibold text-zinc-900 dark:text-white outline-none transition-all"
+                      />
                     ) : (
                       <NexusDropdown
                         options={getGradeList(selectedUniversity)}
                         value={c.grade}
                         onChange={(val) => updateCourse(c.id, { grade: val })}
-                        className="w-24"
-                        buttonClassName="min-w-0 w-24 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-3.5"
+                        className="w-20"
+                        buttonClassName="min-w-0 w-20 bg-zinc-100/70 dark:bg-white/[0.04] border border-transparent hover:border-zinc-300 dark:hover:border-white/20 rounded-xl px-2.5 py-2 text-center text-xs"
                       />
                     )}
                   </div>
-                  <button onClick={() => removeCourse(c.id)} className="p-3 text-red-500 opacity-40 hover:opacity-100 border-none bg-transparent mt-4 cursor-pointer transition-opacity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+
+                  {/* Delete Button */}
+                  <div className="col-span-1 w-full sm:w-auto flex justify-end">
+                    <button
+                      onClick={() => removeCourse(c.id)}
+                      className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                      title="Remove course"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
-      <div className="pt-2 flex items-center justify-between">
-        <div className="text-[11px] sm:text-xs text-zinc-400 font-semibold">
-          {selectedUniversity === 'iitm_bs' ? 'Total Level Credits' : 'Total Semester Credits'}: <span className="text-zinc-800 dark:text-white font-bold">{currentStats.totalCredits}</span>
+      {/* Footer Bar */}
+      <div className="px-5 py-3.5 bg-zinc-50/70 dark:bg-white/[0.02] border-t border-zinc-100 dark:border-white/[0.06] flex items-center justify-between">
+        <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+          {selectedUniversity === 'iitm_bs' ? 'Level Credits' : 'Semester Credits'}:{' '}
+          <span className="font-semibold text-zinc-900 dark:text-white tabular-nums">{currentStats.totalCredits}</span>
         </div>
         <button
           onClick={() => setShowForecast(!showForecast)}
-          className={`px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all border-none shadow-none cursor-pointer ${showForecast
-              ? 'bg-brand-primary text-white'
-              : 'bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20'
-            }`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
+            showForecast
+              ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
+              : 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-white/10'
+          }`}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
             <path d="M3 3v18h18M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
           </svg>
           {showForecast ? 'Hide Forecast' : 'Degree Forecast'}
@@ -729,32 +797,39 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
       </div>
 
       {showForecast && (
-        <div className="search-dropdown-anim bg-white dark:bg-[#18181b] border-none shadow-none p-6 sm:p-8 rounded-[32px] md:rounded-[40px] space-y-6 mt-4">
-          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="border-t border-zinc-100 dark:border-white/[0.06] p-5 space-y-4 bg-zinc-50/40 dark:bg-white/[0.01]">
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h4 className="text-[11px] sm:text-xs font-bold text-brand-primary uppercase tracking-wider">Degree target</h4>
-              <p className="text-[10px] text-zinc-400 mt-0.5">Forecast individual semester performance required for target CGPA</p>
+              <h4 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">Degree Target</h4>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">Forecast individual semester performance required for target CGPA</p>
             </div>
-            <div className="relative">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500 font-medium">Target CGPA:</span>
               <input
                 type="number"
                 step="0.1"
                 max="10"
                 value={targetCGPA}
                 onChange={(e) => setTargetCGPA(e.target.value)}
-                className="w-24 bg-zinc-100 dark:bg-[#111113] border-none shadow-none rounded-2xl px-3 py-2.5 text-sm text-center font-bold text-brand-primary outline-none"
+                className="w-20 bg-white dark:bg-[#18181c] border border-zinc-200/80 dark:border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-center font-bold text-orange-600 dark:text-orange-400 outline-none"
                 placeholder="9.0"
               />
-              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-brand-primary rounded-full flex items-center justify-center text-white text-[9px] font-black">!</span>
             </div>
           </header>
 
           {Number(targetCGPA) > 0 && roadmapData.summary ? (
-            <div className="space-y-6 animate-fade-in">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="space-y-4 animate-fade-in">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {roadmapData.roadmap.map((item) => (
-                  <div key={item.sem} className={`p-4 rounded-[24px] border-none shadow-none transition-all flex flex-col items-center justify-center text-center relative overflow-hidden ${item.isManual ? 'bg-brand-primary/15' : 'bg-zinc-100 dark:bg-[#111113]'}`}>
-                    <p className="text-[10px] text-zinc-400 mb-2">
+                  <div
+                    key={item.sem}
+                    className={`p-3 rounded-xl border transition-all flex flex-col items-center justify-center text-center relative ${
+                      item.isManual
+                        ? 'border-orange-500/30 bg-orange-500/5'
+                        : 'border-zinc-200/60 dark:border-white/[0.06] bg-white dark:bg-[#18181b]'
+                    }`}
+                  >
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-1.5 font-medium">
                       {(() => {
                         const isIITM = selectedUniversity === 'iitm_bs';
                         const termName = currentCurriculum.terms.find(t => t.termNumber === item.sem)?.termName || `Term ${item.sem}`;
@@ -766,44 +841,50 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                     </p>
 
                     <div className="flex items-center gap-1.5 relative z-10">
-                      <button onClick={() => adjustSemTarget(item.sem, -0.1)} className="w-6 h-6 rounded-full bg-zinc-200/60 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none cursor-pointer">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M5 12h14" /></svg>
+                      <button
+                        onClick={() => adjustSemTarget(item.sem, -0.1)}
+                        className="w-5 h-5 rounded-md bg-zinc-100 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-orange-500 hover:text-white transition-colors cursor-pointer"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-2.5 h-2.5"><path d="M5 12h14" /></svg>
                       </button>
-                      <span className={`text-base font-bold tracking-tight text-brand-primary`}>{item.sgpa.toFixed(1)}</span>
-                      <button onClick={() => adjustSemTarget(item.sem, 0.1)} className="w-6 h-6 rounded-full bg-zinc-200/60 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-brand-primary hover:text-white transition-all border-none cursor-pointer">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5"><path d="M12 5v14M5 12h14" /></svg>
+                      <span className="text-sm font-bold text-zinc-900 dark:text-white tabular-nums px-1">
+                        {item.sgpa.toFixed(1)}
+                      </span>
+                      <button
+                        onClick={() => adjustSemTarget(item.sem, 0.1)}
+                        className="w-5 h-5 rounded-md bg-zinc-100 dark:bg-white/10 flex items-center justify-center text-zinc-600 dark:text-white hover:bg-orange-500 hover:text-white transition-colors cursor-pointer"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-2.5 h-2.5"><path d="M12 5v14M5 12h14" /></svg>
                       </button>
                     </div>
 
                     {item.isManual ? (
-                      <button onClick={() => resetManual(item.sem)} className="mt-2 text-[9px] text-brand-primary hover:underline border-none bg-transparent flex items-center gap-1 cursor-pointer">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                        Locked • Reset
+                      <button onClick={() => resetManual(item.sem)} className="mt-1.5 text-[10px] text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 cursor-pointer font-medium">
+                        Reset Lock
                       </button>
                     ) : (
-                      <p className="mt-2 text-[9px] text-zinc-400">Auto balancing</p>
+                      <p className="mt-1.5 text-[10px] text-zinc-400 font-medium">Auto</p>
                     )}
-
-                    {item.isManual && <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-brand-primary rounded-bl-sm" />}
                   </div>
                 ))}
               </div>
 
-              <div className={`p-4 rounded-[24px] border-none shadow-none flex items-center gap-3 ${roadmapData.summary.isImpossible ? 'bg-brand-secondary/15' : 'bg-brand-primary/10'}`}>
-                <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center flex-shrink-0 font-black text-xs ${roadmapData.summary.isImpossible ? 'bg-brand-secondary' : 'bg-brand-primary'}`}>
-                  {roadmapData.summary.isImpossible ? '!' : 'i'}
-                </div>
-                <p className="text-[10px] sm:text-[11px] font-bold text-zinc-600 dark:text-zinc-300 leading-relaxed">
+              <div className={`p-3.5 rounded-xl border flex items-center gap-3 ${
+                roadmapData.summary.isImpossible
+                  ? 'border-red-500/20 bg-red-500/5 text-red-700 dark:text-red-400'
+                  : 'border-orange-500/20 bg-orange-500/5 text-zinc-700 dark:text-zinc-300'
+              }`}>
+                <p className="text-xs leading-relaxed font-medium">
                   {roadmapData.summary.isImpossible
-                    ? "Target mathematically unreachable. Reduce manual locks or lower target CGPA."
-                    : <>Auto-balancing: Remaining unlocked {selectedUniversity === 'iitm_bs' ? 'terms' : 'semesters'} now require an average of <strong className="text-brand-primary">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to maintain your <strong className="text-brand-primary">{targetCGPA}</strong> goal.</>
+                    ? "Target mathematically unreachable. Lower target CGPA or adjust manual limits."
+                    : <>Auto-balancing: Remaining unlocked {selectedUniversity === 'iitm_bs' ? 'terms' : 'semesters'} require an average of <strong className="font-semibold text-orange-600 dark:text-orange-400 tabular-nums">{roadmapData.summary.avgNeeded.toFixed(2)} SGPA</strong> to reach <strong className="font-semibold">{targetCGPA}</strong>.</>
                   }
                 </p>
               </div>
             </div>
           ) : (
-            <div className="py-8 text-center border-none bg-zinc-100 dark:bg-[#111113] rounded-[24px] opacity-60">
-              <p className="text-[11px] sm:text-xs text-zinc-400 font-medium">Enter target CGPA to run simulation</p>
+            <div className="py-6 text-center text-xs text-zinc-400">
+              Enter target CGPA above to calculate required future SGPA.
             </div>
           )}
         </div>
@@ -812,108 +893,168 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   );
 
   const actionButtonsEl = (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <button
         onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${isHistoryOpen ? 'text-brand-primary' : 'text-zinc-400 hover:text-brand-primary'
-          }`}
+        className={`h-9 w-9 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+          isHistoryOpen
+            ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20'
+            : 'bg-zinc-100 dark:bg-[#18181b] border-zinc-200/30 dark:border-white/[0.04] text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+        }`}
         title="Archived Reports"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+          <path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" />
+        </svg>
       </button>
 
       <button
         onClick={saveSnapshot}
         disabled={isSaving}
-        className={`p-3 rounded-full transition-all border-none bg-zinc-100 dark:bg-[#111113] hover:bg-zinc-200 dark:hover:bg-[#161618] cursor-pointer flex items-center justify-center ${isSaving ? 'opacity-50' : 'text-zinc-400 hover:text-emerald-500'
-          }`}
-        title="Save to Vault"
+        className="h-9 w-9 rounded-xl border border-zinc-200/30 dark:border-white/[0.04] bg-zinc-100 dark:bg-[#18181b] hover:bg-zinc-200/70 dark:hover:bg-white/[0.06] text-zinc-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all cursor-pointer flex items-center justify-center"
+        title="Save Snapshot"
       >
-        {isSaving ? <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>}
+        {isSaving ? (
+          <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+        )}
       </button>
 
-      <button onClick={() => {
-        setIsNameModalOpen(true);
-      }} className="px-6 py-3 bg-brand-primary hover:bg-brand-primary/95 text-white rounded-full text-[10px] md:text-xs font-bold shadow-none active:scale-95 transition-all flex items-center gap-1.5 border-none cursor-pointer">
-        Generate Link
+      <button
+        onClick={() => setIsNameModalOpen(true)}
+        className="h-9 px-3.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl text-xs font-semibold shadow-xs active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+          <polyline points="16 6 12 2 8 6" />
+          <line x1="12" y1="2" x2="12" y2="15" />
+        </svg>
+        <span>Share Link</span>
       </button>
     </div>
   );
 
   const performanceOverviewEl = (
-    <div className="space-y-6">
-      {/* Clean Individual Actions Row (Hidden on mobile, visible on desktop) */}
-      <div className="hidden lg:flex justify-end px-1">
+    <div className="space-y-4">
+      {/* Desktop Action Row */}
+      <div className="hidden lg:flex justify-end">
         {actionButtonsEl}
       </div>
 
-      {/* Unified Score Card Box */}
-      <div className="bg-gradient-to-br from-brand-primary to-brand-secondary text-white border-none shadow-none relative overflow-hidden group rounded-[32px] md:rounded-[40px] p-6 sm:p-8 min-h-[150px]">
-        {/* Glow Effects */}
-        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 blur-[30px] rounded-full pointer-events-none transition-transform group-hover:scale-125 duration-700" />
-        <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/5 blur-[30px] rounded-full pointer-events-none transition-transform group-hover:scale-125 duration-700" />
-
-        <div className="grid grid-cols-2 gap-4 relative z-10 divide-x divide-white/15">
-          {/* SGPA Section */}
-          <div className="text-center px-2">
-            <p className="text-[10px] text-white/80 font-bold uppercase tracking-wider">TGPA</p>
-            <p className="text-4xl font-extrabold text-white mt-3 leading-none tracking-tight">{currentStats.sgpa.toFixed(2)}</p>
-            <div className="w-full mt-4 px-2">
-              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white transition-all duration-500" style={{ width: `${(currentStats.sgpa / 10) * 100}%` }} />
+      {/* Apple-Style Metrics Card */}
+      <div className="rounded-2xl border border-zinc-200/40 dark:border-white/[0.04] bg-white dark:bg-[#151518] p-5 sm:p-6 shadow-xs">
+        <div className="grid grid-cols-2 divide-x divide-zinc-100 dark:divide-white/[0.06]">
+          {/* TGPA / SGPA Column */}
+          <div className="flex flex-col items-center justify-center text-center pr-3 sm:pr-6">
+            <span className="text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1 tracking-tight">
+              {selectedUniversity === 'iitm_bs' ? 'Term SGPA' : 'Semester SGPA'}
+            </span>
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white tabular-nums">
+              {currentStats.sgpa > 0 ? currentStats.sgpa.toFixed(2) : '0.00'}
+            </div>
+            {/* Progress Bar */}
+            <div className="w-full max-w-[130px] sm:max-w-[140px] mt-3">
+              <div className="h-1.5 bg-zinc-100 dark:bg-white/[0.08] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-zinc-900 dark:bg-white rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${Math.min(100, Math.max(0, (currentStats.sgpa / 10) * 100))}%` }}
+                />
               </div>
             </div>
           </div>
 
-          {/* CGPA Section */}
-          <div className="text-center px-2">
-            <p className="text-[10px] text-white/80 font-bold uppercase tracking-wider">Overall CGPA</p>
-            <p className="text-4xl font-extrabold text-white mt-3 leading-none tracking-tight">{overallCGPA}</p>
-            <div className="w-full mt-4 px-2">
-              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white transition-all duration-500" style={{ width: `${(parseFloat(overallCGPA) / 10) * 100}%` }} />
+          {/* Overall CGPA Column */}
+          <div className="flex flex-col items-center justify-center text-center pl-3 sm:pl-6">
+            <span className="text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1 tracking-tight">
+              Overall CGPA
+            </span>
+            <div className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white tabular-nums">
+              {parseFloat(overallCGPA) > 0 ? overallCGPA : '0.00'}
+            </div>
+            {/* Progress Bar */}
+            <div className="w-full max-w-[130px] sm:max-w-[140px] mt-3">
+              <div className="h-1.5 bg-zinc-100 dark:bg-white/[0.08] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-zinc-900 dark:bg-white rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${Math.min(100, Math.max(0, (parseFloat(overallCGPA) / 10) * 100))}%` }}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Grade distribution */}
-      <div className="p-6 sm:p-8 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113]">
-        <h4 className="text-[11px] sm:text-xs text-zinc-400 mb-4 uppercase tracking-wider font-bold">Grade distribution</h4>
-        <div className="space-y-3">
+      {/* Grade Distribution */}
+      <div className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] p-5 shadow-xs space-y-3">
+        <h4 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Grade Distribution</h4>
+        <div className="space-y-2.5">
           {Object.entries(currentStats.gradeCounts)
             .filter(([_, count]) => (count as number) > 0)
-            .map(([grade, count]) => (
-              <div key={grade} className="flex items-center justify-between text-xs">
-                <span className="font-semibold dark:text-white">Grade {grade}</span>
-                <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-24 bg-white dark:bg-[#18181b] rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-primary" style={{ width: `${((count as number) / courses.length) * 100}%` }} />
+            .sort(([gA], [gB]) => (getGradePoints(selectedUniversity)[gB] ?? 0) - (getGradePoints(selectedUniversity)[gA] ?? 0))
+            .map(([grade, count]) => {
+              const points = getGradePoints(selectedUniversity)[grade] ?? 0;
+              const fillPercent = Math.max(8, (points / 10) * 100);
+              return (
+                <div key={grade} className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-zinc-700 dark:text-zinc-300">Grade {grade}</span>
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-1.5 w-24 bg-zinc-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-orange-500 rounded-full transition-all duration-300"
+                        style={{ width: `${fillPercent}%` }}
+                      />
+                    </div>
+                    <span className="font-semibold text-zinc-900 dark:text-white tabular-nums w-4 text-right">
+                      {count}
+                    </span>
                   </div>
-                  <span className="font-bold text-brand-primary w-4 text-right">{count}</span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           {courses.length === 0 && (
-            <p className="text-[10px] font-bold text-zinc-400 uppercase italic opacity-60">Awaiting grade input...</p>
+            <p className="text-[11px] text-zinc-400 italic py-2 text-center">No grades entered yet</p>
           )}
         </div>
       </div>
 
       {/* Inline Vault History Panel */}
       {isHistoryOpen && (
-        <div ref={historyPanelRef} className="p-6 rounded-[32px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] animate-fade-in space-y-4">
-          <h3 className="text-[11px] sm:text-xs font-semibold text-brand-primary uppercase tracking-wider">Saved reports</h3>
-          {history.length === 0 ? <p className="text-[10px] font-bold text-zinc-400 uppercase italic opacity-60 text-center py-4">Vault empty.</p> : (
-            <div className="space-y-3">
+        <div ref={historyPanelRef} className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] p-4 shadow-xs space-y-3 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Saved Reports</h3>
+            <span className="text-[10px] text-zinc-400 font-medium">{history.length} saved</span>
+          </div>
+          {history.length === 0 ? (
+            <p className="text-[11px] text-zinc-400 text-center py-3">No saved reports in vault.</p>
+          ) : (
+            <div className="space-y-2">
               {history.map(h => (
-                <div key={h.id} onClick={() => loadSnapshot(h)} className="p-4 bg-white dark:bg-[#18181b] border-none shadow-none rounded-[24px] cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#222226] transition-all flex items-center justify-between">
+                <div
+                  key={h.id}
+                  onClick={() => loadSnapshot(h)}
+                  className="p-3 bg-zinc-50/70 dark:bg-white/[0.02] border-none rounded-xl cursor-pointer hover:bg-zinc-100/60 dark:hover:bg-white/[0.05] transition-all flex items-center justify-between group"
+                >
                   <div className="min-w-0 flex-1 pr-2">
-                    <p className="text-xs font-semibold dark:text-white truncate">{h.label}</p>
-                    <p className="text-[9px] font-bold text-zinc-400 uppercase mt-0.5">{new Date(h.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate group-hover:text-orange-500 transition-colors">
+                      {h.label}
+                    </p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      {new Date(h.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
                   </div>
-                  <button onClick={(e) => deleteHistory(h.id, e)} className="p-1.5 text-red-500 opacity-40 hover:opacity-100 border-none bg-transparent flex-shrink-0 cursor-pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg></button>
+                  <button
+                    onClick={(e) => deleteHistory(h.id, e)}
+                    className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                      <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
               ))}
             </div>
@@ -924,17 +1065,35 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 px-4 md:px-0">
-      <div className="flex flex-row items-center justify-between gap-4 mb-6 pb-2 w-full">
-        <div>
-          <h2 className="text-3xl font-bold text-zinc-800 dark:text-white tracking-tighter">
-            CGPA <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Hub</span>
-          </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs mt-1">Calculate and forecast your SGPA and CGPA</p>
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in pb-20 px-4 md:px-6">
+      {/* Header */}
+      <div className="flex flex-row items-center justify-between gap-4 pb-2 w-full">
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-100 dark:bg-white/[0.05] hover:bg-zinc-200/60 dark:hover:bg-white/10 border border-zinc-200/30 dark:border-white/[0.03] transition-all cursor-pointer shrink-0 active:scale-95"
+              title="Back to Hub"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight leading-tight">
+              CGPA Hub
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
+              Calculate and forecast your semester SGPA and cumulative CGPA
+            </p>
+          </div>
         </div>
 
-        {/* Program Selector Only */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Program Selector */}
+        <div className="flex items-center shrink-0">
           <NexusDropdown
             options={Object.keys(CURRICULUM_REGISTRY)
               .filter(k => selectedUniversity === 'iitm_bs' ? k === 'bs-data-science' : k !== 'bs-data-science')
@@ -947,49 +1106,58 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
               setManualAdjustments({});
               setCourses([]);
             }}
+            align="right"
+            className="w-auto shrink-0"
+            buttonClassName="h-9 px-3.5 text-xs font-semibold rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200/30 dark:border-white/[0.04] text-zinc-900 dark:text-white"
           />
         </div>
       </div>
 
-      {/* Vault history moved inline into performanceOverviewEl */}
-
+      {/* Academic History (If beyond sem 1) */}
       {currentSemester > 1 && (
-        <div className="p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] bg-zinc-100 dark:bg-[#111113] border-none shadow-none mb-8 animate-fade-in">
-          <h3 className="text-[11px] sm:text-xs font-bold text-brand-primary mb-6">
-            {selectedUniversity === 'iitm_bs' ? `Academic history (Terms 1 – ${currentSemester - 1})` : `Academic history (Sems 1 – ${currentSemester - 1})`}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] p-5 shadow-xs space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">
+              {selectedUniversity === 'iitm_bs' ? `Academic History (Terms 1 – ${currentSemester - 1})` : `Academic History (Semesters 1 – ${currentSemester - 1})`}
+            </h3>
+            <span className="text-[11px] text-zinc-400 font-medium">Prior Performance</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1 font-semibold">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">
                 {selectedUniversity === 'iitm_bs' ? `CGPA till Term ${currentSemester - 1}` : `CGPA till Sem ${currentSemester - 1}`}
               </label>
               <input
-                type="number" step="0.01" max="10"
+                type="number"
+                step="0.01"
+                max="10"
                 value={prevCGPA}
                 onChange={(e) => setPrevCGPA(e.target.value)}
                 placeholder="e.g. 8.45"
-                className="w-full bg-white dark:bg-[#18181b] border-none shadow-none rounded-2xl px-6 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full bg-zinc-100/70 dark:bg-white/[0.04] border border-transparent focus:border-zinc-300 dark:focus:border-white/20 rounded-xl px-4 py-2.5 text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all"
               />
             </div>
             <div>
-              <label className="block text-[11px] sm:text-xs text-zinc-400 mb-2 ml-1 font-semibold">Total credits earned</label>
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">Total Credits Earned</label>
               <input
                 type="number"
                 value={prevTotalCredits}
                 onChange={(e) => setPrevTotalCredits(e.target.value)}
                 placeholder={`Default: ${archivedCredits}`}
-                className="w-full bg-white dark:bg-[#18181b] border-none shadow-none rounded-2xl px-6 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full bg-zinc-100/70 dark:bg-white/[0.04] border border-transparent focus:border-zinc-300 dark:focus:border-white/20 rounded-xl px-4 py-2.5 text-xs font-semibold text-zinc-900 dark:text-white outline-none transition-all"
               />
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
-        <div className="flex-1 w-full lg:max-w-[550px] space-y-6">
-          {/* Semester and Mode Dropdowns (Outside of header but on top) */}
-          <div className="flex flex-row items-center justify-between gap-3 px-1 w-full">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+      {/* Main Grid */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Left Column: Controls & Courses */}
+        <div className="flex-1 w-full space-y-4">
+          {/* Controls Bar: Semester Selector + Mode Segmented Control */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
               <NexusDropdown
                 options={currentCurriculum.terms.map(t => t.termName)}
                 value={currentCurriculum.terms.find(t => t.termNumber === currentSemester)?.termName || `Semester ${currentSemester}`}
@@ -998,90 +1166,121 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                   if (term) {
                     setCurrentSemester(term.termNumber);
                     setManualAdjustments({});
+                    setCourses([]);
                   }
                 }}
+                className="w-auto shrink-0"
+                buttonClassName="h-9 px-3.5 text-xs font-semibold rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200/30 dark:border-white/[0.04] text-zinc-900 dark:text-white"
               />
-              <NexusDropdown
-                options={['By Marks', 'By Grades']}
-                value={inputMode === 'marks' ? 'By Marks' : 'By Grades'}
-                onChange={(val) => {
-                  setInputMode(val === 'By Marks' ? 'marks' : 'grades');
-                }}
-              />
+
+              {/* iOS Segmented Pill for Marks / Grades */}
+              <div className="h-9 inline-flex p-0.5 rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200/30 dark:border-white/[0.03] shrink-0 items-center">
+                <button
+                  type="button"
+                  onClick={() => setInputMode('marks')}
+                  className={`h-8 px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    inputMode === 'marks'
+                      ? 'bg-white dark:bg-[#27272a] text-zinc-900 dark:text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  By Marks
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('grades')}
+                  className={`h-8 px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    inputMode === 'grades'
+                      ? 'bg-white dark:bg-[#27272a] text-zinc-900 dark:text-white shadow-2xs'
+                      : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  By Grades
+                </button>
+              </div>
             </div>
+
+            {/* Mobile Actions */}
             <div className="flex lg:hidden">
               {actionButtonsEl}
             </div>
           </div>
+
           {courseEntriesEl}
         </div>
-        <div className="w-full lg:w-[290px] flex-shrink-0 space-y-6">
+
+        {/* Right Column: Score Metrics & Distribution */}
+        <div className="w-full lg:w-[320px] flex-shrink-0 space-y-4">
           {performanceOverviewEl}
         </div>
       </div>
 
-      <div className="flex justify-center mt-4">
+      {/* Grading Standards Reference Toggle */}
+      <div className="flex justify-center pt-2">
         <button
           onClick={() => setShowGradingStandards(!showGradingStandards)}
-          className="text-xs font-semibold text-zinc-400 hover:text-brand-primary transition-all flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-100 dark:bg-[#111113] border-none shadow-none hover:bg-zinc-200 dark:hover:bg-[#161618] active:scale-95 duration-100 cursor-pointer"
+          className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-[#18181b] border border-zinc-200/30 dark:border-white/[0.03] cursor-pointer"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`w-4 h-4 transition-transform duration-200 ${showGradingStandards ? 'rotate-180' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 transition-transform duration-200 ${showGradingStandards ? 'rotate-180' : ''}`}>
             <path d="M6 9l6 6 6-6" />
           </svg>
-          {showGradingStandards ? 'Hide Grading Standards' : 'Show Grading Standards Reference'}
+          {showGradingStandards ? 'Hide Grading Standards' : 'Grading Standards Reference'}
         </button>
       </div>
 
       {showGradingStandards && (
-        <div className="search-dropdown-anim p-6 sm:p-8 md:p-9 rounded-[32px] md:rounded-[40px] border-none shadow-none bg-zinc-100 dark:bg-[#111113] overflow-hidden">
-          <header className="flex items-center justify-between mb-8">
-            <h3 className="text-[11px] sm:text-xs font-bold text-brand-primary uppercase tracking-wider">
-              {selectedUniversity === 'iitm_bs' ? 'IIT Madras' : shortBrandName} grading standards
+        <div className="rounded-2xl border border-zinc-200/30 dark:border-white/[0.03] bg-white dark:bg-[#151518] p-6 shadow-xs space-y-5 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">
+              {selectedUniversity === 'iitm_bs' ? 'IIT Madras' : shortBrandName} Grading Standards
             </h3>
-            <span className="text-[11px] sm:text-xs font-bold text-zinc-400 uppercase tracking-widest bg-white dark:bg-[#18181b] px-3.5 py-1 rounded-full">Standard Reference</span>
-          </header>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <span className="text-[11px] font-medium text-zinc-400 bg-zinc-100 dark:bg-white/[0.06] px-2.5 py-0.5 rounded-md">Official Scale</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5">
             {getStandards(selectedUniversity).map((s) => (
-              <div key={s.grade} className="p-5 rounded-[28px] bg-white dark:bg-[#18181b] border-none shadow-none flex flex-col items-center text-center group transition-all">
-                <span className="text-xl font-bold text-zinc-900 dark:text-white mb-1 group-hover:scale-110 transition-transform">{s.grade}</span>
-                <p className="text-xs text-brand-primary mb-2">{s.points} Points</p>
-                <p className="text-[11px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 mb-0.5">{s.range} Marks</p>
-                <p className="text-[11px] sm:text-xs text-zinc-400 opacity-40">{s.label}</p>
+              <div key={s.grade} className="p-3 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/[0.04] text-center hover:border-zinc-200 dark:hover:border-white/10 transition-colors">
+                <span className="text-lg font-bold text-zinc-900 dark:text-white block">{s.grade}</span>
+                <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 mt-0.5">{s.points} Pts</p>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">{s.range}</p>
+                <p className="text-[10px] text-zinc-400 mt-0.5 truncate">{s.label}</p>
               </div>
             ))}
           </div>
-          <div className="mt-6 p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/10">
-            <p className="text-[11px] sm:text-xs font-bold text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/[0.04]">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
               {selectedUniversity === 'iitm_bs' ? (
-                <><strong className="text-brand-primary">Pro Tip:</strong> IIT Madras BS program uses absolute grading. S stands for Super (10 points), A is Excellent (9 points), and E is the minimum passing grade (4 points).</>
+                <><strong className="text-zinc-900 dark:text-white">Notice:</strong> IIT Madras BS uses absolute grading. S stands for Super (10 pts), A is Excellent (9 pts), and E is the passing threshold (4 pts).</>
               ) : (
-                <><strong className="text-brand-primary">Pro Tip:</strong> {shortBrandName} uses relative grading based on class performance. These mark ranges are "Safe Estimates" to ensure you hit your target grade regardless of class average shifts.</>
+                <><strong className="text-zinc-900 dark:text-white">Notice:</strong> {shortBrandName} uses relative grading. These mark ranges represent safe estimates to target specific letter grades.</>
               )}
             </p>
           </div>
         </div>
       )}
 
+      {/* Share Modal */}
       {isShareModalOpen && createPortal(
         <div
           className={`modal-overlay ${isClosingShare ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseShare(); }}
         >
-          <div className={`nexus-modal w-full max-w-sm p-10 ${isClosingShare ? 'closing' : ''}`}>
-            <button onClick={handleCloseShare} className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          <div className={`nexus-modal w-full max-w-sm p-6 sm:p-7 rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#18181c] shadow-2xl ${isClosingShare ? 'closing' : ''}`}>
+            <button onClick={handleCloseShare} className="absolute top-5 right-5 p-1.5 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
-            <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20 relative group/icon">
-              <div className="absolute inset-0 bg-brand-primary/20 blur-2xl rounded-full opacity-0 group-hover/icon:opacity-100 transition-opacity" />
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary relative z-10"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-4 text-orange-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
             </div>
 
-            <h3 className="text-3xl font-bold tracking-tight mb-2 text-zinc-900 dark:text-white leading-none">Share Report</h3>
-            <p className="text-zinc-500 text-[11px] sm:text-xs mb-8">Encrypted link generated for your academic snapshot.</p>
+            <h3 className="text-xl font-bold tracking-tight mb-1 text-zinc-900 dark:text-white">Share Report</h3>
+            <p className="text-zinc-500 text-xs mb-5">Encrypted link generated for your academic snapshot.</p>
 
-            <div className="bg-zinc-50 dark:bg-[#0a0a0a]/50 border border-zinc-200 dark:border-white/10 rounded-3xl p-6 mb-8 select-all break-all text-[11px] font-mono text-zinc-600 dark:text-zinc-400 leading-relaxed shadow-inner max-h-32 overflow-y-auto custom-scrollbar">
+            <div className="bg-zinc-50 dark:bg-[#121215] border border-zinc-200/80 dark:border-white/10 rounded-xl p-3.5 mb-5 select-all break-all text-[11px] font-mono text-zinc-600 dark:text-zinc-400 leading-relaxed max-h-28 overflow-y-auto custom-scrollbar">
               {shareUrl}
             </div>
 
@@ -1093,7 +1292,7 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
                 btn.innerText = "COPIED!";
                 setTimeout(() => { if (btn) btn.innerText = originalText; }, 2000);
               }}
-              className="w-full py-5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all border-none"
+              className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-semibold text-xs shadow-xs active:scale-[0.99] transition-all border-none cursor-pointer"
             >
               Copy Link
             </button>
@@ -1101,35 +1300,36 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
         </div>,
         document.getElementById('modal-root') || document.body
       )}
+
+      {/* Name / Verto Identity Modal */}
       {isNameModalOpen && createPortal(
         <div
           className={`modal-overlay ${isClosingName ? 'closing' : ''}`}
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseName(); }}
         >
-          <div className={`nexus-modal w-full max-w-sm p-10 ${isClosingName ? 'closing' : ''}`}>
-            <button onClick={handleCloseName} className="absolute top-8 right-8 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          <div className={`nexus-modal w-full max-w-sm p-6 sm:p-7 rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#18181c] shadow-2xl ${isClosingName ? 'closing' : ''}`}>
+            <button onClick={handleCloseName} className="absolute top-5 right-5 p-1.5 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent cursor-pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
-            <div className="w-20 h-20 bg-brand-primary/10 rounded-[32px] flex items-center justify-center mb-8 border border-brand-primary/20 relative group/icon">
-              <div className="absolute inset-0 bg-brand-primary/20 blur-2xl rounded-full opacity-0 group-hover/icon:opacity-100 transition-opacity" />
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-10 h-10 text-brand-primary relative z-10">
+            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-4 text-orange-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
 
-            <h3 className="text-3xl font-bold tracking-tight mb-2 text-zinc-900 dark:text-white leading-none">Verto Identity</h3>
-            <p className="text-zinc-500 text-[11px] sm:text-xs mb-8">Enter your name to personalize the verified report.</p>
+            <h3 className="text-xl font-bold tracking-tight mb-1 text-zinc-900 dark:text-white">Report Author</h3>
+            <p className="text-zinc-500 text-xs mb-4">Enter your name to personalize the verified report.</p>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-4 mb-5">
               <input
                 type="text"
-                placeholder="Enter Verto's Name"
+                placeholder="Enter your name..."
                 value={vertoName}
                 onChange={(e) => setVertoName(e.target.value)}
-                className="w-full bg-white dark:bg-[#0a0a0a] border border-zinc-200 dark:border-white/10 rounded-2xl px-5 py-4 text-sm font-semibold dark:text-white outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full bg-zinc-100/70 dark:bg-[#121215] border border-zinc-200/80 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-semibold dark:text-white outline-none focus:border-orange-500"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -1141,9 +1341,9 @@ const CGPACalculator: React.FC<CGPACalculatorProps> = ({ userProfile, hideHeader
 
             <button
               onClick={handleGenerateLink}
-              className="w-full py-5 bg-gradient-to-r from-brand-primary to-brand-secondary text-white rounded-[24px] font-bold text-sm shadow-xl shadow-brand-primary/20 active:scale-95 transition-all border-none"
+              className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl font-semibold text-xs shadow-xs active:scale-[0.99] transition-all border-none cursor-pointer"
             >
-              Generate Protocol
+              Generate Share Link
             </button>
           </div>
         </div>,

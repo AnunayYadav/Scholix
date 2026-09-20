@@ -334,27 +334,19 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
             </div>
           </div>
         </div>
-      ) : (
+      ) : activeTab !== 'cgpa' ? (
         <div className="max-w-5xl mx-auto px-4 sm:px-0">
           <div className="flex flex-col gap-4 mb-4">
             <button 
               onClick={() => navigate(prefix + '/tools')} 
-              className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white transition-colors bg-zinc-100 dark:bg-[#111113] border-none shadow-none hover:bg-zinc-200/70 dark:hover:bg-[#161618] px-5 py-2.5 rounded-full cursor-pointer self-start active:scale-95"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white transition-colors bg-zinc-100 dark:bg-[#111113] border-none shadow-none hover:bg-zinc-200/70 dark:hover:bg-[#161618] cursor-pointer self-start active:scale-95"
+              title="Back to Hub"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3.5 h-3.5"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-              Back to Hub
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
             </button>
-            {activeTab !== 'cgpa' && activeTab !== 'attendance' && activeTab !== 'placement' && (
-              <div>
-                <h1 className="text-2xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-none mb-2">
-                </h1>
-                <p className="text-zinc-500 dark:text-zinc-400 font-medium text-[11px] sm:text-xs">
-                </p>
-              </div>
-            )}
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Tools Hub Ad */}
       <div className="max-w-5xl mx-auto px-4 sm:px-0">
@@ -364,7 +356,7 @@ const ToolsHub: React.FC<ToolsHubProps> = ({ userProfile }) => {
       <div className="relative">
         <div className="transition-all duration-500 transform">
           {activeTab === 'attendance' && <AttendanceTracker userProfile={userProfile} hideHeader={false} />}
-          {activeTab === 'cgpa' && <CGPACalculator userProfile={userProfile} hideHeader={true} />}
+          {activeTab === 'cgpa' && <CGPACalculator userProfile={userProfile} onBack={() => navigate(prefix + '/tools')} />}
           {activeTab === 'placement' && (
             <PlacementPrefect 
               userProfile={userProfile} 
