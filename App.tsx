@@ -415,16 +415,44 @@ const PlacementRedirect: React.FC = () => {
   return <Navigate to={`/tools?tab=placement&id=${reportId}`} replace />;
 };
 
+const getDynamicGreeting = (hour: number): string => {
+  // Late Night: 11 PM to 3:59 AM
+  if (hour >= 23 || hour < 4) {
+    const lateNightOptions = ['Late grind', 'Night owl', 'Still up'];
+    return lateNightOptions[Math.floor(Math.random() * lateNightOptions.length)];
+  }
+  // Early Dawn: 4 AM to 5:59 AM
+  if (hour >= 4 && hour < 6) {
+    const dawnOptions = ['Early riser', 'Up early'];
+    return dawnOptions[Math.floor(Math.random() * dawnOptions.length)];
+  }
+  // Morning: 6 AM to 11:59 AM
+  if (hour >= 6 && hour < 12) {
+    const morningOptions = ['Good morning', 'Morning'];
+    return morningOptions[Math.floor(Math.random() * morningOptions.length)];
+  }
+  // Afternoon: 12 PM to 4:59 PM
+  if (hour >= 12 && hour < 17) {
+    const afternoonOptions = ['Good afternoon', 'Good day'];
+    return afternoonOptions[Math.floor(Math.random() * afternoonOptions.length)];
+  }
+  // Evening: 5 PM to 10:59 PM
+  const eveningOptions = ['Good evening', 'Evening'];
+  return eveningOptions[Math.floor(Math.random() * eveningOptions.length)];
+};
+
 const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ userProfile }) => {
-  const [greeting, setGreeting] = useState('');
+  const [greeting, setGreeting] = useState(() => getDynamicGreeting(new Date().getHours()));
+  const [currentTime, setCurrentTime] = useState(() => new Date());
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
   const navigate = useNavigate();
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) setGreeting('Good morning');
-    else if (hour >= 12 && hour < 17) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const toggleTheme = () => {
@@ -441,10 +469,16 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
 
   const displayName = userProfile?.username || 'Verto';
 
-  const dateStr = new Date().toLocaleDateString('en-US', {
+  const dateStr = currentTime.toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'short',
     day: 'numeric'
+  });
+
+  const timeStr = currentTime.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
   });
 
   return (
@@ -457,12 +491,14 @@ const DashboardHeader: React.FC<{ userProfile: UserProfile | null }> = React.mem
             <div className="flex items-center justify-between w-full lg:w-auto gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                  <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-                    {dateStr}
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-pulse" />
+                  <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>{dateStr}</span>
+                    <span className="text-zinc-300 dark:text-zinc-700 font-normal">•</span>
+                    <span className="normal-case font-mono font-medium text-zinc-500 dark:text-zinc-400">{timeStr}</span>
                   </p>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-0.5">
+                <h1 className="text-xl md:text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-0.5">
                   {greeting}, <span className="text-brand-primary">{displayName}</span>
                 </h1>
               </div>
