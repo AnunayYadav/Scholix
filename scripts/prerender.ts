@@ -280,7 +280,7 @@ async function prerender() {
       title: r.title,
       description: r.description,
       contentHtml: `
-        <div style="padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
+        <div style="padding: 40px 20px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
           <header style="text-align: center; margin-bottom: 40px;">
             <a href="/" style="display: inline-block; margin-bottom: 20px;">
               <img src="/Scholix_dark.webp" alt="Scholix" style="height: 48px;" />
@@ -312,7 +312,7 @@ async function prerender() {
       title: `${prog} ${uniShort} Notes & Study Guides | ${uniName} - Scholix`,
       description: `Browse course folders, assignments, syllabus details, and previous year papers for ${uniName} ${prog} curriculum.`,
       contentHtml: `
-        <div style="padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
+        <div style="padding: 40px 20px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
           <header style="margin-bottom: 30px;">
             <nav style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">
               <a href="/" style="color: #ea580c; text-decoration: none;">Home</a> &gt; 
@@ -451,7 +451,7 @@ async function prerender() {
 
     // Render rich, SEO-optimized, fully visible HTML
     const contentHtml = `
-      <article style="max-width: 900px; margin: 0 auto; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937;">
+      <article style="max-width: 900px; margin: 0 auto; padding: 40px 20px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937;">
         <!-- Breadcrumb Navigation -->
         <nav aria-label="Breadcrumb" style="font-size: 0.9rem; color: #6b7280; margin-bottom: 16px;">
           <a href="/" style="color: #ea580c; text-decoration: none;">Home</a> &gt; 
@@ -616,7 +616,7 @@ async function prerender() {
         title: cat.title,
         description: cat.desc,
         contentHtml: `
-          <div style="padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
+          <div style="padding: 40px 20px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
             <header style="margin-bottom: 30px;">
               <nav style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">
                 <a href="${subjectPath}" style="color: #ea580c; text-decoration: none;">← Back to ${details.code}</a>
@@ -646,7 +646,7 @@ async function prerender() {
       title: `BTech CSE ${term.termName} Notes, PYQs & Papers | LPU - Scholix`,
       description: `Download syllabus guides, lecture notes, and PYQs for all subjects in LPU BTech CSE ${term.termName}.`,
       contentHtml: `
-        <div style="padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
+        <div style="padding: 40px 20px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
           <header style="margin-bottom: 30px;">
             <nav style="font-size: 0.9rem; color: #6b7280; margin-bottom: 12px;">
               <a href="/lpu/library/btechcse" style="color: #ea580c; text-decoration: none;">← BTech CSE Library</a>
@@ -707,7 +707,7 @@ async function prerender() {
           title: `${f.program} ${f.name} Notes & Papers | ${uniName} - Scholix`,
           description: `Access academic notes, question papers, and course guides for ${uniName} ${f.program} ${f.name}.`,
           contentHtml: `
-            <div style="padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
+            <div style="padding: 40px 20px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto;">
               <header style="margin-bottom: 30px;">
                 <a href="/${uniSlug}/library/${progSlug}" style="text-decoration: none; color: #ea580c; font-weight: 600;">← Program Library</a>
                 <h1 style="font-size: 2.2rem; font-weight: 800; color: #111827; margin-top: 16px;">${f.name} Semester Folders</h1>

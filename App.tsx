@@ -1857,7 +1857,7 @@ const AppContent: React.FC = () => {
     const bgColor = theme === 'dark' ? '#050505' : '#fdfdfd';
     const logoSrc = theme === 'dark' ? '/Scholix_dark.webp' : '/Scholix_light.webp';
     return (
-      <div className="flex flex-col items-center justify-center min-h-[100dvh]" style={{ backgroundColor: bgColor, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+      <div className="flex flex-col items-center justify-center min-h-[100dvh]" style={{ backgroundColor: bgColor, fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
         <div style={{ animation: 'pulse 1.8s ease-in-out infinite' }}>
           <img src={logoSrc} alt="Scholix" style={{ height: '60px', objectFit: 'contain' }} />
         </div>

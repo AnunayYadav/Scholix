@@ -841,7 +841,7 @@ const PlacementPrefect: React.FC<PlacementPrefectProps> = ({ userProfile, hideHe
       printContainer.style.width = '700px';
       printContainer.style.backgroundColor = backgroundColor;
       printContainer.style.color = textColor;
-      printContainer.style.fontFamily = 'Inter, sans-serif';
+      printContainer.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
       printContainer.style.padding = '40px 40px 80px 40px';
       
       const radarSVG = generateRadarSVG(result.detailedScores || {});

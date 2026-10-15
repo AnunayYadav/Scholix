@@ -219,7 +219,7 @@ export default async function handler(req: any, res: any) {
         subject: emailSubject,
         htmlContent: `
           <html>
-            <body style="font-family: 'Inter', Helvetica, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px;">
+            <body style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px;">
               <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; padding: 40px; border: 1px solid #e2e8f0; border-bottom: 4px solid ${brandColor};">
                 <div style="margin-bottom: 30px;">
                   <img src="${brandLogo}" width="44" height="44" style="width: 44px; height: 44px; border-radius: 10px; vertical-align: middle; display: inline-block;" alt="${shortBrandName} Logo">
