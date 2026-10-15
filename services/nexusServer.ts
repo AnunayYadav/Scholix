@@ -21,6 +21,104 @@ export const isIITMProgram = (program: string): boolean => {
   return name.startsWith('bs ') || name.includes('iitm') || name.includes('madras');
 };
 
+/**
+ * Smart file ordering detection algorithm:
+ * Detects unit, module, chapter, lecture, part, lab, and syllabus numbers from filenames
+ * to assign consistent sequence numbers for library items (e.g. Unit 1 -> 10, Unit 2 -> 20, Module 11 -> 110, Syllabus -> 4).
+ */
+export const extractSmartOrder = (fileName: string): number => {
+  if (!fileName) return 500;
+  const clean = fileName.replace(/\.[^/.]+$/, '').trim();
+  const lower = clean.toLowerCase();
+
+  // 1. Syllabus / Curriculum / Course Guide / Course Outline
+  if (lower.includes('syllabus') || lower.includes('curriculum') || lower.includes('course guide') || lower.includes('course outline')) {
+    return 4;
+  }
+
+  // 2. Decimal system (e.g. 'Shift_1.1', 'Shift_1.2', 'Shift_2.1', 'Shift_2.2', 'Shift_2.3', 'Unit 1.1', 'Module 2.3', '1.1', '2.2')
+  // Supports decimal patterns with or without keywords
+  const decimalRegex = /(?:unit|module|chapter|chap|ch|lecture|lec|week|block|lab|exp|experiment|shift|set|ca|part|pt|section|sec|paper|test|quiz|v|ver|version)?\s*[-_.:#]?\s*(\d+)\.(\d+)(?:\.(\d+))?(?=[^a-zA-Z0-9]|$)/i;
+  const decimalMatch = clean.match(decimalRegex);
+  if (decimalMatch) {
+    const major = parseInt(decimalMatch[1], 10);
+    const minor = parseInt(decimalMatch[2], 10);
+    // Disregard standalone years (e.g. 2023 without decimals)
+    if (major >= 0 && major < 100) {
+      if (major === 0) return 5;
+      return major * 10 + Math.min(minor, 9);
+    }
+  }
+
+  // 3. Unit / Module / Chapter / Lecture / Week / Block / Lab / Experiment / Shift / Set / CA / Paper / Midterm / Endterm
+  const romanMap: Record<string, number> = {
+    i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10,
+    xi: 11, xii: 12, xiii: 13, xiv: 14, xv: 15, xvi: 16, xvii: 17, xviii: 18, xix: 19, xx: 20
+  };
+
+  const mainRegex = /(?:unit|module|chapter|chap|ch|lecture|lec|week|block|lab|exp|experiment|shift|set|ca|paper|test|quiz|midterm|endterm)\s*[-_.:#]?\s*(\d+|[ivx]+)(?=[^a-zA-Z0-9]|$)/i;
+  const mainMatch = clean.match(mainRegex);
+
+  // Subparts: Part 1, Pt 2, Section 1
+  const partRegex = /(?:part|pt|section|sec)\s*[-_.:#]?\s*(\d+|[ivx]+)(?=[^a-zA-Z0-9]|$)/i;
+  const partMatch = clean.match(partRegex);
+
+  let partNum = 0;
+  if (partMatch) {
+    const rawPart = partMatch[1].toLowerCase();
+    if (/^\d+$/.test(rawPart)) {
+      partNum = parseInt(rawPart, 10);
+    } else if (romanMap[rawPart]) {
+      partNum = romanMap[rawPart];
+    }
+  }
+
+  if (mainMatch) {
+    const rawVal = mainMatch[1].toLowerCase();
+    let num = -1;
+    if (/^\d+$/.test(rawVal)) {
+      num = parseInt(rawVal, 10);
+    } else if (romanMap[rawVal]) {
+      num = romanMap[rawVal];
+    }
+
+    if (num === 0) return 5;
+
+    if (num > 0) {
+      if (partNum > 1) {
+        return num * 10 + Math.min(partNum - 1, 9);
+      }
+      return num * 10;
+    }
+  }
+
+  // 4. Just Part (without Unit/Module keyword)
+  if (partMatch && partNum > 0) {
+    return partNum * 10;
+  }
+
+  // 5. Leading number (e.g. '01_intro.pdf', '1. Overview', '02 - Notes')
+  const leadingMatch = clean.match(/^(?:\[?\s*)0*([1-9]\d{0,2})(?:[\s._\-)\]]|$)/);
+  if (leadingMatch) {
+    const num = parseInt(leadingMatch[1], 10);
+    if (num > 0 && num < 100) {
+      return num * 10;
+    }
+  }
+
+  // 6. Trailing number before extension (e.g. 'Operating Systems - 1', 'Maths 2', 'Endterm_1')
+  const trailingMatch = clean.match(/(?:^|[\s_#\-])0*([1-9]\d?)$/);
+  if (trailingMatch) {
+    const num = parseInt(trailingMatch[1], 10);
+    if (num > 0 && num < 50) {
+      return num * 10;
+    }
+  }
+
+  return 500;
+};
+
+
 
 // Rate limiter for auth operations
 const rateLimiter = {
@@ -2051,12 +2149,15 @@ class NexusServer {
       university = isIITMProgram(program) ? "iitmuni" : "lpu";
     }
 
+    const smartOrder = extractSmartOrder(name);
+
     const { error: dbErr } = await client.from('library_items').insert([{
       name, description: desc, parent_id: catFolder?.id || null, type: 'file',
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, storage_path: path,
       uploader_id: uid, status: admin ? 'approved' : 'pending',
       program: program.trim(),
-      university
+      university,
+      display_order: smartOrder
     }]);
     if (dbErr) throw dbErr;
   }
@@ -2343,7 +2444,12 @@ class NexusServer {
 
   static async requestUpdate(id: string, metadata: any, admin: boolean) {
     const client = getSupabase();
-    if (client) await client.from('library_items').update(admin ? metadata : { pending_update: metadata }).eq('id', id);
+    if (!client) return;
+    const payload = { ...metadata };
+    if (payload.name && (payload.display_order === undefined || payload.display_order === null || payload.display_order === 0)) {
+      payload.display_order = extractSmartOrder(payload.name);
+    }
+    await client.from('library_items').update(admin ? payload : { pending_update: payload }).eq('id', id);
   }
 
   static async fetchPendingFiles(program: string, q?: string): Promise<LibraryFile[]> {

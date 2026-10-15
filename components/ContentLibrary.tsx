@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
-import NexusServer from '../services/nexusServer.ts';
+import NexusServer, { extractSmartOrder } from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import ModernPDFViewer from './pdf/ModernPDFViewer.tsx';
 import { executeSecureDownload } from './pdf/utils/pdfDownloader.ts';
@@ -1502,16 +1502,16 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     }
 
     data.sort((a, b) => {
-      // Primary sort: display_order
-      const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
-      const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+      // Primary sort: smart display_order
+      const orderA = (typeof a.display_order === 'number' && a.display_order > 0) ? a.display_order : extractSmartOrder(a.name);
+      const orderB = (typeof b.display_order === 'number' && b.display_order > 0) ? b.display_order : extractSmartOrder(b.name);
       if (orderA !== orderB) return orderA - orderB;
 
       // Secondary sort: user selected criteria
       if (sortBy === 'newest') return b.uploadDate - a.uploadDate;
       if (sortBy === 'oldest') return a.uploadDate - b.uploadDate;
-      if (sortBy === 'az') return a.name.localeCompare(b.name);
-      return 0;
+      if (sortBy === 'az') return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+      return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
     });
     return data;
   }, [allFiles, searchQuery, isAdminView, viewMode, activeSemester, activeSubject, activeCategory, sortBy, fileFilterType]);

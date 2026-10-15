@@ -16,7 +16,7 @@ import {
   CommunityPost, MaterialRequest, StudyPack, WikiSection, SubjectChatMsg, SubjectStats
 } from '../types/communityTypes';
 import CommunityService, { uploadCommunityImage } from '../services/communityService';
-import NexusServer from '../services/nexusServer';
+import NexusServer, { extractSmartOrder } from '../services/nexusServer';
 import { askGeminiText } from '../services/geminiService';
 import FileDetailPage from './FileDetailPage';
 import PDFViewer from './PDFViewer.tsx';
@@ -1405,11 +1405,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     });
     console.log("[SubjectCommunity] Filtered subjectFiles count:", filtered.length);
     
-    // Sort files by display_order ascending (1 to 6), with uploadDate descending as fallback
+    // Sort files by smart display_order ascending, then natural numeric filename order, with uploadDate descending as final fallback
     return [...filtered].sort((a, b) => {
-      const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
-      const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+      const orderA = (typeof a.display_order === 'number' && a.display_order > 0) ? a.display_order : extractSmartOrder(a.name);
+      const orderB = (typeof b.display_order === 'number' && b.display_order > 0) ? b.display_order : extractSmartOrder(b.name);
       if (orderA !== orderB) return orderA - orderB;
+      const nameComp = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+      if (nameComp !== 0) return nameComp;
       return b.uploadDate - a.uploadDate;
     });
   }, [allFiles, activeSubject.name, searchQuery]);
@@ -3232,10 +3234,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     const currentFiles = subjectFiles
       .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
       .sort((a, b) => {
-        const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+        const orderA = (typeof a.display_order === 'number' && a.display_order > 0) ? a.display_order : extractSmartOrder(a.name);
+        const orderB = (typeof b.display_order === 'number' && b.display_order > 0) ? b.display_order : extractSmartOrder(b.name);
         if (orderA !== orderB) return orderA - orderB;
-        return a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
       });
 
     const currentIndex = currentFiles.findIndex(f => f.id === fileId);
@@ -3845,10 +3847,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
     return subjectFiles
       .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
       .sort((a, b) => {
-        const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+        const orderA = (typeof a.display_order === 'number' && a.display_order > 0) ? a.display_order : extractSmartOrder(a.name);
+        const orderB = (typeof b.display_order === 'number' && b.display_order > 0) ? b.display_order : extractSmartOrder(b.name);
         if (orderA !== orderB) return orderA - orderB;
-        return a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
       });
   }, [activeCategoryFolder, subjectFiles]);
 
@@ -5482,10 +5484,10 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
               const activeCategoryFiles = subjectFiles
                 .filter(f => isFileTypeMatchingCategory(f, activeCategoryFolder))
                 .sort((a, b) => {
-                  const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
-                  const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+                  const orderA = (typeof a.display_order === 'number' && a.display_order > 0) ? a.display_order : extractSmartOrder(a.name);
+                  const orderB = (typeof b.display_order === 'number' && b.display_order > 0) ? b.display_order : extractSmartOrder(b.name);
                   if (orderA !== orderB) return orderA - orderB;
-                  return a.name.localeCompare(b.name);
+                  return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
                 });
               const fileIdx = activeCategoryFiles.findIndex(f => f.id === activeMenuFileId);
               const isFirstFile = fileIdx <= 0;
