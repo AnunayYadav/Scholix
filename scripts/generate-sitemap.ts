@@ -67,6 +67,9 @@ async function generate() {
     { loc: 'https://scholix.app/lpu', priority: '0.9', changefreq: 'daily' },
     { loc: 'https://scholix.app/lpu/library', priority: '0.8', changefreq: 'daily' },
     { loc: 'https://scholix.app/lpu/quiz', priority: '0.8', changefreq: 'daily' },
+    { loc: 'https://scholix.app/lpu/quiz/official', priority: '0.8', changefreq: 'daily' },
+    { loc: 'https://scholix.app/lpu/quiz/custom', priority: '0.8', changefreq: 'daily' },
+    { loc: 'https://scholix.app/lpu/quiz/history', priority: '0.6', changefreq: 'weekly' },
     { loc: 'https://scholix.app/lpu/campus', priority: '0.8', changefreq: 'weekly' },
     { loc: 'https://scholix.app/lpu/campus/mess', priority: '0.8', changefreq: 'daily' },
     { loc: 'https://scholix.app/lpu/campus/map', priority: '0.7', changefreq: 'monthly' },
@@ -85,6 +88,9 @@ async function generate() {
     { loc: 'https://scholix.app/iitm', priority: '0.8', changefreq: 'daily' },
     { loc: 'https://scholix.app/iitm/library', priority: '0.7', changefreq: 'daily' },
     { loc: 'https://scholix.app/iitm/quiz', priority: '0.7', changefreq: 'daily' },
+    { loc: 'https://scholix.app/iitm/quiz/official', priority: '0.7', changefreq: 'daily' },
+    { loc: 'https://scholix.app/iitm/quiz/custom', priority: '0.7', changefreq: 'daily' },
+    { loc: 'https://scholix.app/iitm/quiz/history', priority: '0.5', changefreq: 'weekly' },
     { loc: 'https://scholix.app/iitm/timetable', priority: '0.7', changefreq: 'weekly' },
   ];
 
@@ -123,6 +129,11 @@ async function generate() {
       ['notes', 'pyqs', 'syllabus'].forEach(cat => {
         urls.push(buildUrlNode(`${subjUrl}/${cat}`, currentDate, 'daily', '0.8'));
       });
+
+      // Add subject-specific Quiz Taker URLs for organic test prep search intent
+      const quizSubjSlug = slugify(subjectName);
+      urls.push(buildUrlNode(`https://scholix.app/lpu/quiz/official/${quizSubjSlug}`, currentDate, 'daily', '0.8'));
+      urls.push(buildUrlNode(`https://scholix.app/lpu/quiz/custom/${quizSubjSlug}`, currentDate, 'daily', '0.8'));
     };
 
     term.coreSubjects.forEach(addSubject);
