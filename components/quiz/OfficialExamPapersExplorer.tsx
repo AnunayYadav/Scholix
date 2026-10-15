@@ -323,9 +323,52 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
 
       {/* Unified Archive List */}
       {isLoading ? (
-        <div className="py-20 text-center space-y-2">
-          <div className="w-7 h-7 border-2 border-zinc-400 dark:border-white/40 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-medium text-zinc-400">Loading authentic question papers...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-pulse">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="p-4 rounded-2xl bg-white dark:bg-[#131316] border border-zinc-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between min-h-[148px]"
+            >
+              <div>
+                {/* Top: Icon + Tag Skeleton & Badge Skeleton */}
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-zinc-200/80 dark:bg-white/[0.06] shrink-0" />
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-16 h-3 rounded bg-zinc-200/80 dark:bg-white/[0.08]" />
+                      <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-white/[0.08]" />
+                      <div className="w-12 h-2.5 rounded bg-zinc-200/60 dark:bg-white/[0.04]" />
+                    </div>
+                  </div>
+                  <div className="w-14 h-4.5 rounded-full bg-zinc-200/80 dark:bg-white/[0.06] shrink-0" />
+                </div>
+
+                {/* Title Skeleton */}
+                <div className="space-y-1.5 mt-2">
+                  <div
+                    className="h-3.5 rounded bg-zinc-200/80 dark:bg-white/[0.07]"
+                    style={{ width: `${82 - (i % 3) * 6}%` }}
+                  />
+                  <div
+                    className="h-3 rounded bg-zinc-200/50 dark:bg-white/[0.04]"
+                    style={{ width: `${52 + (i % 2) * 14}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Bottom Section: Inline Specs & Action Button Skeleton */}
+              <div className="pt-3 mt-3 border-t border-zinc-100 dark:border-white/[0.05] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-2.5 rounded bg-zinc-200/60 dark:bg-white/[0.04]" />
+                  <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-white/[0.08]" />
+                  <div className="w-9 h-2.5 rounded bg-zinc-200/60 dark:bg-white/[0.04]" />
+                  <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-white/[0.08]" />
+                  <div className="w-7 h-2.5 rounded bg-zinc-200/60 dark:bg-white/[0.04]" />
+                </div>
+                <div className="w-22 h-6 rounded-full bg-zinc-200/80 dark:bg-white/[0.08] shrink-0" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredPapers.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">

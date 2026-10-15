@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { LibraryFile, UserProfile, Folder } from '../types.ts';
-import NexusServer, { isIITMProgram } from '../services/nexusServer.ts';
+import NexusServer from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import ModernPDFViewer from './pdf/ModernPDFViewer.tsx';
 import { executeSecureDownload } from './pdf/utils/pdfDownloader.ts';
@@ -461,7 +461,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const [activeSubject, setActiveSubject] = useState<Folder | null>(null);
   const [activeCategory, setActiveCategory] = useState<Folder | null>(null);
 
-  const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA", "BS Data Science"];
+  const initialPrograms = ["BTech CSE", "BTech IT", "BCA", "MCA", "MBA", "BCom", "BA"];
   const [availablePrograms, setAvailablePrograms] = useState(initialPrograms);
   const [selectedProgram, setSelectedProgram] = useState(() => {
     if (program) {
@@ -1168,19 +1168,20 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   const fetchFromSource = useCallback(async (showSkeleton = true) => {
     if (showSkeleton) setIsLoading(true);
     try {
+      const targetProgram = program ? selectedProgram : 'All';
       const [folderList, filesFromDb] = await Promise.all([
-        NexusServer.fetchFolders(selectedProgram),
+        NexusServer.fetchFolders(targetProgram),
         isAdminView
-          ? NexusServer.fetchPendingFiles(selectedProgram, searchQuery)
+          ? NexusServer.fetchPendingFiles(targetProgram, searchQuery)
           : (viewMode === 'my-uploads' && userProfile)
             ? NexusServer.fetchUserFiles(userProfile.id)
-            : NexusServer.fetchFiles(selectedProgram, searchQuery)
+            : NexusServer.fetchFiles(targetProgram, searchQuery)
       ]);
 
       setFolders(folderList);
       setAllFiles(filesFromDb);
       console.log("[ContentLibrary] fetchFromSource successfully loaded:", {
-        selectedProgram,
+        targetProgram,
         foldersCount: folderList.length,
         filesCount: filesFromDb.length,
         sampleFiles: filesFromDb.slice(0, 3)
@@ -1190,7 +1191,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     } finally {
       setIsLoading(false);
     }
-  }, [isAdminView, viewMode, userProfile, searchQuery, selectedProgram]);
+  }, [isAdminView, viewMode, userProfile, searchQuery, selectedProgram, program]);
 
   useEffect(() => {
     fetchFromSource(true);
@@ -1703,7 +1704,7 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
         }
       }
 
-      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, folderIcon, folderColor, uniSlug === 'iitm' ? 'iitmuni' : 'lpu');
+      await NexusServer.createFolder(newFolderName.trim(), type, parentId, selectedProgram, folderIcon, folderColor, 'lpu');
       if (targetSectionName) {
         const freshFolders = await NexusServer.fetchFolders(selectedProgram);
         const createdSub = freshFolders.find(f => f.type === 'subject' && f.name.toLowerCase() === newFolderName.trim().toLowerCase() && f.parent_id === parentId);
@@ -2282,161 +2283,75 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
             )
           ) : !program && viewMode === 'browse' ? (
             // Screen 1: Program Selection Screen (Root)
-            <div className="space-y-8 animate-fade-in">
-              {/* IIT Madras Section */}
-              {availablePrograms.some(isIITMProgram) && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between pb-1 mt-2 px-1">
-                    <span className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200">Indian Institute of Technology Madras</span>
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">IITM Portal</span>
-                  </div>
-                  {layoutMode === 'list' ? (
-                    <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
-                      {availablePrograms.filter(isIITMProgram).map((prog) => {
-                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                        const pResources = allFiles.filter(f => f.program === prog).length;
-                        let subtitle = "4 Years Program (BS Degree)";
+            <div className="space-y-6 animate-fade-in">
+              {layoutMode === 'list' ? (
+                <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
+                  {availablePrograms.map((prog) => {
+                    const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                    const pResources = allFiles.filter(f => f.program === prog).length;
 
-                        return (
-                          <Link
-                            key={prog}
-                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                            className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none no-underline"
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
-                              <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                              </svg>
-                              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
-                                {prog}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
-                                {subtitle}
-                              </span>
-                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
-                                {pSubjects} {pSubjects === 1 ? 'subject' : 'subjects'}
-                              </span>
-                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
-                                • {pResources} {pResources === 1 ? 'resource' : 'resources'}
-                              </span>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {availablePrograms.filter(isIITMProgram).map((prog) => {
-                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                        const pResources = allFiles.filter(f => f.program === prog).length;
+                    let subtitle = "3 Years Program";
+                    if (prog.includes("BTech")) subtitle = "4 Years Program";
+                    else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
 
-                        return (
-                          <Link
-                            key={prog}
-                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                            className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-2 shadow-xs select-none no-underline"
-                          >
-                            <div className="flex items-center justify-between">
-                              <svg className="w-6 h-6 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                              </svg>
-                              <span className="text-[10px] font-medium text-zinc-400">
-                                {pSubjects || pResources}
-                              </span>
-                            </div>
-                            <span
-                              className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors"
-                              title={prog}
-                            >
-                              {prog}
-                            </span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
+                    return (
+                      <Link
+                        key={prog}
+                        to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                        className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none no-underline"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+                          <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                          </svg>
+                          <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
+                            {prog}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                            {subtitle}
+                          </span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
+                            {pSubjects} {pSubjects === 1 ? 'subject' : 'subjects'}
+                          </span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
+                            • {pResources} {pResources === 1 ? 'resource' : 'resources'}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
-              )}
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {availablePrograms.map((prog) => {
+                    const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
+                    const pResources = allFiles.filter(f => f.program === prog).length;
 
-              {/* LPU Section */}
-              {availablePrograms.some(p => !isIITMProgram(p)) && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between pb-1 px-1">
-                    <span className="text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200">Lovely Professional University</span>
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">LPU Portals</span>
-                  </div>
-                  {layoutMode === 'list' ? (
-                    <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden">
-                      {availablePrograms.filter(p => !isIITMProgram(p)).map((prog) => {
-                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                        const pResources = allFiles.filter(f => f.program === prog).length;
-
-                        let subtitle = "3 Years Program";
-                        if (prog.includes("BTech")) subtitle = "4 Years Program";
-                        else if (prog.includes("MCA") || prog.includes("MBA")) subtitle = "2 Years Program";
-
-                        return (
-                          <Link
-                            key={prog}
-                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                            className="flex items-center justify-between py-2.5 px-3 hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors cursor-pointer group/row select-none no-underline"
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
-                              <svg className="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                              </svg>
-                              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white transition-colors truncate">
-                                {prog}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
-                                {subtitle}
-                              </span>
-                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal">
-                                {pSubjects} {pSubjects === 1 ? 'subject' : 'subjects'}
-                              </span>
-                              <span className="text-xs text-zinc-400 dark:text-zinc-500 font-normal hidden sm:inline">
-                                • {pResources} {pResources === 1 ? 'resource' : 'resources'}
-                              </span>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {availablePrograms.filter(p => !isIITMProgram(p)).map((prog) => {
-                        const pSubjects = folders.filter(f => f.type === 'subject' && f.program === prog).length;
-                        const pResources = allFiles.filter(f => f.program === prog).length;
-
-                        return (
-                          <Link
-                            key={prog}
-                            to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
-                            className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-2 shadow-xs select-none no-underline"
-                          >
-                            <div className="flex items-center justify-between">
-                              <svg className="w-6 h-6 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                              </svg>
-                              <span className="text-[10px] font-medium text-zinc-400">
-                                {pSubjects || pResources}
-                              </span>
-                            </div>
-                            <span
-                              className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors"
-                              title={prog}
-                            >
-                              {prog}
-                            </span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
+                    return (
+                      <Link
+                        key={prog}
+                        to={`${routePrefix}/library/${librarySlug(prog, 'program')}`}
+                        className="p-3.5 rounded-xl border border-zinc-200/70 dark:border-white/5 bg-white dark:bg-[#111113] hover:border-amber-400/40 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all cursor-pointer group flex flex-col gap-2 shadow-xs select-none no-underline"
+                      >
+                        <div className="flex items-center justify-between">
+                          <svg className="w-6 h-6 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                          </svg>
+                          <span className="text-[10px] font-medium text-zinc-400">
+                            {pSubjects || pResources}
+                          </span>
+                        </div>
+                        <span
+                          className="text-xs font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors"
+                          title={prog}
+                        >
+                          {prog}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -246,9 +246,19 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
         let downloadBlob: Blob;
 
         try {
+            const originalPdf = await PDFDocument.load(originalPdfBytes, { ignoreEncryption: true });
+            const origFirstPage = originalPdf.getPage(0);
+            const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
+            const isLandscape = pageWidth > pageHeight;
+
             let coverImageBytes: ArrayBuffer | null = null;
             try {
-                const coverResponse = await fetch('/pdfcover.png');
+                const coverPath = isLandscape ? '/16ratio9pdfcover.png' : '/squarepdfcover.png';
+                let coverResponse = await fetch(coverPath);
+                if (!coverResponse.ok) {
+                    const fallbackPath = isLandscape ? '/squarepdfcover.png' : '/16ratio9pdfcover.png';
+                    coverResponse = await fetch(fallbackPath);
+                }
                 if (coverResponse.ok) {
                     coverImageBytes = await coverResponse.arrayBuffer();
                 }
@@ -256,15 +266,12 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
                 console.warn("Cover image fetch skipped:", coverErr);
             }
 
-            const originalPdf = await PDFDocument.load(originalPdfBytes, { ignoreEncryption: true });
             const finalPdf = await PDFDocument.create();
 
             const [firstPage] = await finalPdf.copyPages(originalPdf, [0]);
             finalPdf.addPage(firstPage);
 
             if (coverImageBytes) {
-                const origFirstPage = originalPdf.getPage(0);
-                const { width: pageWidth, height: pageHeight } = origFirstPage.getSize();
                 const coverImage = await finalPdf.embedPng(coverImageBytes);
                 const coverPage = finalPdf.addPage([pageWidth, pageHeight]);
 

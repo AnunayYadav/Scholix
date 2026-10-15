@@ -90,13 +90,91 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [timerPaused, setTimerPaused] = useState(false);
   const [subjectiveInputs, setSubjectiveInputs] = useState<Record<number, string>>({});
+  const [isQuestionsCollapsed, setIsQuestionsCollapsed] = useState(false);
 
   const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const isProgrammaticScroll = useRef(false);
+  const scrollTimeout = useRef<any>(null);
 
   // Automatically mark current question as visited
   useEffect(() => {
     setVisitedQuestions(prev => new Set(prev).add(currentQuestionIdx));
   }, [currentQuestionIdx, setVisitedQuestions]);
+
+  // Robust, bi-directional scroll spy listening on main-content-area and window
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let ticking = false;
+
+    const updateActiveQuestion = () => {
+      if (isProgrammaticScroll.current) return;
+      if (!questionRefs.current || questionRefs.current.length === 0) return;
+
+      const container = document.getElementById('main-content-area');
+      if (container) {
+        const isNearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 30;
+        if (isNearBottom) {
+          setCurrentQuestionIdx(questionRefs.current.length - 1);
+          return;
+        }
+      } else {
+        const isWindowNearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 30;
+        if (isWindowNearBottom) {
+          setCurrentQuestionIdx(questionRefs.current.length - 1);
+          return;
+        }
+      }
+
+      // Target focus line (below top header/nav, where user's eyes read questions)
+      const focusPoint = Math.min(Math.max(window.innerHeight * 0.25, 120), 180);
+
+      let activeIdx = 0;
+      for (let i = 0; i < questionRefs.current.length; i++) {
+        const el = questionRefs.current[i];
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        // If the top of this question has reached or passed our focus line, it is active
+        if (rect.top <= focusPoint) {
+          activeIdx = i;
+        } else {
+          // Questions are strictly ordered top-to-bottom; once one is below the focus line, stop
+          break;
+        }
+      }
+
+      setCurrentQuestionIdx(activeIdx);
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveQuestion();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const scrollContainer = document.getElementById('main-content-area');
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+
+    // Initial check on render
+    updateActiveQuestion();
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      }
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    };
+  }, [quizQuestions.length, setCurrentQuestionIdx]);
 
   // Total Marks Calculation
   const totalExamMarks = useMemo(() => {
@@ -106,9 +184,31 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
   }, [activeExamPaper, quizQuestions]);
 
   // Subject and Paper Metadata
-  const examName = activeExamPaper?.exam_type ? activeExamPaper.exam_type.toUpperCase() : 'Quiz 1';
-  const subjectCode = selectedSubject?.name?.split(':')[0]?.trim() || activeExamPaper?.subject_code || 'General';
-  const qpTitle = activeExamPaper?.term || activeExamPaper?.title || `${subjectCode} Exam Paper`;
+  const examName = useMemo(() => {
+    if (!activeExamPaper?.exam_type) return 'EXAM';
+    const type = activeExamPaper.exam_type.toLowerCase();
+    if (type === 'endterm') return 'End Term';
+    if (type === 'midterm') return 'Mid Term';
+    if (type === 'practice') return 'Practice Paper';
+    if (type === 'mock') return 'Mock Exam';
+    return type.toUpperCase();
+  }, [activeExamPaper?.exam_type]);
+
+  const subjectCode = activeExamPaper?.subject_code || selectedSubject?.name?.split(':')[0]?.trim() || 'General';
+  const subjectFullName = selectedSubject?.name || activeExamPaper?.subject_name || subjectCode;
+
+  // Authentic paper name display (prioritizes actual paper title, never bare "Regular")
+  const paperTitle = useMemo(() => {
+    if (activeExamPaper?.title && activeExamPaper.title.trim().length > 0 && activeExamPaper.title.toLowerCase() !== 'regular') {
+      return activeExamPaper.title;
+    }
+    const yearStr = activeExamPaper?.year && activeExamPaper.year > 0 ? ` ${activeExamPaper.year}` : '';
+    const termStr = activeExamPaper?.term && activeExamPaper.term !== 'Regular' ? ` (${activeExamPaper.term})` : '';
+    return `${subjectCode} ${examName}${yearStr}${termStr}`;
+  }, [activeExamPaper, subjectCode, examName]);
+
+  const paperTerm = activeExamPaper?.term || 'Regular';
+  const paperYear = activeExamPaper?.year && activeExamPaper.year > 0 ? String(activeExamPaper.year) : null;
 
   // Toggle Solution Visibility for a question
   const toggleSolution = (idx: number) => {
@@ -120,10 +220,17 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
     });
   };
 
-  // Scroll to question
+  // Scroll to question with smooth programmatic lock
   const scrollToQuestion = (idx: number) => {
+    isProgrammaticScroll.current = true;
     setCurrentQuestionIdx(idx);
     setVisitedQuestions(prev => new Set(prev).add(idx));
+
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      isProgrammaticScroll.current = false;
+    }, 650);
+
     const targetEl = document.getElementById(`exam-question-${idx}`);
     if (targetEl) {
       targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -158,7 +265,7 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
       const doc = new jsPDF();
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(16);
-      doc.text(`${subjectCode}: ${qpTitle}`, 20, 20);
+      doc.text(`${paperTitle}`, 20, 20);
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
@@ -245,24 +352,31 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
           {/* Top Section: Exam Info Card & Mode Selector */}
           <div className="space-y-2">
             {/* 1. Exam Info Card */}
-            <div className="p-3 rounded-xl bg-zinc-100/70 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-1.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Exam</span>
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100">{examName}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Subject</span>
-                <span className="font-semibold text-orange-500">{subjectCode}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Total Marks</span>
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100">{totalExamMarks}.00</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500 dark:text-zinc-400 font-normal">Question Paper</span>
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-right truncate max-w-[150px]" title={qpTitle}>
-                  {qpTitle}
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-zinc-100/70 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-2 text-xs">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-zinc-400 dark:text-zinc-500 font-medium shrink-0 pt-0.5">Paper</span>
+                <span className="font-semibold text-zinc-900 dark:text-white text-right leading-snug line-clamp-2 max-w-[210px]" title={paperTitle}>
+                  {paperTitle}
                 </span>
+              </div>
+              <div className="h-px bg-zinc-200/60 dark:bg-white/[0.04]" />
+              <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[11.5px]">
+                <div className="flex items-center justify-between pr-1">
+                  <span className="text-zinc-400 dark:text-zinc-500 font-normal">Exam</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 uppercase">{activeExamPaper?.exam_type?.toUpperCase() || examName}</span>
+                </div>
+                <div className="flex items-center justify-between pl-1">
+                  <span className="text-zinc-400 dark:text-zinc-500 font-normal">Subject</span>
+                  <span className="font-semibold text-orange-500 truncate max-w-[70px]" title={subjectFullName}>{subjectCode}</span>
+                </div>
+                <div className="flex items-center justify-between pr-1">
+                  <span className="text-zinc-400 dark:text-zinc-500 font-normal">Marks</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">{totalExamMarks}.00</span>
+                </div>
+                <div className="flex items-center justify-between pl-1">
+                  <span className="text-zinc-400 dark:text-zinc-500 font-normal">Session</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate max-w-[80px]">{paperYear ? `${paperYear}` : paperTerm}</span>
+                </div>
               </div>
             </div>
 
@@ -293,68 +407,87 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
             </div>
           </div>
 
-          {/* 3. Question Menu (Fixed-height Scroll Area so buttons always fit on screen) */}
+          {/* 3. Question Menu (Responsive compact tiles: 8 cols on mobile, 10 on tablet, 6 on desktop) */}
           <div className="p-3 rounded-xl bg-zinc-100/70 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 tracking-wide uppercase">
-                Questions
-              </span>
+              <button
+                type="button"
+                onClick={() => setIsQuestionsCollapsed(prev => !prev)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 tracking-wide uppercase hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer group"
+              >
+                <span>Questions</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className={`w-3 h-3 transition-transform duration-200 lg:hidden text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 ${
+                    isQuestionsCollapsed ? '-rotate-90' : ''
+                  }`}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
               <span className="text-xs font-medium text-emerald-500">
                 {Object.keys(userAnswers).length} / {quizQuestions.length} Answered
               </span>
             </div>
 
-            {/* Scrollable Questions Grid: strictly constrained height with squarish tiles */}
-            <div className="max-h-[175px] overflow-y-auto custom-scrollbar pr-1.5">
-              <div className="grid grid-cols-6 gap-1.5 pt-0.5">
-                {quizQuestions.map((q, idx) => {
-                  const isAnswered = userAnswers[idx] !== undefined && userAnswers[idx] !== '';
-                  const isCurrent = currentQuestionIdx === idx;
-                  const isMarked = markedForReview.has(idx);
-                  const isVisited = visitedQuestions.has(idx);
+            {!isQuestionsCollapsed && (
+              <>
+                {/* Scrollable Questions Grid: responsive grid prevents giant stretched tiles on mobile */}
+                <div className="max-h-[136px] sm:max-h-[140px] lg:max-h-[175px] overflow-y-auto custom-scrollbar pr-1">
+                  <div className="grid grid-cols-8 sm:grid-cols-10 lg:grid-cols-6 gap-1.5 pt-0.5">
+                    {quizQuestions.map((q, idx) => {
+                      const isAnswered = userAnswers[idx] !== undefined && userAnswers[idx] !== '';
+                      const isCurrent = currentQuestionIdx === idx;
+                      const isMarked = markedForReview.has(idx);
+                      const isVisited = visitedQuestions.has(idx);
 
-                  let stateStyle = 'bg-zinc-100 dark:bg-[#1e1e23] text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-white/[0.04] hover:bg-zinc-200 dark:hover:bg-[#282830]';
-                  if (isAnswered) {
-                    stateStyle = 'bg-emerald-500 text-white font-bold shadow-xs';
-                  } else if (isMarked) {
-                    stateStyle = 'bg-purple-600 text-white font-bold shadow-xs';
-                  } else if (isVisited) {
-                    stateStyle = 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/35 font-semibold';
-                  }
+                      let stateStyle = 'bg-zinc-100 dark:bg-[#1e1e23] text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-white/[0.04] hover:bg-zinc-200 dark:hover:bg-[#282830]';
+                      if (isAnswered) {
+                        stateStyle = 'bg-emerald-500 text-white font-bold shadow-xs';
+                      } else if (isMarked) {
+                        stateStyle = 'bg-purple-600 text-white font-bold shadow-xs';
+                      } else if (isVisited) {
+                        stateStyle = 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/35 font-semibold';
+                      }
 
-                  const activeRing = isCurrent
-                    ? 'ring-2 ring-zinc-900 dark:ring-white z-10 shadow-sm'
-                    : '';
+                      const activeRing = isCurrent
+                        ? 'ring-1 ring-offset-1.5 ring-zinc-900 dark:ring-white/90 ring-offset-zinc-50 dark:ring-offset-[#131316] z-10 shadow-xs font-bold scale-[1.03]'
+                        : '';
 
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => scrollToQuestion(idx)}
-                      className={`w-full aspect-square rounded-lg flex items-center justify-center text-xs font-semibold transition-all cursor-pointer relative ${stateStyle} ${activeRing}`}
-                    >
-                      {idx + 1}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => scrollToQuestion(idx)}
+                          className={`w-full aspect-square max-w-[42px] mx-auto rounded-lg flex items-center justify-center text-xs font-semibold transition-all cursor-pointer relative ${stateStyle} ${activeRing}`}
+                        >
+                          {idx + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-            {/* Status Legend */}
-            <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1.5 px-0.5 border-t border-zinc-200/40 dark:border-white/[0.04]">
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-xs bg-emerald-500 inline-block" />
-                <span>Answered</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-xs bg-amber-500/30 border border-amber-500/50 inline-block" />
-                <span>Visited</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-xs bg-zinc-200 dark:bg-[#1e1e23] border border-zinc-300 dark:border-white/[0.1] inline-block" />
-                <span>Unvisited</span>
-              </span>
-            </div>
+                {/* Status Legend */}
+                <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1.5 px-0.5 border-t border-zinc-200/40 dark:border-white/[0.04]">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-xs bg-emerald-500 inline-block" />
+                    <span>Answered</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-xs bg-amber-500/30 border border-amber-500/50 inline-block" />
+                    <span>Visited</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-xs bg-zinc-200 dark:bg-[#1e1e23] border border-zinc-300 dark:border-white/[0.1] inline-block" />
+                    <span>Unvisited</span>
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Bottom Section: Timer + Submit & End Exam Buttons */}
@@ -443,47 +576,58 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
             const isCoding = q.type === 'coding';
             const isAnswered = userAnswers[idx] !== undefined && userAnswers[idx] !== '';
             
-            // In Learning Mode: Show solution ONLY IF question is answered OR user clicked "View Solutions"
-            // In Exam Mode: Show solution ONLY IF user clicked "View Solutions"
-            const isSolutionVisible = revealedSolutions.has(idx) || (examMode === 'learning' && isAnswered);
+            // In Learning Mode: Show solution if toggled OR if answered
+            // In Exam Mode: NEVER show solutions during active test
+            const isSolutionVisible = examMode === 'learning' && (revealedSolutions.has(idx) || isAnswered);
             
             const questionMarks = q.marks || (isSubjective ? 10 : 1);
             const questionTypeLabel = isCoding ? 'Coding' : isSubjective ? 'Subjective' : (q.questionType || 'MCQ');
+            const isCurrentQuestion = currentQuestionIdx === idx;
 
             return (
               <div
                 key={idx}
                 id={`exam-question-${idx}`}
                 ref={el => (questionRefs.current[idx] = el)}
-                className="p-5 sm:p-6 rounded-2xl bg-zinc-100/60 dark:bg-[#131316] border border-zinc-200/50 dark:border-white/[0.05] shadow-xs space-y-4 scroll-mt-6 transition-all"
+                className={`p-5 sm:p-6 rounded-2xl bg-zinc-100/60 dark:bg-[#131316] border shadow-xs space-y-4 scroll-mt-6 transition-all duration-200 ${
+                  isCurrentQuestion
+                    ? 'border-zinc-300/90 dark:border-white/20 shadow-sm ring-1 ring-zinc-900/5 dark:ring-white/[0.08]'
+                    : 'border-zinc-200/50 dark:border-white/[0.05]'
+                }`}
               >
                 
                 {/* Question Header Bar */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-200/40 dark:border-white/[0.04]">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-orange-500" />
+                    <span className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      isCurrentQuestion
+                        ? 'bg-orange-500 ring-2 ring-orange-500/25'
+                        : 'bg-zinc-300 dark:bg-zinc-700'
+                    }`} />
                     <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">
                       Question {idx + 1}
                     </h3>
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
-                    {/* View Solutions Button */}
-                    <button
-                      type="button"
-                      onClick={() => toggleSolution(idx)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                        isSolutionVisible
-                          ? 'bg-emerald-500/10 text-emerald-500'
-                          : 'bg-white dark:bg-[#202024] hover:bg-zinc-200 dark:hover:bg-[#28282e] text-zinc-600 dark:text-zinc-300'
-                      }`}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                        <circle cx="12" cy="12" r="10" />
-                        <polygon points="12 8 8 12 12 16 12 8" />
-                      </svg>
-                      <span>{isSolutionVisible ? 'Hide Solution' : 'View Solution'}</span>
-                    </button>
+                    {/* View Solutions Button - Only visible in Learning Mode */}
+                    {examMode === 'learning' && (
+                      <button
+                        type="button"
+                        onClick={() => toggleSolution(idx)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isSolutionVisible
+                            ? 'bg-emerald-500/10 text-emerald-500'
+                            : 'bg-white dark:bg-[#202024] hover:bg-zinc-200 dark:hover:bg-[#28282e] text-zinc-600 dark:text-zinc-300'
+                        }`}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                          <circle cx="12" cy="12" r="10" />
+                          <polygon points="12 8 8 12 12 16 12 8" />
+                        </svg>
+                        <span>{isSolutionVisible ? 'Hide Solution' : 'View Solution'}</span>
+                      </button>
+                    )}
 
                     {/* Marks & Type Badge */}
                     <span className="text-[11px] font-medium text-zinc-400 bg-white dark:bg-[#1a1a1e] px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-zinc-200/50 dark:border-white/[0.04]">
@@ -631,60 +775,33 @@ export const ContinuousExamViewer: React.FC<ContinuousExamViewerProps> = ({
                 )}
 
                 {/* Question Footer Action Bar */}
-                <div className="flex items-center justify-between pt-3 border-t border-zinc-200/40 dark:border-white/[0.04] text-xs text-zinc-400 flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="px-2.5 py-1 rounded-lg hover:bg-white dark:hover:bg-[#202024] transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-500"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                      <span>Discussions (0)</span>
-                    </button>
+                <div className="flex items-center justify-between pt-3 border-t border-zinc-200/40 dark:border-white/[0.04] text-xs text-zinc-400">
+                  <button
+                    type="button"
+                    onClick={() => onReportQuestion(q.id || '')}
+                    className="px-2.5 py-1 rounded-lg hover:bg-blue-500/10 hover:text-blue-500 transition-colors flex items-center gap-1.5 cursor-pointer text-blue-500/80 font-medium"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span>Suggest Correction</span>
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={() => onReportQuestion(q.id || '')}
-                      className="px-2.5 py-1 rounded-lg hover:bg-blue-500/10 hover:text-blue-500 transition-colors flex items-center gap-1.5 cursor-pointer text-blue-500/80"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                      <span>Suggest Correction</span>
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onReportQuestion(q.id || '')}
-                      className="px-2.5 py-1 rounded-lg hover:bg-orange-500/10 hover:text-orange-500 transition-colors flex items-center gap-1.5 cursor-pointer text-orange-500/80"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
-                      <span>Broken Format?</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleBookmark(q.id || '')}
-                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                        bookmarkedIds.has(q.id || '')
-                          ? 'text-orange-500 bg-orange-500/10'
-                          : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
-                      }`}
-                      title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
-                    >
-                      <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                      </svg>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleBookmark(q.id || '')}
+                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      bookmarkedIds.has(q.id || '')
+                        ? 'text-orange-500 bg-orange-500/10'
+                        : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+                    }`}
+                    title={bookmarkedIds.has(q.id || '') ? 'Remove Bookmark' : 'Bookmark Question'}
+                  >
+                    <svg viewBox="0 0 24 24" fill={bookmarkedIds.has(q.id || '') ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             );

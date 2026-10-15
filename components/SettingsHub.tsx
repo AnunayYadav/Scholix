@@ -79,17 +79,7 @@ const SECTIONS = (userProfile: UserProfile | null): SettingSection[] => [
           </svg>
         ),
         isToggle: true
-      },
-      ...(userProfile ? [{
-        id: 'merge_libraries',
-        label: 'Merge Content Libraries',
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M4 6h16a2 2 0 0 0 2-2V2H2v2a2 2 0 0 0 2 2z" />
-          </svg>
-        ),
-        isToggle: true
-      }] : [])
+      }
     ]
   },
   {
@@ -202,12 +192,6 @@ export function SettingsHub({
   const [showChatModal, setShowChatModal] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [mergeLibraries, setMergeLibraries] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('nexus_merge_libraries') === 'true';
-    }
-    return false;
-  });
   const prefix = uniSlug ? `/${uniSlug}` : '';
 
   useEffect(() => {
@@ -245,11 +229,6 @@ export function SettingsHub({
     if (item.isToggle) {
       if (item.id === 'theme') {
         toggleTheme();
-      } else if (item.id === 'merge_libraries') {
-        const nextVal = !mergeLibraries;
-        setMergeLibraries(nextVal);
-        localStorage.setItem('nexus_merge_libraries', String(nextVal));
-        window.dispatchEvent(new Event('storage'));
       }
     } else if (item.id === 'download') {
       setShowDownloadModal(true);
@@ -446,14 +425,14 @@ export function SettingsHub({
                       {item.isToggle ? (
                         <div
                           className={`w-7 h-4 rounded-full p-[2px] transition-colors duration-200 flex items-center shrink-0 ${
-                            (item.id === 'theme' ? theme === 'dark' : mergeLibraries)
+                            theme === 'dark'
                               ? 'bg-orange-500'
                               : 'bg-zinc-300 dark:bg-zinc-700'
                           }`}
                         >
                           <div
                             className={`w-3 h-3 bg-white rounded-full shadow-xs transition-transform duration-200 ${
-                              (item.id === 'theme' ? theme === 'dark' : mergeLibraries)
+                              theme === 'dark'
                                 ? 'translate-x-3'
                                 : 'translate-x-0'
                             }`}
