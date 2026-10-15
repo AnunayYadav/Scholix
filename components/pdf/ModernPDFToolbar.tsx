@@ -48,10 +48,16 @@ interface ModernPDFToolbarProps {
     onDownload: () => void;
     onPrint?: () => void;
     onOpenShortcuts: () => void;
+    onInteraction?: () => void;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
 export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
     showToolbar,
+    onInteraction,
+    onMouseEnter,
+    onMouseLeave,
     displayFileName,
     fullBrandName,
     isDocx,
@@ -153,6 +159,9 @@ export const ModernPDFToolbar: React.FC<ModernPDFToolbarProps> = ({
 
     return (
         <header
+            onPointerDown={onInteraction}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
             className={`fixed top-0 left-0 right-0 flex items-center justify-between px-3 sm:px-5 h-13 sm:h-14 z-50 transition-all duration-300 backdrop-blur-xl ${
                 isLight
                     ? 'bg-white/85 text-zinc-900 border-b border-zinc-200/80 shadow-xs'

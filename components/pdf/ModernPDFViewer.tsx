@@ -141,6 +141,13 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
     const scaleRef = useRef(scale);
     scaleRef.current = scale;
     const lastScrollYRef = useRef(0);
+    const suppressToolbarHideUntilRef = useRef<number>(0);
+    const isToolbarHoveredRef = useRef<boolean>(false);
+
+    const keepToolbarVisible = useCallback((durationMs: number = 2000) => {
+        suppressToolbarHideUntilRef.current = Date.now() + durationMs;
+        setShowToolbar(true);
+    }, []);
 
     // Touch Pinch state
     const touchStartDistRef = useRef<number | null>(null);
@@ -471,6 +478,7 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
 
     // Smooth Focal-Point Zooming with Cursor / Pinch Focal Locking
     const handleZoomWithFocal = useCallback((nextScale: number, clientX?: number, clientY?: number) => {
+        keepToolbarVisible(2000);
         const clamped = Math.min(3.5, Math.max(0.35, nextScale));
         const container = scrollContainerRef.current;
         if (!container || clamped === scaleRef.current) return;
@@ -571,6 +579,7 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
     }, [pdfDoc, rotation, calculateFitScale]);
 
     const handleFitPage = useCallback(() => {
+        keepToolbarVisible(2000);
         setViewMode('page');
         if (pdfDoc) {
             pdfDoc.getPage(1).then((page: any) => {
@@ -579,9 +588,10 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
                 handleZoomWithFocal(nextScale);
             });
         }
-    }, [pdfDoc, rotation, calculateFitScale, handleZoomWithFocal]);
+    }, [pdfDoc, rotation, calculateFitScale, handleZoomWithFocal, keepToolbarVisible]);
 
     const handleFitWidth = useCallback(() => {
+        keepToolbarVisible(2000);
         setViewMode('width');
         if (pdfDoc) {
             pdfDoc.getPage(1).then((page: any) => {
@@ -590,7 +600,7 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
                 handleZoomWithFocal(nextScale);
             });
         }
-    }, [pdfDoc, rotation, calculateFitScale, handleZoomWithFocal]);
+    }, [pdfDoc, rotation, calculateFitScale, handleZoomWithFocal, keepToolbarVisible]);
 
     const handleToggleFit = useCallback(() => {
         if (viewMode === 'page') handleFitWidth();
@@ -599,22 +609,24 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
 
     // Jump to specific page
     const jumpToPage = useCallback((pageNum: number) => {
+        keepToolbarVisible(2500);
         const target = Math.max(1, Math.min(numPages, pageNum));
         setCurrentPage(target);
         const pageEl = pageRefs.current[target];
         if (pageEl) {
             pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, [numPages]);
+    }, [numPages, keepToolbarVisible]);
 
     // Rotate document
     const handleRotate = useCallback(() => {
+        keepToolbarVisible(2000);
         if (isImage) {
             setImageRotation(prev => (prev + 90) % 360);
         } else {
             setRotation(prev => (prev + 90) % 360);
         }
-    }, [isImage]);
+    }, [isImage, keepToolbarVisible]);
 
     // Search Engine
     const performSearch = useCallback(async () => {
@@ -735,6 +747,14 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
     const handleScroll = (e: React.UIEvent<HTMLElement>) => {
         setFloatingMenuPos(null);
         const currentScrollY = e.currentTarget.scrollTop;
+
+        // Never auto-hide toolbar if mouse is over toolbar or if user just interacted with a button / programmatic jump
+        if (Date.now() < suppressToolbarHideUntilRef.current || isToolbarHoveredRef.current) {
+            setShowToolbar(true);
+            lastScrollYRef.current = currentScrollY;
+            return;
+        }
+
         if (currentScrollY > lastScrollYRef.current + 35 && currentScrollY > 100) {
             setShowToolbar(false);
         } else if (currentScrollY < lastScrollYRef.current - 25 || currentScrollY < 60) {
@@ -915,6 +935,9 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
 
     return createPortal(
         <div
+            onMouseMove={(e) => {
+                if (e.clientY < 70) setShowToolbar(true);
+            }}
             className={`fixed inset-0 z-[9999] flex flex-col overflow-hidden pdf-viewer-overlay transition-colors duration-200 ${getViewerBg()} ${
                 active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-[0.99] pointer-events-none'
             }`}
@@ -922,6 +945,14 @@ export const ModernPDFViewer: React.FC<ModernPDFViewerProps> = ({
             {/* Top Toolbar */}
             <ModernPDFToolbar
                 showToolbar={showToolbar}
+                onInteraction={() => keepToolbarVisible(2000)}
+                onMouseEnter={() => {
+                    isToolbarHoveredRef.current = true;
+                    keepToolbarVisible(1000);
+                }}
+                onMouseLeave={() => {
+                    isToolbarHoveredRef.current = false;
+                }}
                 displayFileName={displayFileName}
                 fullBrandName={fullBrandName}
                 isDocx={isDocx}

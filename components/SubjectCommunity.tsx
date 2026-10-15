@@ -72,6 +72,8 @@ interface SubjectCommunityProps {
   activeCategory?: FolderType | null;
   onCategoryChange?: (category: FolderType | null) => void;
   onNavigateToProgram?: () => void;
+  layoutMode?: 'list' | 'grid';
+  onLayoutModeChange?: (mode: 'list' | 'grid') => void;
 }
 
 const getSubjectTheme = (nameOrCode: string, folderColor?: string, folderIcon?: string, sectionName?: string) => {
@@ -939,7 +941,9 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   onAdminReviewClick,
   activeCategory,
   onCategoryChange,
-  onNavigateToProgram
+  onNavigateToProgram,
+  layoutMode: propLayoutMode,
+  onLayoutModeChange
 }) => {
   const subjectCodeMatch = activeSubject.name.match(/^([A-Za-z]+\d{3})/);
   const subjectCode = subjectCodeMatch ? subjectCodeMatch[1].toUpperCase() : activeSubject.name.split(':')[0].trim();
@@ -1068,7 +1072,27 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
   const [fileFilterType, setFileFilterType] = useState<string>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState<boolean>(false);
   const [localSearchQuery, setLocalSearchQuery] = useState<string>('');
-  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>('list');
+  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>(() => {
+    if (propLayoutMode) return propLayoutMode;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('scholix_library_layout_mode');
+      if (saved === 'grid' || saved === 'list') return saved;
+    }
+    return 'list';
+  });
+
+  useEffect(() => {
+    if (propLayoutMode && propLayoutMode !== layoutMode) {
+      setLayoutMode(propLayoutMode);
+    }
+  }, [propLayoutMode]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('scholix_library_layout_mode', layoutMode);
+    }
+    onLayoutModeChange?.(layoutMode);
+  }, [layoutMode, onLayoutModeChange]);
 
   // Navigation / Tabs
   const [activeTab, setActiveTab] = useState<'files' | 'social' | 'discussions' | 'requests' | 'packs' | 'leaderboard' | 'people'>('files');

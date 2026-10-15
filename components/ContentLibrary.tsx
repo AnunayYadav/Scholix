@@ -271,6 +271,81 @@ const SkeletonFolderCard = () => (
   </div>
 );
 
+const SkeletonFolderListItem: React.FC<{ width?: string }> = ({ width = "50%" }) => (
+  <div className="flex items-center justify-between py-2.5 px-3">
+    <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+      <div className="w-5 h-5 rounded bg-amber-400/20 dark:bg-amber-400/10 skeleton-pulse shrink-0" />
+      <div className="h-3.5 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" style={{ width, maxWidth: '280px', minWidth: '120px' }} />
+    </div>
+    <div className="flex items-center gap-3 shrink-0">
+      <div className="h-3 w-16 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse hidden sm:inline" />
+      <div className="h-3 w-12 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+    </div>
+  </div>
+);
+
+const SkeletonFileList = () => {
+  const widths = ["60%", "75%", "45%", "68%", "52%", "80%", "40%", "58%"];
+  return (
+    <div className="w-full overflow-hidden border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] shadow-xs animate-fade-in">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b border-zinc-150 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
+              <th className="py-3 pl-4 pr-2 w-10">
+                <div className="w-3.5 h-3.5 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+              </th>
+              <th className="py-3 px-3 min-w-[220px]">
+                <div className="h-2.5 w-16 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+              </th>
+              <th className="py-3 px-3 w-36 hidden sm:table-cell">
+                <div className="h-2.5 w-20 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+              </th>
+              <th className="py-3 px-3 w-36 hidden sm:table-cell">
+                <div className="h-2.5 w-20 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+              </th>
+              <th className="py-3 px-3 w-24">
+                <div className="h-2.5 w-12 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+              </th>
+              <th className="py-3 pr-4 text-right w-12"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
+            {widths.map((w, i) => (
+              <tr key={i}>
+                <td className="py-3.5 pl-4 pr-2 w-10">
+                  <div className="w-3.5 h-3.5 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+                </td>
+                <td className="py-3.5 px-3 min-w-[220px]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-orange-500/10 skeleton-pulse shrink-0" />
+                    <div className="space-y-1.5 min-w-0 flex-1 max-w-sm">
+                      <div className="h-3.5 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" style={{ width: w }} />
+                      <div className="h-2.5 w-24 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3.5 px-3 w-36 hidden sm:table-cell">
+                  <div className="h-3 w-24 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+                </td>
+                <td className="py-3.5 px-3 w-36 hidden sm:table-cell">
+                  <div className="h-3 w-20 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+                </td>
+                <td className="py-3.5 px-3 w-24">
+                  <div className="h-3 w-12 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse" />
+                </td>
+                <td className="py-3.5 pr-4 text-right w-12">
+                  <div className="w-4 h-4 rounded bg-zinc-200/80 dark:bg-white/10 skeleton-pulse ml-auto" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 const SkeletonFileCard = () => (
   <div className="p-4 rounded-[24px] border border-zinc-100 dark:border-white/5 bg-white dark:bg-[#0c0c0e] relative overflow-hidden flex flex-col min-h-[148px]">
     <div className="flex items-center justify-between mb-3">
@@ -450,7 +525,19 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>('list');
+  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('scholix_library_layout_mode');
+      if (saved === 'grid' || saved === 'list') return saved;
+    }
+    return 'list';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('scholix_library_layout_mode', layoutMode);
+    }
+  }, [layoutMode]);
   const [fileFilterType, setFileFilterType] = useState<string>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const navigate = useNavigate();
@@ -1508,7 +1595,15 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
     if (isAdminView || viewMode === 'my-uploads') return [];
 
     const filtered = finalFolders.filter(f => {
-      if (!activeSemester) return f.type === 'semester';
+      if (!activeSemester) {
+        if (f.type !== 'semester') return false;
+        if (selectedProgram && f.program) {
+          const normProg = f.program.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const normSelected = selectedProgram.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (normProg !== normSelected) return false;
+        }
+        return true;
+      }
       if (!activeSubject) {
         // We are listing subjects
         const isSubject = f.type === 'subject' && f.parent_id === activeSemester.id;
@@ -1541,6 +1636,24 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
       if (!activeCategory) return f.type === 'category' && f.parent_id === activeSubject.id;
       return false;
     });
+
+    if (!activeSemester) {
+      // Sort semesters by display_order first (e.g. 80, 81, 82...) so canonical semesters come first
+      const sortedSemesters = [...filtered].sort((a, b) => {
+        const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.display_order ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name);
+      });
+
+      const seen = new Set<string>();
+      return sortedSemesters.filter(f => {
+        const key = f.name.toLowerCase().trim();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
 
     return [...filtered].sort((a, b) => {
       const orderA = a.display_order ?? Number.MAX_SAFE_INTEGER;
@@ -2268,18 +2381,30 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
           )}
 
           {isLoading ? (
-            (!activeSubject && viewMode === 'browse') ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fade-in">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <SkeletonFolderCard key={i} />
-                ))}
-              </div>
+            layoutMode === 'list' ? (
+              (!activeSubject && viewMode === 'browse') ? (
+                <div className="w-full divide-y divide-zinc-100 dark:divide-white/5 border border-zinc-200/70 dark:border-white/5 rounded-xl bg-white dark:bg-[#111113] overflow-hidden animate-fade-in">
+                  {["50%", "65%", "40%", "70%", "55%", "60%", "48%", "62%"].map((w, i) => (
+                    <SkeletonFolderListItem key={i} width={w} />
+                  ))}
+                </div>
+              ) : (
+                <SkeletonFileList />
+              )
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-fade-in">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <SkeletonFileCard key={i} />
-                ))}
-              </div>
+              (!activeSubject && viewMode === 'browse') ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fade-in">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <SkeletonFolderCard key={i} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-fade-in">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <SkeletonFileCard key={i} />
+                  ))}
+                </div>
+              )
             )
           ) : !program && viewMode === 'browse' ? (
             // Screen 1: Program Selection Screen (Root)
@@ -2366,6 +2491,8 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
               allFolders={finalFolders}
               userProgressList={userProgressList}
               activeCategory={activeCategory}
+              layoutMode={layoutMode}
+              onLayoutModeChange={setLayoutMode}
               onCategoryChange={(cat) => {
                 setActiveCategory(cat);
                 const subjectBasePath = (program && semester && subject)
