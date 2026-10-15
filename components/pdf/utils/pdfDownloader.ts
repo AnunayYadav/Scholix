@@ -122,9 +122,12 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
                         }
                     }
                 }
-            } else if (url) {
-                const sessionRes = await NexusServer.getSession();
-                const token = sessionRes?.data?.session?.access_token;
+            }
+        }
+
+        if (!originalPdfBytes && url) {
+            const sessionRes = await NexusServer.getSession();
+            const token = sessionRes?.data?.session?.access_token;
                 const fetchOptions: RequestInit = {};
                 if (!url.startsWith('blob:') && token) {
                     fetchOptions.headers = { 'Authorization': `Bearer ${token}` };
@@ -144,7 +147,6 @@ export const executeSecureDownload = async (options: DownloadOptions): Promise<v
                     throw new Error(errorMsg);
                 }
             }
-        }
 
         if (!originalPdfBytes || originalPdfBytes.length === 0) {
             throw new Error("Unable to retrieve document source file.");

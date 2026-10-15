@@ -85,8 +85,8 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
       await NexusServer.trackEvent('apk_download');
       
       const link = document.createElement('a');
-      link.href = '/Scholix.apk';
-      link.download = 'Scholix.apk';
+      link.href = '/ScholixApp.apk';
+      link.download = 'ScholixApp.apk';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -161,7 +161,7 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
               </div>
               <div className="bg-zinc-50/50 dark:bg-white/[0.03] border border-zinc-100 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-center">
                 <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.1em] mb-1.5">File Size</span>
-                <span className="text-xl font-semibold text-zinc-900 dark:text-white">6.59 MB</span>
+                <span className="text-xl font-semibold text-zinc-900 dark:text-white">9.36 MB</span>
               </div>
             </div>
 
@@ -183,7 +183,7 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                 )}
-                <span>{isDownloading ? 'Preparing Download...' : 'Download Scholix.apk'}</span>
+                <span>{isDownloading ? 'Preparing Download...' : 'Download ScholixApp.apk'}</span>
               </motion.button>
               
               <button

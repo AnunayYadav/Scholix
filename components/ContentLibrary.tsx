@@ -6,6 +6,7 @@ import { LibraryFile, UserProfile, Folder } from '../types.ts';
 import NexusServer, { isIITMProgram } from '../services/nexusServer.ts';
 import PDFViewer from './PDFViewer.tsx';
 import ModernPDFViewer from './pdf/ModernPDFViewer.tsx';
+import { executeSecureDownload } from './pdf/utils/pdfDownloader.ts';
 import NexusOriginals from './NexusOriginals.tsx';
 import NexusDropdown from './NexusDropdown.tsx';
 import { useUniversity } from '../hooks/useUniversity.tsx';
@@ -1835,46 +1836,41 @@ const ContentLibrary: React.FC<ContentLibraryProps> = ({ userProfile, initialVie
   };
 
   const handleDirectDownload = async (file: LibraryFile) => {
-    try {
-      showToast("Starting download...", "info");
-      const client = NexusServer.getClient();
-      if (client) {
-        try {
-          const { data, error } = await client.storage.from('nexus-documents').download(file.storage_path);
-          if (!error && data) {
-            const blobUrl = URL.createObjectURL(data);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = file.name || 'document';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-            showToast("Download started!", "success");
-            return;
-          }
-        } catch (storageErr) {
-          console.warn("Direct storage download failed, trying proxy route...", storageErr);
-        }
-      }
+    if (!userProfile) {
+      showToast("Please sign in to download this document.", "info");
+      onAuthRequired?.();
+      return;
+    }
 
-      const sessionRes = await NexusServer.getSession();
-      const token = sessionRes?.data?.session?.access_token;
-      const url = NexusServer.getFileUrl(file.storage_path, token);
-      if (url) {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.name || 'document';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast("Download started!", "success");
-      } else {
-        throw new Error("Unable to resolve download URL");
-      }
+    try {
+      const fileName = file.name || 'document.pdf';
+      const isDocx = /\.docx$/i.test(file.storage_path || fileName);
+      const isLegacyDoc = /\.doc$/i.test(file.storage_path || fileName);
+      const isImage = /\.(png|jpg|jpeg|webp|svg|gif)$/i.test(file.storage_path || fileName);
+      const isAdmin = !!(userProfile && (userProfile.is_admin || (userProfile as any).role === 'admin'));
+
+      let fileUrl: string | undefined = undefined;
+      try {
+        const sessionRes = await NexusServer.getSession();
+        const token = sessionRes?.data?.session?.access_token;
+        fileUrl = NexusServer.getFileUrl(file.storage_path, token);
+      } catch (_) {}
+
+      await executeSecureDownload({
+        file,
+        fileId: file.id,
+        url: fileUrl,
+        fileName,
+        displayFileName: fileName,
+        userProfile,
+        isAdmin,
+        isDocx,
+        isLegacyDoc,
+        isImage,
+      });
     } catch (err: any) {
-      console.error("Download failed:", err);
-      showToast("Failed to download file.", "error");
+      console.error("Direct download failed:", err);
+      showToast(err.message || "Failed to download file.", "error");
     }
   };
 
