@@ -265,7 +265,7 @@ const TodaysSchedule: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in">
-      <div className="bg-white dark:bg-[#17171a] rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 lg:p-6 transition-all duration-300 overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-[#17171a] rounded-2xl border border-zinc-200/40 dark:border-white/[0.03] p-5 lg:p-6 transition-all duration-300 overflow-hidden flex flex-col">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -289,7 +289,7 @@ const TodaysSchedule: React.FC = () => {
         </div>
 
         {!dayData || sortedSlots.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center space-y-2.5 py-10 bg-zinc-50/60 dark:bg-[#121215] rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800/80">
+          <div className="flex flex-col items-center justify-center text-center space-y-2.5 py-10 bg-zinc-50/60 dark:bg-[#121215] rounded-xl border border-dashed border-zinc-200/40 dark:border-white/[0.03]">
             <div className="w-10 h-10 rounded-xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary">
               <Calendar size={18} strokeWidth={1.75} />
             </div>
@@ -620,7 +620,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
                   </h3>
                 </div>
 
-                <div className="bg-white dark:bg-[#17171a] rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/60">
+                <div className="bg-white dark:bg-[#17171a] rounded-2xl border border-zinc-200/40 dark:border-white/[0.03] overflow-hidden divide-y divide-zinc-100/40 dark:divide-white/[0.02]">
                   {section.items.map((item) => (
                     <button
                       key={item.id}
@@ -628,7 +628,7 @@ const Dashboard: React.FC<{ userProfile: UserProfile | null }> = React.memo(({ u
                       className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-zinc-50/80 dark:hover:bg-[#1f1f24] transition-colors text-left group cursor-pointer"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#202025] border border-zinc-200/60 dark:border-zinc-700/60 flex items-center justify-center text-zinc-600 dark:text-zinc-300 group-hover:text-brand-primary group-hover:bg-brand-primary/10 group-hover:border-brand-primary/25 transition-all shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-[#202025] border border-zinc-200/30 dark:border-white/[0.03] flex items-center justify-center text-zinc-600 dark:text-zinc-300 group-hover:text-brand-primary group-hover:bg-brand-primary/10 group-hover:border-brand-primary/25 transition-all shrink-0">
                           {React.cloneElement(item.icon as React.ReactElement, { size: 18, strokeWidth: 1.75 })}
                         </div>
                         <div className="min-w-0">
