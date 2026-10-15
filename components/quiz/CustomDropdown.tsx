@@ -88,7 +88,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
             : 'border-zinc-200/80 dark:border-white/[0.08]'
         }`}
       >
-        <span className="text-xs font-medium text-zinc-900 dark:text-white truncate">
+        <span className={`text-xs font-medium truncate ${selectedOption ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 dark:text-zinc-500'}`}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <motion.div

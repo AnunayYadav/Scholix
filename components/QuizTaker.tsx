@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { slugify } from '../utils/slugify';
 import Editor from '@monaco-editor/react';
 import { UserProfile, QuizQuestion, LibraryFile, ExamPaper, ExamCategory } from '../types.ts';
@@ -466,7 +466,20 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   const isLPU = selectedUniversity === 'lpu';
   const { subjectName, quizId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const routePrefix = uniSlug ? `/${uniSlug}` : '';
+
+  // Parse path relative to quiz root, e.g. "", "/official", "/official/:subject", "/custom", "/history"
+  const quizRelativePath = useMemo(() => {
+    let p = location.pathname;
+    if (routePrefix && p.startsWith(routePrefix)) {
+      p = p.slice(routePrefix.length);
+    }
+    if (p.startsWith('/quiz')) {
+      p = p.slice(5);
+    }
+    return p;
+  }, [location.pathname, routePrefix]);
 
 
   // ═══════════ Dashboard State ═══════════
@@ -1021,8 +1034,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   }, [quizQuestions]);
 
   const hasMCQs = useMemo(() => {
-    return subjectQuestions.some(q => q.type === 'mcq');
-  }, [subjectQuestions]);
+    if (!selectedSubject || subjectQuestions.length === 0) return true;
+    return subjectQuestions.some(q => q.type === 'mcq') || true;
+  }, [selectedSubject, subjectQuestions]);
 
   const hasSubjective = useMemo(() => {
     return subjectQuestions.some(q => q.type === 'subjective');
@@ -1057,14 +1071,14 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   useEffect(() => {
     if (selectedSubject) {
       setNumMCQ(10);
-      setNumSubjective(hasSubjective ? 2 : 0);
-      setNumCoding(hasCoding ? 2 : 0);
+      setNumSubjective(0);
+      setNumCoding(0);
       setSelectedUnits([]);
       setSelectedTopics([]);
       setSelectedDifficulties([]);
       setSelectedQuestionTypes(['MCQ', 'PYQ', 'Case Based']);
     }
-  }, [selectedSubject, hasSubjective, hasCoding]);
+  }, [selectedSubject]);
 
   useEffect(() => {
     let timer: any;
@@ -1155,12 +1169,26 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
 
       setSubjectsWithSyllabi(finalSubjects);
 
-      // Auto-select if selectedSubject is not set or not in list
+      // By default no subject is selected unless specified in URL or already chosen
       if (finalSubjects.length > 0) {
         setSelectedSubject(prev => {
-          if (!prev) return finalSubjects[0];
-          const exists = finalSubjects.find(s => s.name === prev.name || s.id === prev.id);
-          return exists || finalSubjects[0];
+          const segments = quizRelativePath.split('/').filter(Boolean);
+          const targetSlug = segments[1] || (segments[0] !== 'official' && segments[0] !== 'custom' && segments[0] !== 'history' && segments[0] !== 'challenge' ? segments[0] : '');
+          if (targetSlug) {
+            const sub = finalSubjects.find(s => {
+              const sSlug = slugify(s.name);
+              if (sSlug === targetSlug) return true;
+              const match = s.name.match(/^[A-Za-z]+[\s-]*[0-9]+/);
+              if (match && slugify(match[0]) === targetSlug.toLowerCase()) return true;
+              return false;
+            });
+            if (sub) return sub;
+          }
+          if (prev) {
+            const exists = finalSubjects.find(s => s.name === prev.name || s.id === prev.id);
+            if (exists) return exists;
+          }
+          return null;
         });
       } else {
         setSelectedSubject(null);
@@ -1173,36 +1201,110 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
     }
   };
 
-  // Sync selectedSubject with URL param
+  // Explicit, clean navigation helpers
+  const navigateToDashboard = useCallback(() => {
+    setSelectedSubject(null);
+    setShowCustomQuizBuilder(false);
+    setDashboardView('dashboard');
+    navigate(`${routePrefix}/quiz`);
+  }, [navigate, routePrefix, setDashboardView]);
+
+  const navigateToOfficial = useCallback((sub?: SubjectWithSyllabus | null) => {
+    setShowCustomQuizBuilder(false);
+    setDashboardView('official');
+    if (sub) {
+      setSelectedSubject(sub);
+      navigate(`${routePrefix}/quiz/official/${slugify(sub.name)}`);
+    } else {
+      setSelectedSubject(null);
+      navigate(`${routePrefix}/quiz/official`);
+    }
+  }, [navigate, routePrefix, setDashboardView]);
+
+  const navigateToCustom = useCallback((sub?: SubjectWithSyllabus | null) => {
+    setShowCustomQuizBuilder(true);
+    setDashboardView('custom');
+    if (sub) {
+      setSelectedSubject(sub);
+      navigate(`${routePrefix}/quiz/custom/${slugify(sub.name)}`);
+    } else {
+      setSelectedSubject(null);
+      navigate(`${routePrefix}/quiz/custom`);
+    }
+  }, [navigate, routePrefix, setDashboardView]);
+
+  const navigateToHistory = useCallback(() => {
+    setShowCustomQuizBuilder(false);
+    setDashboardView('history');
+    navigate(`${routePrefix}/quiz/history`);
+  }, [navigate, routePrefix, setDashboardView]);
+
+  // Comprehensive two-way route synchronization for quiz taker subroutes
   useEffect(() => {
-    if (subjectsWithSyllabi.length > 0 && subjectName) {
-      const sub = subjectsWithSyllabi.find(s => {
-        const sSlug = slugify(s.name);
-        if (sSlug === subjectName) return true;
-        const match = s.name.match(/^[A-Za-z]+[\s-]*[0-9]+/);
-        if (match && slugify(match[0]) === subjectName.toLowerCase()) return true;
-        return false;
-      });
-      if (sub && (!selectedSubject || selectedSubject.name !== sub.name)) {
-        setSelectedSubject(sub);
+    // If an active quiz session is in progress, do not override views
+    if (quizQuestions.length > 0 || quizCompleted || reviewMode) {
+      return;
+    }
+
+    const segments = quizRelativePath.split('/').filter(Boolean);
+    const mode = segments[0] || '';
+    const subjectSlug = segments[1] || '';
+
+    if (!mode) {
+      // Root dashboard (/quiz or /lpu/quiz)
+      setDashboardView('dashboard');
+      setShowCustomQuizBuilder(false);
+      setSelectedSubject(null);
+    } else if (mode === 'official') {
+      setDashboardView('official');
+      setShowCustomQuizBuilder(false);
+      if (subjectSlug && subjectsWithSyllabi.length > 0) {
+        const sub = subjectsWithSyllabi.find(s => slugify(s.name) === subjectSlug || slugify(s.name.split(':')[0]) === subjectSlug);
+        if (sub) setSelectedSubject(sub);
+      } else if (!subjectSlug) {
+        setSelectedSubject(null);
+      }
+    } else if (mode === 'custom') {
+      setDashboardView('custom');
+      setShowCustomQuizBuilder(true);
+      if (subjectSlug && subjectsWithSyllabi.length > 0) {
+        const sub = subjectsWithSyllabi.find(s => slugify(s.name) === subjectSlug || slugify(s.name.split(':')[0]) === subjectSlug);
+        if (sub) setSelectedSubject(sub);
+      } else if (!subjectSlug) {
+        setSelectedSubject(null);
+      }
+    } else if (mode === 'history') {
+      setDashboardView('history');
+      setShowCustomQuizBuilder(false);
+      setSelectedSubject(null);
+    } else if (mode !== 'challenge') {
+      // Legacy /quiz/:subjectName
+      if (subjectsWithSyllabi.length > 0) {
+        const sub = subjectsWithSyllabi.find(s => slugify(s.name) === mode || slugify(s.name.split(':')[0]) === mode);
+        if (sub) {
+          setDashboardView('official');
+          setSelectedSubject(sub);
+        } else {
+          setDashboardView('dashboard');
+          setSelectedSubject(null);
+        }
       }
     }
-  }, [subjectName, subjectsWithSyllabi]);
+  }, [quizRelativePath, subjectsWithSyllabi, quizQuestions.length, quizCompleted, reviewMode, setDashboardView]);
 
   // Update URL when selectedSubject changes
   const handleSubjectChange = (sub: SubjectWithSyllabus | null) => {
-    if (sub) {
-      // If we are already in a quiz for this subject, maybe we don't want to reset? 
-      // But if we're picking a new subject from the setup screen, we reset.
-      navigate(`${routePrefix}/quiz/${slugify(sub.name)}`);
-      setQuizQuestions([]);
-      setQuizIdInState(null);
+    if (dashboardView === 'custom') {
+      navigateToCustom(sub);
+    } else if (dashboardView === 'official') {
+      navigateToOfficial(sub);
     } else {
-      navigate(`${routePrefix}/quiz`);
-      setQuizQuestions([]);
-      setQuizIdInState(null);
+      if (sub) {
+        navigateToOfficial(sub);
+      } else {
+        navigateToDashboard();
+      }
     }
-    setSelectedSubject(sub);
   };
 
   const [quizIdInState, setQuizIdInState] = useState<string | null>(null);
@@ -2864,23 +2966,9 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           subjectsWithSyllabi={subjectsWithSyllabi}
           onStartFeaturedQuiz={handleStartFeaturedQuiz}
           onStartChallenge={handleStartChallenge}
-          onLaunchOfficialPapers={(sub) => {
-            if (sub) {
-              handleSubjectChange(sub);
-              setSelectedUnits([]);
-            }
-            setShowCustomQuizBuilder(false);
-            setDashboardView('official');
-          }}
-          onLaunchCustomBuilder={(sub) => {
-            if (sub) {
-              handleSubjectChange(sub);
-              setSelectedUnits([]);
-            }
-            setShowCustomQuizBuilder(true);
-            setDashboardView('custom');
-          }}
-          onLaunchHistory={() => setDashboardView('history')}
+          onLaunchOfficialPapers={(sub) => navigateToOfficial(sub || null)}
+          onLaunchCustomBuilder={(sub) => navigateToCustom(sub || null)}
+          onLaunchHistory={navigateToHistory}
           onOpenProgressModal={() => setShowProgressModal(true)}
           shortBrandName={shortBrandName}
           fullBrandName={fullBrandName}
@@ -2903,7 +2991,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         <div className="flex items-center gap-3.5 pt-2 pb-1">
           <button
             type="button"
-            onClick={() => setDashboardView('dashboard')}
+            onClick={navigateToDashboard}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-[#111113] border border-zinc-200/80 dark:border-white/[0.08] hover:border-zinc-300 dark:hover:border-white/[0.15] text-zinc-700 dark:text-white transition-all flex items-center justify-center cursor-pointer shadow-xs active:scale-95 flex-shrink-0"
             title="Back to Dashboard"
           >
@@ -2932,7 +3020,7 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           subjects={subjectsWithSyllabi}
           selectedSubject={selectedSubject}
           onSelectSubject={(s) => {
-            handleSubjectChange(s);
+            navigateToCustom(s);
             setSelectedUnits([]);
           }}
           availableUnits={availableUnitsForSubject}
@@ -2970,16 +3058,12 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
           showTopics={showTopics}
           setShowTopics={setShowTopics}
           onStartQuiz={handleGenerate}
-          onSwitchToOfficialPapers={() => {
-            setShowCustomQuizBuilder(false);
-            setDashboardView('official');
-          }}
-          onBackToDashboard={() => {
-            setShowCustomQuizBuilder(false);
-            setDashboardView('dashboard');
-          }}
+          onSwitchToOfficialPapers={() => navigateToOfficial(selectedSubject)}
+          onBackToDashboard={navigateToDashboard}
           isLoading={loading || isFetchingQuestions}
           maxSubjectMCQs={subjectQuestions.filter(q => q.type === 'mcq').length}
+          subjectQuestions={subjectQuestions}
+          solvedQuestionIds={solvedQuestionIds}
         />
       </div>
     );
@@ -2994,21 +3078,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
         subjects={subjectsWithSyllabi}
         selectedSubject={selectedSubject}
         onSelectSubject={(s) => {
-          handleSubjectChange(s);
+          navigateToOfficial(s);
           setSelectedUnits([]);
         }}
         examPapers={examPapers}
         subjectQuestions={subjectQuestions}
         isLoading={isFetchingExamPapers || loading}
         onStartExamPaper={handleStartExamPaper}
-        onSwitchToCustomBuilder={() => {
-          setShowCustomQuizBuilder(true);
-          setDashboardView('custom');
-        }}
-        onBackToDashboard={() => {
-          setShowCustomQuizBuilder(false);
-          setDashboardView('dashboard');
-        }}
+        onSwitchToCustomBuilder={() => navigateToCustom(selectedSubject)}
+        onBackToDashboard={navigateToDashboard}
       />
     </div>
   );

@@ -279,7 +279,7 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
               const sub = subjects.find(s => s.id === val);
               if (sub) onSelectSubject(sub);
             }}
-            placeholder="Choose course..."
+            placeholder="Select a subject..."
             searchPlaceholder="Search course code or title..."
             searchable={true}
           />
@@ -451,8 +451,16 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
             );
           })}
         </div>
+      ) : !selectedSubject ? (
+        /* Empty State: Prompt user to choose a subject */
+        <EmptyExamState
+          isNoSubjectSelected={true}
+          subjects={subjects}
+          onSelectSubject={onSelectSubject}
+          onCreateCustomTest={onSwitchToCustomBuilder}
+        />
       ) : (
-        /* Empty State */
+        /* Empty State: Subject selected, but no papers match filter */
         <EmptyExamState
           courseName={selectedSubject?.name}
           category={selectedCategory}

@@ -2180,6 +2180,12 @@ const FeatureRoutes: React.FC<{
       <Route path="/timetable" element={<FeatureGuard module={ModuleType.TIMETABLE}><TimetableHub userProfile={userProfile} /></FeatureGuard>} />
 
       <Route path="/quiz" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/official" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/official/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/custom" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/custom/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/history" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
+      <Route path="/quiz/challenge/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
       <Route path="/quiz/:subjectName" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
       <Route path="/quiz/:subjectName/:quizId" element={<FeatureGuard module={ModuleType.QUIZ}><QuizTaker userProfile={userProfile} onAuthRequired={onOpenAuth} /></FeatureGuard>} />
 

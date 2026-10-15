@@ -48,6 +48,8 @@ interface CompactCustomQuizBuilderProps {
   onBackToDashboard?: () => void;
   isLoading: boolean;
   maxSubjectMCQs?: number;
+  subjectQuestions?: any[];
+  solvedQuestionIds?: Set<string>;
 }
 
 export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> = ({
@@ -82,9 +84,52 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
   onSwitchToOfficialPapers,
   onBackToDashboard,
   isLoading,
+  subjectQuestions = [],
+  solvedQuestionIds = new Set(),
 }) => {
   const allUnitsSelected = availableUnits.length > 0 && availableUnits.every(u => selectedUnits.includes(u));
-  const totalSelectedQuestions = (hasMCQs ? numMCQ : 0) + (hasSubjective ? numSubjective : 0) + (hasCoding ? numCoding : 0);
+
+  // Dynamically calculate matching questions in pool based on selected units, difficulties, and solved status
+  const matchingAvailableMCQs = React.useMemo(() => {
+    if (!subjectQuestions || subjectQuestions.length === 0 || selectedUnits.length === 0) {
+      return 0;
+    }
+
+    const lowerDifficulties = selectedDifficulties.map(d => d.toLowerCase());
+
+    const filtered = subjectQuestions.filter(q => {
+      // Must be MCQ
+      if (q.type && q.type !== 'mcq') return false;
+
+      // Unit filter
+      const unitNum = Number(q.unit);
+      if (!selectedUnits.includes(unitNum)) return false;
+
+      // Difficulty filter
+      if (lowerDifficulties.length > 0) {
+        const qDiff = String(q.difficulty || 'medium').toLowerCase();
+        if (!lowerDifficulties.includes(qDiff)) return false;
+      }
+
+      // Solved filter
+      if (!includeSolved && solvedQuestionIds.has(q.id)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return filtered.length;
+  }, [subjectQuestions, selectedUnits, selectedDifficulties, includeSolved, solvedQuestionIds]);
+
+  // Actual question count to be served: user selection clamped by available questions
+  const effectiveQuestionsCount = React.useMemo(() => {
+    if (selectedUnits.length === 0) return 0;
+    if (matchingAvailableMCQs > 0) {
+      return Math.min(numMCQ, matchingAvailableMCQs);
+    }
+    return numMCQ;
+  }, [selectedUnits.length, matchingAvailableMCQs, numMCQ]);
 
   const subjectOptions: DropdownOption[] = React.useMemo(() => {
     return subjects.map(s => {
@@ -236,38 +281,27 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
         {/* 4. Questions & Duration Row */}
         <div className="px-4 py-3 sm:px-4.5 sm:py-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
-            {/* MCQ Count */}
-            {hasMCQs && (
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">MCQ Questions</span>
-                  <div className="flex items-center gap-1">
-                    {[10, 20, 30].map(cnt => (
-                      <button
-                        key={cnt}
-                        type="button"
-                        onClick={() => setNumMCQ(cnt)}
-                        className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md cursor-pointer transition-colors ${
-                          numMCQ === cnt 
-                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' 
-                            : 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-white/10'
-                        }`}
-                      >
-                        {cnt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={numMCQ}
-                  onChange={(e) => setNumMCQ(parseInt(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] rounded-xl text-xs font-semibold text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-400 dark:focus:border-white/20 transition-colors"
-                />
+            {/* MCQ Count - Clean and minimal */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                  MCQ Questions
+                </span>
+                {selectedUnits.length > 0 && matchingAvailableMCQs > 0 && (
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/[0.06] text-zinc-500 dark:text-zinc-400">
+                    {matchingAvailableMCQs} available
+                  </span>
+                )}
               </div>
-            )}
+              <input
+                type="number"
+                min="1"
+                max={matchingAvailableMCQs > 0 ? matchingAvailableMCQs : 100}
+                value={numMCQ}
+                onChange={(e) => setNumMCQ(Math.max(1, parseInt(e.target.value) || 0))}
+                className="w-full px-2.5 py-1.5 bg-zinc-50 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] rounded-xl text-xs font-semibold text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-400 dark:focus:border-white/20 transition-colors"
+              />
+            </div>
 
             {/* Time Limit */}
             <div className="space-y-1">
@@ -352,12 +386,18 @@ export const CompactCustomQuizBuilder: React.FC<CompactCustomQuizBuilderProps> =
           <button
             type="button"
             onClick={onStartQuiz}
-            disabled={isLoading || totalSelectedQuestions === 0 || selectedUnits.length === 0}
+            disabled={isLoading || effectiveQuestionsCount === 0 || selectedUnits.length === 0}
             className="w-full py-2.5 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-30 transition-all font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <Play className="w-3 h-3 fill-current" />
             <span>
-              {isLoading ? 'Preparing assessment...' : `Start Custom Assessment (${totalSelectedQuestions} Qs • ${timerMinutes}m)`}
+              {isLoading
+                ? 'Preparing assessment...'
+                : selectedUnits.length === 0
+                ? 'Select Target Units to Begin'
+                : effectiveQuestionsCount === 0
+                ? 'No Questions Available for Selection'
+                : `Start Custom Assessment (${effectiveQuestionsCount} Qs • ${timerMinutes}m)`}
             </span>
           </button>
         </div>
