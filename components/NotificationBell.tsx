@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotificationStore } from '../stores/notificationStore';
 import { UserProfile } from '../types';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 interface NotificationBellProps {
     userProfile: UserProfile | null;
@@ -230,16 +231,18 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userProfile }) => {
                     {isDetailModalOpen && selectedNotification && (
                         <div ref={detailModalRef} className="fixed inset-0 z-[9999] flex items-center justify-center p-6 sm:p-0">
                             <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
+                                variants={iosBackdropVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
                                 onClick={() => setIsDetailModalOpen(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                                className="absolute inset-0 bg-black/60"
                             />
                             <motion.div 
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                variants={iosModalVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
                                 className="bg-white dark:bg-[#0c0c0c] w-full max-w-sm rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-3xl overflow-hidden relative z-10"
                             >
                                 <div className="p-8">

@@ -4676,12 +4676,12 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           onClick={() => setShowEditModal(false)}
         >
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xl animate-overlay-in"
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           />
 
           <div 
-            className="relative w-full max-w-lg bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/10 rounded-[32px] p-6 sm:p-8 shadow-2xl space-y-5 z-10 my-8 overflow-hidden flex flex-col animate-fade-in"
+            className="relative w-full max-w-lg bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/10 rounded-[32px] p-6 sm:p-8 shadow-2xl space-y-5 z-10 my-8 overflow-hidden flex flex-col animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -4915,13 +4915,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         >
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xl animate-overlay-in"
             style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           />
 
           {/* Modal Container */}
           <div 
-            className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-zinc-150 dark:border-white/5 rounded-[36px] p-6 sm:p-8 shadow-2xl space-y-6 z-10 my-8 overflow-hidden max-h-[90vh] flex flex-col"
+            className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-zinc-150 dark:border-white/5 rounded-[36px] p-6 sm:p-8 shadow-2xl space-y-6 z-10 my-8 overflow-hidden max-h-[90vh] flex flex-col animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -5133,13 +5133,13 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
         >
           {/* Apple-style Frosted Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-xl"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xl animate-overlay-in"
             style={{ backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)' }}
           />
 
           {/* Modal Container */}
           <div 
-            className="relative w-full max-w-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-white/[0.08] rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-[0_32px_64px_rgba(0,0,0,0.36)] space-y-5 z-10 my-auto overflow-hidden max-h-[88vh] flex flex-col animate-fade-in"
+            className="relative w-full max-w-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-white/[0.08] rounded-[28px] sm:rounded-[32px] p-6 sm:p-7 shadow-[0_32px_64px_rgba(0,0,0,0.36)] space-y-5 z-10 my-auto overflow-hidden max-h-[88vh] flex flex-col animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with integrated Year Switcher */}

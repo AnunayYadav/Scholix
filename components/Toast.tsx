@@ -104,9 +104,9 @@ const ToastItemComponent: React.FC<{ toast: ToastItem; onDismiss: (id: number) =
 
     return (
         <div
-            className={`flex items-center gap-3 pl-3.5 pr-4 py-3 rounded-xl border backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`flex items-center gap-3 pl-3.5 pr-4 py-3 rounded-2xl border backdrop-blur-xl transition-all duration-250 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                 toast.exiting
-                    ? 'opacity-0 translate-y-2 scale-95'
+                    ? 'opacity-0 -translate-y-3 scale-95 pointer-events-none'
                     : 'opacity-100 translate-y-0 scale-100 animate-toast-in'
             } bg-white/95 dark:bg-[#121214]/95 border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${s.leftBorder} ${s.glowColor}`}
             style={{ width: '100%', minWidth: 280, maxWidth: 360 }}

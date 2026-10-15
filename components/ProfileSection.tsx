@@ -6,6 +6,7 @@ import VerifiedBadge from './VerifiedBadge.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useXP } from '../hooks/useXP.ts';
 import { showToast } from './Toast.tsx';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 interface ProfileSectionProps {
   userProfile: UserProfile | null;
@@ -461,9 +462,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
           {showPasswordModal && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                variants={iosBackdropVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
                 onClick={() => {
                   if (!isUpdating) {
                     setShowPasswordModal(false);
@@ -475,12 +477,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                     setModalError(null);
                   }
                 }}
-                className="absolute inset-0 bg-black/40 backdrop-blur-md"
+                className="absolute inset-0 bg-black/40"
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                variants={iosModalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
                 className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-white/10 shadow-xl p-6 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -654,9 +657,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
           {showDeleteModal && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                variants={iosBackdropVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
                 onClick={() => {
                   if (!isUpdating) {
                     setShowDeleteModal(false);
@@ -664,12 +668,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                     setDeleteConfirmation('');
                   }
                 }}
-                className="absolute inset-0 bg-black/40 backdrop-blur-md"
+                className="absolute inset-0 bg-black/40"
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                variants={iosModalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
                 className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl border border-red-500/20 shadow-xl p-6 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >

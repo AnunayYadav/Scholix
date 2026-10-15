@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 interface DownloadAPKModalProps {
   isOpen: boolean;
@@ -105,20 +106,20 @@ const DownloadAPKModal: React.FC<DownloadAPKModalProps> = ({ isOpen, onClose }) 
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={iosBackdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-xl"
-            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            className="absolute inset-0 bg-black/40"
           />
 
           {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            variants={iosModalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="relative w-full max-w-[380px] bg-white dark:bg-[#0d0d0d] rounded-[32px] border border-zinc-200/50 dark:border-white/5 shadow-2xl overflow-hidden p-8"
             onClick={(e) => e.stopPropagation()}
           >

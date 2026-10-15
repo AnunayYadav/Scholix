@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SUPPORT_CHAT_TREE, ChatNode, ChatOption } from '../data/supportChatData.ts';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 interface Message {
   id: string;
@@ -98,18 +99,19 @@ const ChatSupportModal: React.FC<ChatSupportModalProps> = ({ isOpen, onClose, on
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={iosBackdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-xl"
-            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            className="absolute inset-0 bg-black/40"
           />
           
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            variants={iosModalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="relative w-full max-w-lg bg-zinc-50 dark:bg-[#0a0a0a] rounded-[40px] overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10 flex flex-col h-[600px] max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >

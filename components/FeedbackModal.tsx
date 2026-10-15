@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer.ts';
 import { showToast } from './Toast.tsx';
 import { UserProfile } from '../types';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -42,19 +43,20 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, userProf
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden pointer-events-auto">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={iosBackdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={() => !isSubmitting && onClose()}
-            className="absolute inset-0 bg-black/40 backdrop-blur-xl"
-            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            className="absolute inset-0 bg-black/40"
           />
 
           {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            variants={iosModalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] rounded-[40px] border border-zinc-200 dark:border-white/10 shadow-2xl p-10 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >

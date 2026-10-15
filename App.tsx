@@ -72,8 +72,6 @@ import NotificationBell from './components/NotificationBell.tsx';
 import { useNotificationStore } from './stores/notificationStore.ts';
 import { useLoadingStore } from './stores/loadingStore.ts';
 import UniversalSearch from './components/UniversalSearch.tsx';
-import { useOnlineStatus } from './hooks/useOnlineStatus.ts';
-import OfflineOverlay from './components/OfflineOverlay.tsx';
 import AcademicCalendar from './components/AcademicCalendar.tsx';
 
 const getUniSlug = (id: UniversityId): string => {
@@ -714,26 +712,26 @@ const AuthInput: React.FC<{
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
   return (
-    <div className="space-y-2 group">
+    <div className="space-y-1.5 group">
       <div className="flex justify-between items-center px-1">
-        <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 tracking-widest ml-1">{label}</label>
+        <label className="text-[11.5px] font-semibold text-zinc-500 dark:text-zinc-400 tracking-normal">{label}</label>
         {status && status !== 'idle' && (
           <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
             {status === 'checking' && (
               <>
-                <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                <div className="w-2.5 h-2.5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
                 <span className="text-zinc-400 dark:text-zinc-500">Checking...</span>
               </>
             )}
             {status === 'available' && (
               <>
-                <CheckCircle2 size={13} className="text-emerald-500" />
+                <CheckCircle2 size={12} className="text-emerald-500" />
                 <span className="text-emerald-500">Available</span>
               </>
             )}
             {status === 'taken' && (
               <>
-                <X size={13} className="text-red-500" />
+                <X size={12} className="text-red-500" />
                 <span className="text-red-500">Taken</span>
               </>
             )}
@@ -741,7 +739,7 @@ const AuthInput: React.FC<{
         )}
       </div>
       <div className="relative">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-accent transition-colors">
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 group-focus-within:text-accent transition-colors flex items-center justify-center">
           {icon}
         </div>
         <input
@@ -750,18 +748,18 @@ const AuthInput: React.FC<{
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className={`w-full bg-zinc-100 dark:bg-zinc-900/50 border ${error || status === 'taken' ? 'border-red-500/50 focus:border-red-500/50' :
+          className={`w-full bg-zinc-100 dark:bg-[#161618] border ${error || status === 'taken' ? 'border-red-500/50 focus:border-red-500/50' :
               status === 'available' ? 'border-emerald-500/50 focus:border-emerald-500/50' :
-                'border-black/5 dark:border-white/10'
-            } rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-accent/50 focus:ring-4 focus:ring-accent/5 transition-all`}
+                'border-zinc-200/80 dark:border-white/10'
+            } rounded-xl py-2.5 sm:py-3 pl-10 pr-10 text-[13.5px] font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/10 transition-all`}
         />
         {type === 'password' && (
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         )}
       </div>
@@ -774,14 +772,14 @@ const StepCard: React.FC<{ step: number; title: string; active: boolean }> = ({ 
     whileHover={{ x: 4 }}
     className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${active
         ? 'bg-accent/10 border-accent/20 shadow-[0_0_20px_rgba(255,122,24,0.1)]'
-        : 'bg-black/20 border-white/5 opacity-50'
+        : 'bg-zinc-100 dark:bg-[#161618] border-zinc-200/80 dark:border-white/5 opacity-70'
       }`}
   >
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${active ? 'bg-accent text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
+    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${active ? 'bg-accent text-white' : 'bg-zinc-200 dark:bg-[#202024] text-zinc-500 dark:text-zinc-400'
       }`}>
       {step}
     </div>
-    <span className={`text-sm font-bold tracking-tight ${active ? 'text-zinc-900 dark:text-white' : 'text-zinc-500'}`}>
+    <span className={`text-sm font-bold tracking-tight ${active ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 dark:text-zinc-400'}`}>
       {title}
     </span>
     {active && (
@@ -817,6 +815,22 @@ const PremiumAuthModal: React.FC<{
     regNo: '',
     password: ''
   });
+
+  const [shouldMountVideo, setShouldMountVideo] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Defer video loading until modal entrance animation has completely settled (750ms)
+      const timer = setTimeout(() => {
+        setShouldMountVideo(true);
+      }, 750);
+      return () => clearTimeout(timer);
+    } else {
+      setShouldMountVideo(false);
+      setIsVideoLoaded(false);
+    }
+  }, [isOpen]);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -903,8 +917,17 @@ const PremiumAuthModal: React.FC<{
     };
 
     modal.addEventListener('keydown', handleTab);
-    firstFocusable?.focus();
-    return () => modal.removeEventListener('keydown', handleTab);
+    
+    // Focus without forcing layout jump or scroll
+    const focusTimer = setTimeout(() => {
+      const inputElement = modal.querySelector('input') || firstFocusable;
+      inputElement?.focus({ preventScroll: true });
+    }, 200);
+
+    return () => {
+      modal.removeEventListener('keydown', handleTab);
+      clearTimeout(focusTimer);
+    };
   }, [isOpen, mode, step]);
 
   // Debounced username check
@@ -1211,56 +1234,85 @@ const PremiumAuthModal: React.FC<{
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             onClick={mode === 'verify_email' ? undefined : onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md will-change-[opacity]"
           />
 
-          {/* Modal Glow */}
+          {/* Hardware-accelerated Modal Glow (pure GPU gradient, zero raster overhead) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.4 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-accent/10 blur-[120px] rounded-full pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, rgba(255, 122, 24, 0.12) 0%, transparent 70%)',
+              transform: 'translate(-50%, -50%) translateZ(0)',
+            }}
           />
 
           {/* Modal Container */}
           <motion.div
             ref={modalRef}
-            initial={{ opacity: 0, scale: 0.98, y: 10 }}
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: 10 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{
-              duration: 0.4,
-              ease: [0.22, 1, 0.36, 1]
+              type: "spring",
+              damping: 32,
+              stiffness: 380,
+              mass: 0.8
             }}
-            className="relative w-full max-w-[1100px] h-full sm:h-auto max-h-[100%] sm:max-h-[720px] bg-white dark:bg-zinc-950 border border-black/5 dark:border-white/10 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col sm:flex-row shadow-3xl text-zinc-900 dark:text-white"
+            style={{
+              willChange: 'transform, opacity',
+              transform: 'translateZ(0)',
+              WebkitBackfaceVisibility: 'hidden',
+              backfaceVisibility: 'hidden',
+            }}
+            className="relative w-full max-w-[1100px] h-full sm:h-auto max-h-[100%] sm:max-h-[720px] bg-white dark:bg-[#0c0c0e] border border-zinc-200/80 dark:border-white/10 rounded-2xl sm:rounded-[32px] overflow-hidden flex flex-col sm:flex-row shadow-2xl text-zinc-900 dark:text-white"
           >
             {mode !== 'verify_email' && (
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 p-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all hover:bg-black/10 dark:hover:bg-white/10"
+                className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 p-2 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all hover:bg-zinc-200 dark:hover:bg-white/10 active:scale-90"
               >
                 <X size={20} />
               </button>
             )}
 
             {/* LEFT SECTION - Brand Experience */}
-            <div className="hidden lg:flex w-[45%] relative flex-col p-12 overflow-hidden border-r border-black/5 dark:border-white/5 bg-zinc-950">
-              {/* Video Background */}
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover scale-105"
-              >
-                <source src="/authvideo.mp4" type="video/mp4" />
-              </video>
+            <div className="hidden lg:flex w-[45%] relative flex-col p-12 overflow-hidden border-r border-zinc-200/80 dark:border-white/10 bg-[#0c0c0e] select-none">
+              {/* Ambient dark background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0c0c0e] via-[#121215] to-[#0c0c0e]" />
 
-              {/* Glass Overlays */}
-              <div className="absolute inset-0 bg-zinc-950/40" />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-zinc-950/20" />
+              {/* Simple loading spinner while video loads */}
+              {!isVideoLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                  <div className="w-8 h-8 rounded-full border-2 border-orange-500/20 border-t-orange-500 animate-spin" />
+                </div>
+              )}
+
+              {/* Deferred Video Background - mounts after modal animation has settled */}
+              {shouldMountVideo && (
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  onCanPlay={() => setIsVideoLoaded(true)}
+                  className={`absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-1000 ease-out pointer-events-none ${
+                    isVideoLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <source src="/authvideo.mp4" type="video/mp4" />
+                </video>
+              )}
+
+              {/* Cinematic Overlays */}
+              <div className="absolute inset-0 bg-[#0c0c0e]/40 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-transparent to-[#0c0c0e]/30 pointer-events-none" />
 
               {/* Brand Logo */}
               <div className="relative z-10 flex items-center gap-3">
@@ -1275,12 +1327,7 @@ const PremiumAuthModal: React.FC<{
 
               {/* Hero Content */}
               <div className="relative z-10 flex-1 flex flex-col justify-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="space-y-4"
-                >
+                <div className="space-y-4">
                   <h1 className="text-4xl font-bold text-white leading-[1.1] tracking-tight">
                     Welcome to the <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-2">Future of Learning</span>
@@ -1288,7 +1335,7 @@ const PremiumAuthModal: React.FC<{
                   <p className="text-sm text-zinc-300 font-medium leading-relaxed max-w-[85%]">
                     Your gateway to academic excellence and placement readiness starts here.
                   </p>
-                </motion.div>
+                </div>
               </div>
 
               {/* Footer Info */}
@@ -1296,7 +1343,7 @@ const PremiumAuthModal: React.FC<{
                 <div className="flex items-center gap-4 text-white/40">
                   <div className="flex -space-x-2">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="w-6 h-6 rounded-full border-2 border-zinc-900 bg-zinc-800 flex items-center justify-center text-[10px] font-bold">
+                      <div key={i} className="w-6 h-6 rounded-full border-2 border-[#0c0c0e] bg-zinc-800 flex items-center justify-center text-[10px] font-bold">
                         {i}
                       </div>
                     ))}
@@ -1306,12 +1353,12 @@ const PremiumAuthModal: React.FC<{
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col p-6 sm:p-12 lg:p-16 relative overflow-y-auto no-scrollbar bg-white dark:bg-zinc-950">
+            <div className="flex-1 flex flex-col p-6 sm:p-12 lg:p-16 relative overflow-y-auto no-scrollbar bg-white dark:bg-[#0c0c0e]">
               <motion.div
                 key={mode + '_' + step}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
                 className="w-full max-w-[400px] mx-auto space-y-6 sm:space-y-8 my-auto relative z-10"
               >
                 {step === 'verified' ? (
@@ -1362,7 +1409,7 @@ const PremiumAuthModal: React.FC<{
                             >
                               <AuthInput
                                 label="Username"
-                                icon={<User size={18} />}
+                                icon={<User size={16} />}
                                 placeholder="alex_smith"
                                 value={formData.username}
                                 onChange={handleUsernameChange}
@@ -1371,7 +1418,7 @@ const PremiumAuthModal: React.FC<{
                               />
                               <AuthInput
                                 label="Reg No"
-                                icon={<CheckCircle2 size={18} />}
+                                icon={<CheckCircle2 size={16} />}
                                 placeholder="1220...."
                                 value={formData.regNo}
                                 onChange={handleRegNoChange}
@@ -1384,7 +1431,7 @@ const PremiumAuthModal: React.FC<{
                           {mode === 'login' ? (
                             <AuthInput
                               label="Email or Username"
-                              icon={<Mail size={18} />}
+                              icon={<Mail size={16} />}
                               placeholder="name@university.edu or username"
                               value={identifier}
                               onChange={setIdentifier}
@@ -1393,7 +1440,7 @@ const PremiumAuthModal: React.FC<{
                           ) : (
                             <AuthInput
                               label="Email Address"
-                              icon={<Mail size={18} />}
+                              icon={<Mail size={16} />}
                               placeholder="name@university.edu"
                               value={formData.email}
                               onChange={(val) => {
@@ -1410,7 +1457,7 @@ const PremiumAuthModal: React.FC<{
                               <AuthInput
                                 label="Password"
                                 type="password"
-                                icon={<Lock size={18} />}
+                                icon={<Lock size={16} />}
                                 placeholder="••••••••"
                                 value={formData.password}
                                 onChange={(val) => setFormData({ ...formData, password: val })}
@@ -1459,7 +1506,7 @@ const PremiumAuthModal: React.FC<{
                         <div className="space-y-4">
                           <AuthInput
                             label="Verification Code"
-                            icon={<Rocket size={18} />}
+                            icon={<Rocket size={16} />}
                             placeholder="6-digit code"
                             value={otpValue}
                             onChange={(val) => setOtpValue(val.replace(/[^0-9]/g, '').slice(0, 6))}
@@ -1471,7 +1518,7 @@ const PremiumAuthModal: React.FC<{
                               <AuthInput
                                 label="New Password"
                                 type="password"
-                                icon={<Lock size={18} />}
+                                icon={<Lock size={16} />}
                                 placeholder="••••••••"
                                 value={formData.password}
                                 onChange={(val) => setFormData({ ...formData, password: val })}
@@ -1525,25 +1572,25 @@ const PremiumAuthModal: React.FC<{
                     </div>
 
                     {/* CTA Button */}
-                    <div className="space-y-6 pt-2">
+                    <div className="space-y-5 pt-2">
                       <motion.button
-                        whileHover={!isSubmitDisabled ? { scale: 1.02, y: -2 } : {}}
-                        whileTap={!isSubmitDisabled ? { scale: 0.98 } : {}}
+                        whileHover={!isSubmitDisabled ? { scale: 1.015, y: -1 } : {}}
+                        whileTap={!isSubmitDisabled ? { scale: 0.985 } : {}}
                         onClick={() => handleSubmit()}
                         disabled={isSubmitDisabled}
-                        className="w-full bg-gradient-to-r from-accent to-accent-2 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(255,122,24,0.15)] hover:shadow-[0_20px_40px_rgba(255,122,24,0.3)] transition-all group disabled:opacity-70 disabled:cursor-not-allowed border-none outline-none text-center cursor-pointer"
+                        className="w-full bg-gradient-to-r from-accent to-accent-2 text-white font-bold py-3 sm:py-3.5 rounded-xl flex items-center justify-center gap-2.5 shadow-[0_12px_28px_rgba(255,122,24,0.2)] hover:shadow-[0_16px_32px_rgba(255,122,24,0.3)] transition-all group disabled:opacity-70 disabled:cursor-not-allowed border-none outline-none text-center cursor-pointer"
                       >
                         {loading ? (
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                           <>
-                            <span className="tracking-wider text-sm">
+                            <span className="tracking-wide text-sm font-bold">
                               {mode === 'login' ? 'Sign In'
                                 : mode === 'signup' ? (step === 'otp' ? 'Verify & Join' : 'Create Account')
                                   : mode === 'forgot_password' ? (step === 'otp' ? 'Update Password' : 'Send Recovery Code')
                                     : (step === 'otp' ? 'Verify Code' : 'Send Verification Code')}
                             </span>
-                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                           </>
                         )}
                       </motion.button>
@@ -1606,7 +1653,6 @@ const AppContent: React.FC = () => {
   const [authIsReady, setAuthIsReady] = useState(false);
   const searchResultsRef = useRef<HTMLDivElement>(null);
   const lastHandledUserRef = useRef<string | null>(null);
-  const isOnline = useOnlineStatus();
 
   const handleOpenMobileSearch = () => {
     setIsClosingMobileSearch(false);
@@ -2093,7 +2139,6 @@ const AppContent: React.FC = () => {
       <SpeedInsights />
       <ToastContainer />
       <AnnouncementModal />
-      <OfflineOverlay isOffline={!isOnline} />
     </div>
   );
 };

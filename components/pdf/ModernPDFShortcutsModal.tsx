@@ -28,9 +28,9 @@ export const ModernPDFShortcutsModal: React.FC<ModernPDFShortcutsModalProps> = (
     ];
 
     return (
-        <div className="fixed inset-0 z-[10005] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 z-[10005] bg-black/60 backdrop-blur-xl flex items-center justify-center p-4 animate-overlay-in" onClick={onClose}>
             <div 
-                className="bg-white dark:bg-[#121215] border border-zinc-200 dark:border-white/10 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 text-zinc-900 dark:text-zinc-100"
+                className="bg-white dark:bg-[#121215] border border-zinc-200 dark:border-white/10 rounded-[28px] max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 text-zinc-900 dark:text-zinc-100 animate-scale-in"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between border-b border-zinc-200 dark:border-white/5 pb-3">

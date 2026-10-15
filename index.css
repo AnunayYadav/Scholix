@@ -28,8 +28,8 @@
   }
 
   --animate-shimmer: shimmer 1.5s infinite linear;
-  --animate-fade-in: fadeIn 0.4s ease-out forwards;
-  --animate-fade-in-up: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fadeIn 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-fade-in-up: slideInUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
   --animate-float-slow: float 12s ease-in-out infinite;
   --animate-float-slower: float 18s ease-in-out infinite;
   --animate-bounce-subtle: bounceSubtle 3s ease-in-out infinite;
@@ -44,29 +44,121 @@
     to { background-position: 200% 0; }
   }
 
+  /* iOS Silky Smooth Page & Element Fade In */
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(8px) scale(0.995);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
+  /* iOS Spring Card / Modal Rise */
   @keyframes slideInUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    0% {
+      opacity: 0;
+      transform: translateY(24px) scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
+  /* iOS Alert / Dialog Elastic Scale */
   @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+    0% {
+      opacity: 0;
+      transform: scale(0.93) translateY(8px);
+      filter: blur(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      filter: blur(0px);
+    }
   }
 
+  /* iOS Action Sheet / Tray Slide */
   @keyframes slideUpSheet {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    0% {
+      opacity: 0.6;
+      transform: translateY(100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes slideDownSheet {
-    from { transform: translateY(0); }
-    to { transform: translateY(100%); }
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  /* iOS Dynamic Island / Notification Toast */
+  @keyframes toastIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-16px) scale(0.92);
+      filter: blur(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+  }
+
+  /* iOS Center Modal Entrance & Dismissal */
+  @keyframes iosModalIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.93) translateY(14px);
+      filter: blur(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      filter: blur(0px);
+    }
+  }
+
+  @keyframes iosModalOut {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      filter: blur(0px);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.96) translateY(8px);
+      filter: blur(2px);
+    }
+  }
+
+  @keyframes iosPop {
+    0% {
+      transform: scale(0.92);
+      opacity: 0;
+    }
+    70% {
+      transform: scale(1.025);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
   @keyframes float {
@@ -140,16 +232,20 @@
   --animate-hyper-scale: hyperScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-cursor-blink: blink 0.8s ease-in-out infinite;
   --animate-char-reveal: char-reveal 0.2s ease-out forwards;
-  --animate-slide-up: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-scale-in: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-sheet-in: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-sheet-out: slideDownSheet 0.25s ease-in forwards;
-  --animate-overlay-in: overlayFadeIn 0.3s ease-out forwards;
-  --animate-overlay-out: overlayFadeOut 0.2s ease-in forwards;
-  --animate-slide-in-right: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-up: slideInUp 0.45s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-scale-in: scaleIn 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-sheet-in: slideUpSheet 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-sheet-out: slideDownSheet 0.28s cubic-bezier(0.32, 0, 0.67, 0) both;
+  --animate-overlay-in: overlayFadeIn 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-overlay-out: overlayFadeOut 0.22s cubic-bezier(0.32, 0, 0.67, 0) both;
+  --animate-slide-in-right: slideInRight 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-toast-in: toastIn 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-modal-in: iosModalIn 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-modal-out: iosModalOut 0.22s cubic-bezier(0.32, 0, 0.67, 0) both;
+  --animate-pop: iosPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
   @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(-10px); }
+    from { opacity: 0; transform: translateX(-14px); }
     to { opacity: 1; transform: translateX(0); }
   }
 
@@ -432,21 +528,37 @@ h4,
 
 /* Search Animations */
 @keyframes searchDropdownIn {
-  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
 }
 
 @keyframes searchResultFade {
-  from { opacity: 0; transform: translateX(-5px); }
-  to { opacity: 1; transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-dropdown-anim {
-  animation: searchDropdownIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: searchDropdownIn 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
 }
 
 .search-result-anim {
-  animation: searchResultFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: searchResultFade 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
 }
 
 .rotate-y-180 {
@@ -485,54 +597,113 @@ h4,
   animation: blob-bounce 12s linear infinite;
 }
 
-/* Page transition */
+/* iOS Page Transition */
 .page-transition-enter {
-  animation: pageEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: pageEnter 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
 }
 
 @keyframes pageEnter {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px) scale(0.995);
   }
 
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* Modal exit animations */
+/* iOS Modal Exit Animations */
 @keyframes overlayFadeIn {
-  from {
+  0% {
     opacity: 0;
   }
 
-  to {
+  100% {
     opacity: 1;
   }
 }
 
 @keyframes overlayFadeOut {
-  from {
+  0% {
     opacity: 1;
   }
 
-  to {
+  100% {
     opacity: 0;
   }
 }
 
 @keyframes modalSlideOut {
-  from {
+  0% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 
-  to {
+  100% {
     opacity: 0;
-    transform: translateY(20px) scale(0.96);
+    transform: translateY(14px) scale(0.96);
   }
+}
+
+/* Explicit Animation Utilities */
+.animate-fade-in {
+  animation: fadeIn 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-toast-in {
+  animation: toastIn 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-modal-in {
+  animation: iosModalIn 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-modal-out {
+  animation: iosModalOut 0.22s cubic-bezier(0.32, 0, 0.67, 0) both;
+  will-change: transform, opacity;
+}
+
+/* iOS Tactile Interaction */
+.ios-press,
+.ios-tap {
+  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+}
+
+.ios-press:active,
+.ios-tap:active {
+  transform: scale(0.97) !important;
+  opacity: 0.9;
+}
+
+.ios-card {
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+}
+
+.ios-card:active {
+  transform: scale(0.985);
+}
+
+/* iOS Frosted Glass */
+.ios-glass {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.dark .ios-glass {
+  background-color: rgba(12, 12, 14, 0.78) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Body scroll lock when modal is open */
@@ -549,16 +720,17 @@ body.modal-open {
 
 /* Item list animations */
 .list-item-enter {
-  animation: listItemIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: listItemIn 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
 }
 
 @keyframes listItemIn {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.97);
+    transform: translateY(10px) scale(0.98);
   }
 
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }

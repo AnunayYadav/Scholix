@@ -2,6 +2,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 interface SocialModalProps {
   isOpen: boolean;
@@ -42,19 +43,20 @@ const SocialModal: React.FC<SocialModalProps> = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={iosBackdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-xl"
-            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            className="absolute inset-0 bg-black/40"
           />
 
           {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            variants={iosModalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="relative w-full max-w-[340px] bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl p-7 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >

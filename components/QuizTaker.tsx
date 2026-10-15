@@ -1770,13 +1770,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                 className="absolute inset-0 bg-black/80 backdrop-blur-xl"
                 onClick={() => setShowReportModal(false)}
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                initial={{ opacity: 0, scale: 0.93, y: 14 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.82 }}
                 className="relative w-full max-w-lg bg-black rounded-[32px] border border-white/10 shadow-2xl overflow-hidden p-8"
               >
                 <div className="flex items-center justify-between mb-6">
@@ -1832,13 +1834,15 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
                 className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl"
                 onClick={() => setShowEditModal(false)}
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                initial={{ opacity: 0, scale: 0.93, y: 14 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.82 }}
                 className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
               >
                 <div className="flex items-center justify-between p-8 border-b border-zinc-100 dark:border-white/5">
@@ -2623,15 +2627,16 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
               className="modal-overlay"
               style={{ backdropFilter: 'blur(20px) saturate(180%)', zIndex: 60 }}
               onClick={() => setShowProgressModal(false)}
             >
               <motion.div
-                initial={{ scale: 0.96, opacity: 0, y: 16 }}
+                initial={{ scale: 0.93, opacity: 0, y: 14 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.96, opacity: 0, y: 16 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                exit={{ scale: 0.96, opacity: 0, y: 8 }}
+                transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.82 }}
                 className="w-[92vw] max-w-4xl bg-white/95 dark:bg-[#121214]/95 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-zinc-200/80 dark:border-white/[0.08] relative backdrop-blur-xl flex flex-col max-h-[88vh]"
                 onClick={(e) => e.stopPropagation()}
               >

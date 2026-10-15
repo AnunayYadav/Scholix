@@ -215,7 +215,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile sidebar backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-[400] bg-black/40 backdrop-blur-md md:hidden transition-opacity duration-300"
+          className="fixed inset-0 z-[400] bg-black/50 backdrop-blur-xl md:hidden transition-opacity duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+          style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={toggleMobileMenu}
         />
       )}
@@ -224,7 +225,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`
-          fixed inset-y-0 left-0 z-[410] md:translate-x-0 transform transition-[width] duration-200 ease-out
+          fixed inset-y-0 left-0 z-[410] md:translate-x-0 transform transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
           bg-white dark:bg-[#0c0c0e] border-r border-zinc-200/80 dark:border-zinc-800/80
           ${isMobileMenuOpen ? 'translate-x-0 w-56' : '-translate-x-full md:translate-x-0'}
           ${isExpanded ? 'w-56 shadow-2xl md:shadow-none' : 'md:w-[60px]'}

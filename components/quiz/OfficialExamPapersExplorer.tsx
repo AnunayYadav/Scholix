@@ -431,14 +431,16 @@ export const OfficialExamPapersExplorer: React.FC<OfficialExamPapersExplorerProp
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl"
+              style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
               onClick={() => setActivePaperModal(null)}
             >
               <motion.div
-                initial={{ scale: 0.96, opacity: 0, y: 10 }}
+                initial={{ scale: 0.93, opacity: 0, y: 14 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.96, opacity: 0, y: 10 }}
-                transition={{ duration: 0.16, ease: 'easeOut' }}
+                exit={{ scale: 0.96, opacity: 0, y: 8 }}
+                transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.82 }}
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-md bg-white dark:bg-[#121214] border border-zinc-200/80 dark:border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-5 relative overflow-hidden"
               >

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NexusServer from '../services/nexusServer';
 import { Announcement } from '../types';
+import { iosBackdropVariants, iosModalVariants } from '../utils/iosAnimations';
 
 const AnnouncementModal: React.FC = () => {
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
@@ -44,18 +45,20 @@ const AnnouncementModal: React.FC = () => {
                 <div className="fixed inset-0 z-[100000] flex flex-col items-center justify-center p-4">
                     {/* Dark minimalist backdrop */}
                     <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        variants={iosBackdropVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="absolute inset-0 bg-black/90"
                         onClick={handleClose}
                     />
 
                     {/* Image Container */}
                     <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
+                        variants={iosModalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
                         className="relative max-w-full sm:max-w-xl flex flex-col items-center"
                     >
                         {/* THE IMAGE (Clickable if link exists) */}
