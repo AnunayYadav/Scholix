@@ -231,6 +231,7 @@ export default async function handler(req: any, res: any) {
         const cgpaCalculations = Number(study.cgpa_calculations) || 0;
         const attendanceUpdates = Number(study.attendance_updates) || 0;
         const resumesAnalyzed = Number(study.resumes_analyzed) || 0;
+        const lastSignInAt = authUser?.last_sign_in_at || null;
 
         return {
           id: p.id,
@@ -254,7 +255,9 @@ export default async function handler(req: any, res: any) {
           correct_questions: correctQuestions,
           cgpa_calculations: cgpaCalculations,
           attendance_updates: attendanceUpdates,
-          resumes_analyzed: resumesAnalyzed
+          resumes_analyzed: resumesAnalyzed,
+          last_sign_in_at: lastSignInAt,
+          recent_activities: study.recent_activities || []
         };
       });
 

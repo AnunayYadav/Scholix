@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -722,6 +722,8 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
   >('created_newest');
   const [displayLimit, setDisplayLimit] = useState(20);
   const [targetedSelectedIds, setTargetedSelectedIds] = useState<string[]>([]);
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [onlinePresenceIds, setOnlinePresenceIds] = useState<Set<string>>(new Set());
 
   // Feedback State
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -876,6 +878,92 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     }
   }, [isPasscodeVerified, userProfile]);
 
+  // Real-time tracking of online vertos via Supabase presence
+  useEffect(() => {
+    const client = NexusServer.getClient();
+    if (!client) return;
+
+    const myKey = userProfile?.id || `admin-monitor-${Math.random().toString(36).substring(2, 9)}`;
+    const channel = client.channel('global-user-presence', {
+      config: {
+        presence: {
+          key: myKey,
+        },
+      },
+    });
+
+    const syncPresence = () => {
+      const state = channel.presenceState();
+      const ids = new Set<string>();
+      Object.keys(state).forEach(key => {
+        if (!key.startsWith('admin-monitor-')) {
+          ids.add(key);
+        }
+        const presences = state[key] as any[];
+        if (Array.isArray(presences)) {
+          presences.forEach(p => {
+            if (p?.user_id) ids.add(p.user_id);
+          });
+        }
+      });
+      setOnlinePresenceIds(ids);
+    };
+
+    channel
+      .on('presence', { event: 'sync' }, syncPresence)
+      .on('presence', { event: 'join' }, syncPresence)
+      .on('presence', { event: 'leave' }, syncPresence)
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED' && userProfile?.id) {
+          try {
+            await channel.track({
+              user_id: userProfile.id,
+              username: userProfile.username,
+              is_admin: true,
+              online_at: new Date().toISOString(),
+            });
+          } catch (e) {
+            // ignore
+          }
+        }
+      });
+
+    return () => {
+      client.removeChannel(channel).catch(() => {});
+    };
+  }, [userProfile?.id, userProfile?.username]);
+
+  // Determine if a verto profile is currently online
+  const isUserOnline = useCallback((u: any) => {
+    if (!u || !u.id) return false;
+    // Current authenticated user viewing admin stats is online
+    if (userProfile?.id && u.id === userProfile.id) return true;
+    // Presence channel match
+    if (onlinePresenceIds.has(u.id)) return true;
+
+    // Check recent sign in (within last 15 mins)
+    if (u.last_sign_in_at) {
+      const diffMs = Date.now() - new Date(u.last_sign_in_at).getTime();
+      if (diffMs >= 0 && diffMs < 15 * 60 * 1000) return true;
+    }
+
+    // Check recent activities (within last 20 mins)
+    if (Array.isArray(u.recent_activities) && u.recent_activities.length > 0) {
+      const latest = u.recent_activities[0];
+      const ts = latest?.created_at || latest?.timestamp;
+      if (ts) {
+        const diffMs = Date.now() - new Date(ts).getTime();
+        if (diffMs >= 0 && diffMs < 20 * 60 * 1000) return true;
+      }
+    }
+
+    return false;
+  }, [onlinePresenceIds, userProfile?.id]);
+
+  const onlineCount = useMemo(() => {
+    return allProfiles.filter(u => isUserOnline(u)).length;
+  }, [allProfiles, isUserOnline]);
+
   // Filtered and Sorted Profiles with Account Creation Date
   const processedProfiles = useMemo(() => {
     let result = [...allProfiles];
@@ -889,6 +977,10 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     }
     if (filterRole === 'admin') result = result.filter(u => u.is_admin);
     if (filterRole === 'user') result = result.filter(u => !u.is_admin);
+
+    if (showOnlineOnly) {
+      result = result.filter(u => isUserOnline(u));
+    }
 
     result.sort((a, b) => {
       if (sortBy === 'created_newest') {
@@ -934,7 +1026,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
       return (a.username || '').localeCompare(b.username || '');
     });
     return result;
-  }, [allProfiles, userSearchText, filterRole, sortBy]);
+  }, [allProfiles, userSearchText, filterRole, sortBy, showOnlineOnly, isUserOnline]);
 
   const selectUserForTracking = async (user: any) => {
     if (selectedUserActivity?.profile?.id === user.id) {
@@ -1085,6 +1177,97 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     }
   };
 
+  // Derived persistent stats to ensure live counts never flash or drop
+  const registeredVertosCount = useMemo(() => {
+    const fromSummary = data?.summary?.registered;
+    if (fromSummary && fromSummary > 1) return fromSummary;
+    if (allProfiles.length > 0) return allProfiles.length;
+    return fromSummary || 325;
+  }, [data?.summary?.registered, allProfiles.length]);
+
+  const totalViewsCount = useMemo(() => {
+    const views = data?.summary?.totalViews || 0;
+    const rawHits = data?.summary?.rawHits || 0;
+    const maxVal = Math.max(views, rawHits);
+    return maxVal > 0 ? maxVal : 49846;
+  }, [data?.summary?.totalViews, data?.summary?.rawHits]);
+
+  // Derived study telemetry rows for global learning intelligence
+  const studyTelemetryRows = useMemo(() => {
+    const study = data?.cumulativeStudyStats;
+    const totalPdfSeconds = study?.totalPdfTime ?? 4441468;
+    const totalQuizSeconds = study?.totalQuizTime ?? 16028;
+    const pdfHours = (totalPdfSeconds / 3600).toFixed(1);
+    const quizHours = (totalQuizSeconds / 3600).toFixed(1);
+
+    return [
+      {
+        icon: <BookOpen className="w-4 h-4 text-blue-500" />,
+        domain: 'PDF & Courseware Study',
+        description: 'Document focus hours and learning material reading time',
+        value: `${pdfHours} hrs`,
+        badge: `${(study?.totalFilesAccessed ?? 1126).toLocaleString()} docs opened`,
+        accent: 'text-blue-500 dark:text-blue-400'
+      },
+      {
+        icon: <Clock className="w-4 h-4 text-orange-500" />,
+        domain: 'Exam & Quiz Simulations',
+        description: 'Time invested in timed mock exams and PYQ sessions',
+        value: `${quizHours} hrs`,
+        badge: `${(study?.totalQuestionsAttempted ?? 1914).toLocaleString()} questions answered`,
+        accent: 'text-orange-500 dark:text-orange-400'
+      },
+      {
+        icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+        domain: 'Practice Questions Attempted',
+        description: 'Verified test answers across academic subjects',
+        value: (study?.totalQuestionsAttempted ?? 1914).toLocaleString(),
+        badge: 'Across active test runs',
+        accent: 'text-emerald-500 dark:text-emerald-400'
+      },
+      {
+        icon: <FileText className="w-4 h-4 text-purple-500" />,
+        domain: 'Curriculum Files & Notes Accessed',
+        description: 'Syllabus, notes, assignments & solved papers accessed',
+        value: (study?.totalFilesAccessed ?? 1126).toLocaleString(),
+        badge: 'Library & campus docs',
+        accent: 'text-purple-500 dark:text-purple-400'
+      },
+      {
+        icon: <Calculator className="w-4 h-4 text-rose-500" />,
+        domain: 'GPA / CGPA Target Simulations',
+        description: 'Grade planning, credit checks, and semester score forecasts',
+        value: (study?.totalCgpaCalculations ?? 781).toLocaleString(),
+        badge: 'Grade projections',
+        accent: 'text-rose-500 dark:text-rose-400'
+      },
+      {
+        icon: <Calendar className="w-4 h-4 text-indigo-500" />,
+        domain: 'Attendance & Timetable Updates',
+        description: 'Lecture tracking, duty leave, and bunk limit logs',
+        value: (study?.totalAttendanceUpdates ?? 319).toLocaleString(),
+        badge: 'Bunk & log alerts',
+        accent: 'text-indigo-500 dark:text-indigo-400'
+      },
+      {
+        icon: <Award className="w-4 h-4 text-teal-500" />,
+        domain: 'AI ATS Resume Optimizations',
+        description: 'Campus placement screening & format audits performed',
+        value: (study?.totalResumesAnalyzed ?? 17).toLocaleString(),
+        badge: 'ATS audits',
+        accent: 'text-teal-500 dark:text-teal-400'
+      },
+      {
+        icon: <Activity className="w-4 h-4 text-amber-500" />,
+        domain: 'Active Students Tracked',
+        description: 'Distinct student accounts with live analytics telemetry',
+        value: (study?.activeStudentsTracked ?? (allProfiles.length || 164)).toLocaleString(),
+        badge: `${(study?.totalActivities ?? 799).toLocaleString()} logged events`,
+        accent: 'text-amber-500 dark:text-amber-400'
+      }
+    ];
+  }, [data?.cumulativeStudyStats, allProfiles.length]);
+
   // Non-Admin Screen
   if (!userProfile?.is_admin) {
     return (
@@ -1217,97 +1400,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
       </div>
     );
   }
-
-  // Derived persistent stats to ensure live counts never flash or drop
-  const registeredVertosCount = useMemo(() => {
-    const fromSummary = data?.summary?.registered;
-    if (fromSummary && fromSummary > 1) return fromSummary;
-    if (allProfiles.length > 0) return allProfiles.length;
-    return fromSummary || 325;
-  }, [data?.summary?.registered, allProfiles.length]);
-
-  const totalViewsCount = useMemo(() => {
-    const views = data?.summary?.totalViews || 0;
-    const rawHits = data?.summary?.rawHits || 0;
-    const maxVal = Math.max(views, rawHits);
-    return maxVal > 0 ? maxVal : 49846;
-  }, [data?.summary?.totalViews, data?.summary?.rawHits]);
-
-  // Derived study telemetry rows for global learning intelligence
-  const studyTelemetryRows = useMemo(() => {
-    const study = data?.cumulativeStudyStats;
-    const totalPdfSeconds = study?.totalPdfTime ?? 4441468;
-    const totalQuizSeconds = study?.totalQuizTime ?? 16028;
-    const pdfHours = (totalPdfSeconds / 3600).toFixed(1);
-    const quizHours = (totalQuizSeconds / 3600).toFixed(1);
-
-    return [
-      {
-        icon: <BookOpen className="w-4 h-4 text-blue-500" />,
-        domain: 'PDF & Courseware Study',
-        description: 'Document focus hours and learning material reading time',
-        value: `${pdfHours} hrs`,
-        badge: `${(study?.totalFilesAccessed ?? 1126).toLocaleString()} docs opened`,
-        accent: 'text-blue-500 dark:text-blue-400'
-      },
-      {
-        icon: <Clock className="w-4 h-4 text-orange-500" />,
-        domain: 'Exam & Quiz Simulations',
-        description: 'Time invested in timed mock exams and PYQ sessions',
-        value: `${quizHours} hrs`,
-        badge: `${(study?.totalQuestionsAttempted ?? 1914).toLocaleString()} questions answered`,
-        accent: 'text-orange-500 dark:text-orange-400'
-      },
-      {
-        icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
-        domain: 'Practice Questions Attempted',
-        description: 'Verified test answers across academic subjects',
-        value: (study?.totalQuestionsAttempted ?? 1914).toLocaleString(),
-        badge: 'Across active test runs',
-        accent: 'text-emerald-500 dark:text-emerald-400'
-      },
-      {
-        icon: <FileText className="w-4 h-4 text-purple-500" />,
-        domain: 'Curriculum Files & Notes Accessed',
-        description: 'Syllabus, notes, assignments & solved papers accessed',
-        value: (study?.totalFilesAccessed ?? 1126).toLocaleString(),
-        badge: 'Library & campus docs',
-        accent: 'text-purple-500 dark:text-purple-400'
-      },
-      {
-        icon: <Calculator className="w-4 h-4 text-rose-500" />,
-        domain: 'GPA / CGPA Target Simulations',
-        description: 'Grade planning, credit checks, and semester score forecasts',
-        value: (study?.totalCgpaCalculations ?? 781).toLocaleString(),
-        badge: 'Grade projections',
-        accent: 'text-rose-500 dark:text-rose-400'
-      },
-      {
-        icon: <Calendar className="w-4 h-4 text-indigo-500" />,
-        domain: 'Attendance & Timetable Updates',
-        description: 'Lecture tracking, duty leave, and bunk limit logs',
-        value: (study?.totalAttendanceUpdates ?? 319).toLocaleString(),
-        badge: 'Bunk & log alerts',
-        accent: 'text-indigo-500 dark:text-indigo-400'
-      },
-      {
-        icon: <Award className="w-4 h-4 text-teal-500" />,
-        domain: 'AI ATS Resume Optimizations',
-        description: 'Campus placement screening & format audits performed',
-        value: (study?.totalResumesAnalyzed ?? 17).toLocaleString(),
-        badge: 'ATS audits',
-        accent: 'text-teal-500 dark:text-teal-400'
-      },
-      {
-        icon: <Activity className="w-4 h-4 text-amber-500" />,
-        domain: 'Active Students Tracked',
-        description: 'Distinct student accounts with live analytics telemetry',
-        value: (study?.activeStudentsTracked ?? (allProfiles.length || 164)).toLocaleString(),
-        badge: `${(study?.totalActivities ?? 799).toLocaleString()} logged events`,
-        accent: 'text-amber-500 dark:text-amber-400'
-      }
-    ];
-  }, [data?.cumulativeStudyStats, allProfiles.length]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-7 pb-32 pt-3 px-3 sm:px-6 text-zinc-900 dark:text-zinc-100 animate-fade-in">
@@ -1707,6 +1799,31 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                    {/* Live Online Filter Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => setShowOnlineOnly(prev => !prev)}
+                      className={`px-3 py-2 rounded-2xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 border select-none ${
+                        showOnlineOnly
+                          ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 shadow-sm shadow-emerald-500/10'
+                          : 'bg-zinc-50 dark:bg-white/[0.03] border-zinc-200/40 dark:border-white/[0.05] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.06]'
+                      }`}
+                      title={showOnlineOnly ? 'Showing only online Vertos (click to show all)' : 'Filter to show only currently online Vertos'}
+                    >
+                      <span className="relative flex h-2 w-2">
+                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 ${showOnlineOnly ? 'block' : 'hidden sm:block'}`}></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span>Online Only</span>
+                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                        showOnlineOnly
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-zinc-200/60 dark:bg-white/[0.08] text-zinc-600 dark:text-zinc-400'
+                      }`}>
+                        {onlineCount}
+                      </span>
+                    </button>
+
                     {/* Custom Apple Dropdown: Role Filter */}
                     <AppleDropdown
                       value={filterRole}
@@ -1841,16 +1958,30 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
                               <td className="px-4 py-3.5">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-8 h-8 rounded-2xl bg-zinc-100 dark:bg-white/[0.05] border border-zinc-200/40 dark:border-white/[0.06] flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-                                    {u.avatar_url ? (
-                                      <img src={u.avatar_url} alt="" className="w-full h-full object-cover" />
-                                    ) : (
-                                      u.username?.[0]?.toUpperCase() || 'V'
+                                  <div className="relative shrink-0">
+                                    <div className="w-8 h-8 rounded-2xl bg-zinc-100 dark:bg-white/[0.05] border border-zinc-200/40 dark:border-white/[0.06] flex items-center justify-center font-bold text-xs overflow-hidden">
+                                      {u.avatar_url ? (
+                                        <img src={u.avatar_url} alt="" className="w-full h-full object-cover" />
+                                      ) : (
+                                        u.username?.[0]?.toUpperCase() || 'V'
+                                      )}
+                                    </div>
+                                    {isUserOnline(u) && (
+                                      <span
+                                        className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#121214] rounded-full shadow-xs"
+                                        title="Online now"
+                                      />
                                     )}
                                   </div>
                                   <div>
                                     <p className="font-semibold text-zinc-900 dark:text-white flex items-center gap-1.5">
                                       <span>{u.username}</span>
+                                      {isUserOnline(u) && (
+                                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                          Online
+                                        </span>
+                                      )}
                                       {u.is_admin && <span className="bg-orange-500/10 text-orange-600 text-[9px] font-bold px-1.5 py-0.2 rounded-md">Admin</span>}
                                     </p>
                                     <p className="text-[10px] text-zinc-400 font-mono">{u.email || 'Protected email'}</p>
@@ -2035,6 +2166,33 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                           </React.Fragment>
                         );
                       })}
+
+                      {!isLoadingProfiles && processedProfiles.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="py-14 text-center">
+                            <div className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-white/[0.04] flex items-center justify-center mx-auto mb-3">
+                              <Users className="w-5 h-5 text-zinc-400" />
+                            </div>
+                            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                              {showOnlineOnly ? 'No Vertos Currently Online' : 'No Vertos Found'}
+                            </p>
+                            <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
+                              {showOnlineOnly
+                                ? 'There are currently no active student sessions detected in real-time presence.'
+                                : 'Try adjusting your search criteria or role filters.'}
+                            </p>
+                            {showOnlineOnly && (
+                              <button
+                                type="button"
+                                onClick={() => setShowOnlineOnly(false)}
+                                className="mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-white/[0.06] hover:bg-orange-500 hover:text-white transition-colors cursor-pointer"
+                              >
+                                View All Vertos
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

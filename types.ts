@@ -102,6 +102,8 @@ export interface UserProfile {
   unlocked_frames?: string[];
   avatar_frame?: string;
   is_verified?: 'yes' | 'no';
+  last_sign_in_at?: string | null;
+  recent_activities?: any[];
 }
 
 export interface TimetableSlot {

@@ -1885,6 +1885,38 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
+  // Global real-time user presence sync for active student sessions & admin monitoring
+  useEffect(() => {
+    const client = NexusServer.getClient();
+    if (!client || !userProfile?.id) return;
+
+    const channel = client.channel('global-user-presence', {
+      config: {
+        presence: {
+          key: userProfile.id,
+        },
+      },
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        try {
+          await channel.track({
+            user_id: userProfile.id,
+            username: userProfile.username || 'Verto',
+            online_at: new Date().toISOString(),
+          });
+        } catch (e) {
+          // Ignore presence sync hiccups
+        }
+      }
+    });
+
+    return () => {
+      client.removeChannel(channel).catch(() => {});
+    };
+  }, [userProfile?.id, userProfile?.username]);
+
 
 
   const toggleTheme = React.useCallback(() => {

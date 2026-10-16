@@ -3225,7 +3225,8 @@ class NexusServer {
             questions_attempted: Number(study.questions_attempted) || 0,
             cgpa_calculations: Number(study.cgpa_calculations) || 0,
             attendance_updates: Number(study.attendance_updates) || 0,
-            resumes_analyzed: Number(study.resumes_analyzed) || 0
+            resumes_analyzed: Number(study.resumes_analyzed) || 0,
+            recent_activities: study.recent_activities || []
           };
         });
       } catch (innerError) {
