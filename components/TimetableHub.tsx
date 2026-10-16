@@ -1028,7 +1028,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseRename(); }}
         >
-          <div className={`nexus-modal w-full max-w-sm bg-white dark:bg-[#0d0d0d] rounded-[24px] border border-zinc-100 dark:border-white/5 shadow-xl ${isClosingRename ? 'closing' : ''}`}>
+          <div className={`nexus-modal w-full max-w-sm bg-white dark:bg-[#141417] rounded-[24px] border border-zinc-200/80 dark:border-white/[0.08] shadow-xl ${isClosingRename ? 'closing' : ''}`}>
             <div className="p-8 text-center">
               <h3 className="text-xl font-medium text-zinc-800 dark:text-white mb-2">Rename Profile</h3>
               <p className="text-zinc-500 text-xs font-medium mb-8">Personalize the name for easier access.</p>
@@ -1058,7 +1058,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           style={{ backdropFilter: 'blur(40px) saturate(200%)', WebkitBackdropFilter: 'blur(40px) saturate(200%)' }}
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseMetadata(); }}
         >
-          <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-xl rounded-[32px] overflow-hidden ${isClosingMetadata ? 'closing' : ''}`}>
+          <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] shadow-xl rounded-[32px] overflow-hidden ${isClosingMetadata ? 'closing' : ''}`}>
             <div className="p-10 pb-4 text-center">
               <div className="w-14 h-14 bg-brand-primary/[0.03] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-brand-primary/5 relative group">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-brand-primary/80"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
@@ -1170,7 +1170,7 @@ const TimetableHub: React.FC<{ userProfile: UserProfile | null }> = ({ userProfi
           style={{ backdropFilter: 'blur(32px) saturate(160%)', WebkitBackdropFilter: 'blur(32px) saturate(160%)' }}
           onClick={(e) => { if (e.target === e.currentTarget && !isProcessingAI) handleCloseUpload(); }}
         >
-          <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#0d0d0d] border border-zinc-100 dark:border-white/5 shadow-2xl rounded-[24px] overflow-hidden ${isClosingUpload ? 'closing' : ''}`}>
+          <div className={`nexus-modal w-full max-w-lg bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] shadow-2xl rounded-[24px] overflow-hidden ${isClosingUpload ? 'closing' : ''}`}>
             {/* Header - Reduced padding and size */}
             <div className="px-6 py-5 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
               <div className="flex items-center gap-3">

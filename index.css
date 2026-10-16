@@ -509,18 +509,14 @@ select option {
 }
 
 .dark .nexus-modal {
-  background-color: #0a0a0a;
-  border-color: rgba(255, 255, 255, 0.1);
+  background-color: #141417;
+  border-color: rgba(255, 255, 255, 0.08);
   color: white;
   box-shadow: 0 32px 128px rgba(0, 0, 0, 0.8);
 }
 
 .nexus-modal.closing {
   animation: modalSlideOut 0.25s ease-in forwards;
-}
-
-.dark .nexus-modal {
-  box-shadow: 0 32px 128px rgba(0, 0, 0, 0.8);
 }
 
 .shimmer {

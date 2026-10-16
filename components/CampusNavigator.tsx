@@ -9,22 +9,22 @@ import RoommateFinder from './RoommateFinder.tsx';
 import NexusAd from './NexusAd.tsx';
 import type { UserProfile } from '../types';
 import CampusFacilities from './CampusFacilities.tsx';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ArrowUpRight, 
-  Utensils, 
-  MapPin, 
-  Compass, 
-  ShoppingBag, 
-  Users, 
-  Building2, 
-  CalendarCheck, 
-  Calculator, 
-  Store, 
-  Clock, 
-  AlertCircle, 
-  X, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+  Utensils,
+  MapPin,
+  Compass,
+  ShoppingBag,
+  Users,
+  Building2,
+  CalendarCheck,
+  Calculator,
+  Store,
+  Clock,
+  AlertCircle,
+  X,
   ArrowRight,
   Sparkles
 } from 'lucide-react';
@@ -168,7 +168,7 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
   const weekDaysWithDates = React.useMemo(() => {
     const today = new Date();
     const currentDayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, ...
-    
+
     // Calculate Sunday of current week
     const currentSunday = new Date(today);
     currentSunday.setDate(today.getDate() - currentDayIndex);
@@ -378,8 +378,8 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                       setIsWalkthroughActive(!isWalkthroughActive);
                     }}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all border cursor-pointer active:scale-95 ${isWalkthroughActive
-                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
-                        : 'bg-white dark:bg-[#17171a] border-zinc-200/80 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+                      ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
+                      : 'bg-white dark:bg-[#17171a] border-zinc-200/80 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
                       }`}
                   >
                     <span className="text-[10px] font-medium">
@@ -489,33 +489,33 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
 
             <div className="rounded-2xl bg-white dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80 divide-y divide-zinc-100 dark:divide-zinc-800/60 overflow-hidden shadow-xs">
               {[
-                { 
-                  title: 'Freshers Kit', 
-                  desc: 'Essential guide, onboarding tips & checklist for newcomers', 
+                {
+                  title: 'Freshers Kit',
+                  desc: 'Essential guide, onboarding tips & checklist for newcomers',
                   category: 'Onboarding',
-                  icon: <Compass className="w-5 h-5" strokeWidth={2} />, 
-                  path: '/freshers' 
+                  icon: <Compass className="w-5 h-5" strokeWidth={2} />,
+                  path: '/freshers'
                 },
-                { 
-                  title: 'CGPA Predictor', 
-                  desc: 'Calculate target grades, forecast SGPA & track semester milestones', 
+                {
+                  title: 'CGPA Predictor',
+                  desc: 'Calculate target grades, forecast SGPA & track semester milestones',
                   category: 'Grades & SGPA',
-                  icon: <Calculator className="w-5 h-5" strokeWidth={2} />, 
-                  path: '/tools?tab=cgpa' 
+                  icon: <Calculator className="w-5 h-5" strokeWidth={2} />,
+                  path: '/tools?tab=cgpa'
                 },
-                { 
-                  title: 'Attendance Aide', 
-                  desc: 'Monitor daily attendance margin and safeguard your 75% goal', 
+                {
+                  title: 'Attendance Aide',
+                  desc: 'Monitor daily attendance margin and safeguard your 75% goal',
                   category: '75% Tracker',
-                  icon: <CalendarCheck className="w-5 h-5" strokeWidth={2} />, 
-                  path: '/tools?tab=attendance' 
+                  icon: <CalendarCheck className="w-5 h-5" strokeWidth={2} />,
+                  path: '/tools?tab=attendance'
                 },
-                { 
-                  title: 'Campus Facilities', 
-                  desc: 'Directory of tuck shops, food courts, stationery, ATMs & services', 
+                {
+                  title: 'Campus Facilities',
+                  desc: 'Directory of tuck shops, food courts, stationery, ATMs & services',
                   category: 'Directory',
-                  icon: <Store className="w-5 h-5" strokeWidth={2} />, 
-                  path: '/campus/facilities' 
+                  icon: <Store className="w-5 h-5" strokeWidth={2} />,
+                  path: '/campus/facilities'
                 },
               ].map((tool, idx) => (
                 <button
@@ -569,21 +569,19 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                   <div className="inline-flex p-1 rounded-xl bg-zinc-100 dark:bg-[#17171a] border border-zinc-200/80 dark:border-zinc-800/80">
                     <button
                       onClick={() => setCurrentWeek(1)}
-                      className={`px-5 sm:px-6 py-1.5 rounded-lg text-xs transition-all cursor-pointer border-none ${
-                        currentWeek === 1
-                          ? 'bg-white text-zinc-950 dark:bg-[#202025] dark:text-white shadow-xs font-semibold'
-                          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
-                      }`}
+                      className={`px-5 sm:px-6 py-1.5 rounded-lg text-xs transition-all cursor-pointer border-none ${currentWeek === 1
+                        ? 'bg-white text-zinc-950 dark:bg-[#202025] dark:text-white shadow-xs font-semibold'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
+                        }`}
                     >
                       Week 1
                     </button>
                     <button
                       onClick={() => setCurrentWeek(2)}
-                      className={`px-5 sm:px-6 py-1.5 rounded-lg text-xs transition-all cursor-pointer border-none ${
-                        currentWeek === 2
-                          ? 'bg-white text-zinc-950 dark:bg-[#202025] dark:text-white shadow-xs font-semibold'
-                          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
-                      }`}
+                      className={`px-5 sm:px-6 py-1.5 rounded-lg text-xs transition-all cursor-pointer border-none ${currentWeek === 2
+                        ? 'bg-white text-zinc-950 dark:bg-[#202025] dark:text-white shadow-xs font-semibold'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 bg-transparent font-medium'
+                        }`}
                     >
                       Week 2
                     </button>
@@ -774,11 +772,10 @@ const CampusNavigator: React.FC<{ userProfile: UserProfile | null }> = ({ userPr
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className={`w-full py-5 rounded-xl border border-dashed transition-all flex flex-col items-center justify-center ${
-                    reportForm.imageProof 
-                      ? 'border-brand-primary/50 bg-brand-primary/5' 
-                      : 'border-zinc-200/80 dark:border-zinc-800/80 hover:border-brand-primary/40 bg-zinc-50 dark:bg-[#121215]'
-                  }`}>
+                  <div className={`w-full py-5 rounded-xl border border-dashed transition-all flex flex-col items-center justify-center ${reportForm.imageProof
+                    ? 'border-brand-primary/50 bg-brand-primary/5'
+                    : 'border-zinc-200/80 dark:border-zinc-800/80 hover:border-brand-primary/40 bg-zinc-50 dark:bg-[#121215]'
+                    }`}>
                     {reportForm.imageProof ? (
                       <div className="flex flex-col items-center">
                         <img src={reportForm.imageProof} alt="Proof" className="h-14 w-14 object-cover rounded-xl mb-1.5 shadow-xs" />

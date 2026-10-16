@@ -57,14 +57,14 @@ const SocialModal: React.FC<SocialModalProps> = ({ isOpen, onClose }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-[340px] bg-white dark:bg-[#0a0a0a] rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl p-7 overflow-hidden"
+            className="relative w-full max-w-[340px] bg-white dark:bg-[#141417] rounded-3xl border border-zinc-200/80 dark:border-white/[0.08] shadow-2xl p-6 overflow-hidden text-zinc-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <button 
               onClick={onClose} 
-              className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
+              className="absolute top-5 right-5 p-1.5 text-zinc-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors border-none bg-transparent active:scale-90 cursor-pointer outline-none"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
 
             <div className="mb-6">

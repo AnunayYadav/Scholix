@@ -4687,14 +4687,14 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           />
 
           <div 
-            className="relative w-full max-w-lg bg-white dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/10 rounded-[32px] p-6 sm:p-8 shadow-2xl space-y-5 z-10 my-8 overflow-hidden flex flex-col animate-scale-in"
+            className="relative w-full max-w-lg bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 z-10 my-8 overflow-hidden flex flex-col animate-scale-in text-zinc-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-white/5 pb-4 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold shrink-0">
-                  <Pencil className="w-4.5 h-4.5" />
+                <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold shrink-0">
+                  <Pencil className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-zinc-900 dark:text-white leading-tight">Edit File Metadata & Location</h3>
@@ -4927,7 +4927,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
 
           {/* Modal Container */}
           <div 
-            className="relative w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-zinc-150 dark:border-white/5 rounded-[36px] p-6 sm:p-8 shadow-2xl space-y-6 z-10 my-8 overflow-hidden max-h-[90vh] flex flex-col animate-scale-in"
+            className="relative w-full max-w-xl bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 z-10 my-8 overflow-hidden max-h-[88vh] flex flex-col animate-scale-in text-zinc-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -5621,7 +5621,7 @@ const SubjectCommunity: React.FC<SubjectCommunityProps> = ({
           onClick={() => setSelectedFileDetail(null)}
         >
           <div 
-            className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl bg-zinc-50 dark:bg-[#0c0c0e] border border-zinc-200/80 dark:border-white/10 p-5 sm:p-7 shadow-2xl no-scrollbar" 
+            className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] p-5 sm:p-7 shadow-2xl no-scrollbar text-zinc-900 dark:text-white" 
             onClick={(e) => e.stopPropagation()}
           >
             <FileDetailPage

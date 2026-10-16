@@ -58,6 +58,8 @@ export interface RoommateRequest {
   user_username?: string;
   user_avatar?: string;
   user_is_admin?: boolean;
+  contact_info?: string;
+  description?: string;
 }
 
 export interface EmergencyContact {

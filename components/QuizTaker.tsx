@@ -567,6 +567,7 @@ const QuizTaker: React.FC<{ userProfile: UserProfile | null, onAuthRequired?: ()
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportQuestionId, setReportQuestionId] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
   const [isReporting, setIsReporting] = useState(false);
 
   const [showEditModal, setShowEditModal] = useState(false);
@@ -1814,21 +1815,25 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
   const handleReportOpen = (qId: string) => {
     setReportQuestionId(qId);
     setReportReason('');
+    setReportDetails('');
     setShowReportModal(true);
   };
 
   const submitReport = async () => {
-    if (!reportQuestionId || !reportReason.trim()) return;
+    const finalReason = [reportReason, reportDetails.trim()].filter(Boolean).join(' - ');
+    if (!reportQuestionId || !finalReason.trim()) return;
     setIsReporting(true);
     try {
       await NexusServer.reportQuestion({
         questionId: reportQuestionId,
         userId: userId,
-        reason: reportReason,
+        reason: finalReason,
         subject: selectedSubject?.name
       });
       showToast("Question reported successfully.", "success");
       setShowReportModal(false);
+      setReportReason('');
+      setReportDetails('');
     } catch (err) {
       showToast("Failed to report question.", "error");
     } finally {
@@ -1872,53 +1877,61 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-                className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="absolute inset-0 bg-black/50 backdrop-blur-md"
                 onClick={() => setShowReportModal(false)}
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.93, y: 14 }}
+                initial={{ opacity: 0, scale: 0.94, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.82 }}
-                className="relative w-full max-w-lg bg-black rounded-[32px] border border-white/10 shadow-2xl overflow-hidden p-8"
+                transition={{ type: "spring", damping: 28, stiffness: 350, mass: 0.8 }}
+                className="relative w-full max-w-md bg-white dark:bg-[#141417] rounded-3xl border border-zinc-200/80 dark:border-white/[0.08] shadow-2xl overflow-hidden p-6 sm:p-7 text-zinc-900 dark:text-white"
               >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-white leading-tight">Report Question</h3>
-                  <button onClick={() => setShowReportModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white leading-tight">Report Question</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
+                      What's wrong with this question? Your report helps ensure content quality.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setShowReportModal(false)} 
+                    className="p-1.5 -mr-1 text-zinc-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer border-none bg-transparent"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
 
-                <div className="space-y-6">
-                  <p className="text-sm text-zinc-400 leading-relaxed">What's wrong with this question? Your report will be reviewed by {fullBrandName} Moderators to ensure content quality.</p>
-
-                  <div className="space-y-3">
-                    {['Incorrect Answer', 'Typo/Grammar Error', 'Out of Syllabus', 'Technical Glitch'].map((option) => (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    {['Incorrect/Incomplete Question', 'Incorrect Answer', 'Typo/Grammar Error', 'Out of Syllabus', 'Technical Glitch'].map((option) => (
                       <button
                         key={option}
-                        onClick={() => setReportReason(option)}
-                        className={`w-full text-left p-4 rounded-2xl border transition-all ${reportReason === option
-                            ? 'bg-orange-500/10 border-orange-500 text-orange-400'
-                            : 'bg-white/5 border-white/5 text-zinc-400 hover:border-orange-500/30'
-                          }`}
+                        type="button"
+                        onClick={() => setReportReason(prev => prev === option ? '' : option)}
+                        className={`w-full text-left px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm transition-all cursor-pointer ${
+                          reportReason === option
+                            ? 'bg-orange-500/10 border-orange-500 text-orange-600 dark:text-orange-400 font-semibold shadow-xs'
+                            : 'bg-zinc-50 dark:bg-white/[0.03] border-zinc-200/70 dark:border-white/[0.07] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/[0.06] hover:border-zinc-300 dark:hover:border-white/15'
+                        }`}
                       >
-                        <span className="text-sm font-semibold">{option}</span>
+                        {option}
                       </button>
                     ))}
 
                     <textarea
-                      placeholder="Additional details or specific concerns..."
-                      value={reportReason}
-                      onChange={(e) => setReportReason(e.target.value)}
-                      className="w-full p-4 bg-white/5 border border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[100px] text-zinc-200"
+                      placeholder="Additional details or specific concerns (optional)..."
+                      value={reportDetails}
+                      onChange={(e) => setReportDetails(e.target.value)}
+                      className="w-full p-3.5 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/70 dark:border-white/[0.07] rounded-xl text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all min-h-[85px] resize-none"
                     />
                   </div>
 
                   <button
-                    disabled={!reportReason.trim() || isReporting}
+                    disabled={(!reportReason.trim() && !reportDetails.trim()) || isReporting}
                     onClick={submitReport}
-                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:shadow-xl hover:shadow-orange-500/20 text-white rounded-2xl text-sm font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2 border-none"
+                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-orange-500/20 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 border-none cursor-pointer"
                   >
                     {isReporting ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1936,43 +1949,43 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
-                className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl"
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="absolute inset-0 bg-black/50 backdrop-blur-md"
                 onClick={() => setShowEditModal(false)}
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.93, y: 14 }}
+                initial={{ opacity: 0, scale: 0.94, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                transition={{ type: "spring", damping: 30, stiffness: 340, mass: 0.82 }}
-                className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                transition={{ type: "spring", damping: 28, stiffness: 350, mass: 0.8 }}
+                className="relative w-full max-w-xl bg-white dark:bg-[#141417] rounded-3xl border border-zinc-200/80 dark:border-white/[0.08] shadow-2xl overflow-hidden max-h-[88vh] flex flex-col text-zinc-900 dark:text-white"
               >
-                <div className="flex items-center justify-between p-8 border-b border-zinc-100 dark:border-white/5">
+                <div className="flex items-center justify-between p-5 sm:p-6 border-b border-zinc-100 dark:border-white/[0.06]">
                   <div>
-                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Edit Question</h3>
-                    <p className="text-xs text-zinc-400 mt-1 uppercase tracking-widest font-bold">Admin Console</p>
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Edit Question</h3>
+                    <p className="text-[11px] text-zinc-400 font-semibold uppercase tracking-wider mt-0.5">Admin Console</p>
                   </div>
-                  <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-full transition-colors text-zinc-500">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  <button onClick={() => setShowEditModal(false)} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors text-zinc-400 hover:text-zinc-800 dark:hover:text-white cursor-pointer border-none bg-transparent">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Question Text</label>
+                <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Question Text</label>
                     <textarea
                       value={editForm.question}
                       onChange={(e) => setEditForm(prev => ({ ...prev, question: e.target.value }))}
-                      className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-zinc-800 dark:text-zinc-200"
+                      className="w-full p-3.5 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/70 dark:border-white/[0.07] rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-zinc-800 dark:text-zinc-200 resize-none"
                     />
                   </div>
 
                   {editForm.options && editForm.options.length > 0 && (
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Options</label>
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Options</label>
                       {editForm.options.map((opt, idx) => (
-                        <div key={idx} className="flex gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${editForm.correctAnswer === idx ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
+                        <div key={idx} className="flex gap-2.5 items-center">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${editForm.correctAnswer === idx ? 'bg-emerald-500 text-white shadow-sm' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
                             {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -1982,11 +1995,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                               newOpts[idx] = e.target.value;
                               setEditForm(prev => ({ ...prev, options: newOpts }));
                             }}
-                            className="flex-1 p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-xl text-sm focus:outline-none focus:border-emerald-500/50 text-zinc-800 dark:text-zinc-200"
+                            className="flex-1 p-2.5 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/70 dark:border-white/[0.07] rounded-xl text-xs sm:text-sm focus:outline-none focus:border-emerald-500/50 text-zinc-800 dark:text-zinc-200"
                           />
                           <button
                             onClick={() => setEditForm(prev => ({ ...prev, correctAnswer: idx }))}
-                            className={`px-3 rounded-xl border text-[8px] font-bold uppercase transition-all ${editForm.correctAnswer === idx ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-200 dark:border-white/10 text-zinc-400 hover:border-emerald-500/30'}`}
+                            className={`px-3 py-2 rounded-xl border text-[9px] font-bold uppercase transition-all cursor-pointer ${editForm.correctAnswer === idx ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-200 dark:border-white/10 text-zinc-400 hover:border-emerald-500/30'}`}
                           >
                             Correct
                           </button>
@@ -1995,30 +2008,30 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                     </div>
                   )}
 
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Explanation</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Explanation</label>
                     <textarea
                       value={editForm.explanation}
                       onChange={(e) => setEditForm(prev => ({ ...prev, explanation: e.target.value }))}
-                      className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-zinc-800 dark:text-zinc-200"
+                      className="w-full p-3.5 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/70 dark:border-white/[0.07] rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all min-h-[80px] text-zinc-800 dark:text-zinc-200 resize-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Topic</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Topic</label>
                       <input
                         value={editForm.topic}
                         onChange={(e) => setEditForm(prev => ({ ...prev, topic: e.target.value }))}
-                        className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-zinc-800 dark:text-zinc-200"
+                        className="w-full p-2.5 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200/70 dark:border-white/[0.07] rounded-xl text-xs sm:text-sm focus:outline-none text-zinc-800 dark:text-zinc-200"
                       />
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Difficulty Level</label>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Difficulty Level</label>
                       <select
                         value={editForm.difficulty}
                         onChange={(e) => setEditForm(prev => ({ ...prev, difficulty: e.target.value }))}
-                        className="w-full p-4 bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-2xl text-sm focus:outline-none text-zinc-800 dark:text-zinc-200 appearance-none cursor-pointer"
+                        className="w-full p-2.5 bg-zinc-50 dark:bg-[#1c1c20] border border-zinc-200/70 dark:border-white/[0.07] rounded-xl text-xs sm:text-sm focus:outline-none text-zinc-800 dark:text-zinc-200 appearance-none cursor-pointer"
                       >
                         <option value="easy">Easy</option>
                         <option value="medium">Medium</option>
@@ -2028,11 +2041,11 @@ builtins.input = lambda p="": _inputs.pop(0) if _inputs else ""
                   </div>
                 </div>
 
-                <div className="p-8 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
+                <div className="p-4 sm:p-5 border-t border-zinc-100 dark:border-white/[0.06] bg-zinc-50/50 dark:bg-white/[0.02]">
                   <button
                     disabled={isUpdating}
                     onClick={submitEdit}
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-emerald-600/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 border-none cursor-pointer"
                   >
                     {isUpdating ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -112,33 +112,33 @@ const ChatSupportModal: React.FC<ChatSupportModalProps> = ({ isOpen, onClose, on
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-lg bg-zinc-50 dark:bg-[#0a0a0a] rounded-[40px] overflow-hidden shadow-2xl border border-zinc-200 dark:border-white/10 flex flex-col h-[600px] max-h-[80vh]"
+            className="relative w-full max-w-md bg-white dark:bg-[#141417] rounded-3xl overflow-hidden shadow-2xl border border-zinc-200/80 dark:border-white/[0.08] flex flex-col h-[560px] max-h-[82vh] text-zinc-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-8 bg-white dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-white/5 flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-[20px] bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div className="p-5 sm:p-6 bg-white dark:bg-[#18181c] border-b border-zinc-200/80 dark:border-white/[0.06] flex items-center justify-between shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Scholix Support</h3>
-                  <div className="flex items-center gap-1.5">
+                  <h3 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">Scholix Support</h3>
+                  <div className="flex items-center gap-1.5 mt-0.5">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Automated Assistant</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Automated Assistant</span>
                   </div>
                 </div>
               </div>
               <button 
                 onClick={onClose} 
-                className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-2xl transition-all text-zinc-400 border-none bg-transparent cursor-pointer outline-none active:scale-90"
+                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-all text-zinc-400 hover:text-zinc-800 dark:hover:text-white border-none bg-transparent cursor-pointer outline-none active:scale-90"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-5 h-5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
             </div>
 
             {/* Chat Area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-5 no-scrollbar bg-white dark:bg-[#0a0a0a]">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 no-scrollbar bg-zinc-50/50 dark:bg-[#141417]">
               {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
@@ -146,10 +146,10 @@ const ChatSupportModal: React.FC<ChatSupportModalProps> = ({ isOpen, onClose, on
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}
                 >
-                  <div className={`max-w-[85%] px-5 py-3.5 rounded-[24px] text-sm font-medium shadow-sm leading-relaxed ${
+                  <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs sm:text-sm font-medium shadow-xs leading-relaxed ${
                     msg.isBot 
-                      ? 'bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 rounded-tl-none border border-zinc-100 dark:border-white/5' 
-                      : 'bg-brand-primary text-white rounded-tr-none shadow-brand-primary/20 shadow-lg'
+                      ? 'bg-white dark:bg-[#1e1e24] text-zinc-800 dark:text-zinc-200 rounded-tl-none border border-zinc-200/60 dark:border-white/[0.06]' 
+                      : 'bg-brand-primary text-white rounded-tr-none shadow-brand-primary/20 shadow-md'
                   }`}>
                     {msg.text}
                   </div>
@@ -158,7 +158,7 @@ const ChatSupportModal: React.FC<ChatSupportModalProps> = ({ isOpen, onClose, on
               
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="px-5 py-3.5 rounded-[24px] bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-tl-none flex gap-1.5">
+                  <div className="px-4 py-2.5 rounded-2xl bg-white dark:bg-[#1e1e24] border border-zinc-200/60 dark:border-white/[0.06] rounded-tl-none flex gap-1.5">
                     <div className="w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-600 rounded-full animate-bounce [animation-duration:0.8s]" />
                     <div className="w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-600 rounded-full animate-bounce [animation-duration:0.8s] [animation-delay:0.2s]" />
                     <div className="w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-600 rounded-full animate-bounce [animation-duration:0.8s] [animation-delay:0.4s]" />
@@ -168,14 +168,14 @@ const ChatSupportModal: React.FC<ChatSupportModalProps> = ({ isOpen, onClose, on
             </div>
 
             {/* Options Area */}
-            <div className="p-8 bg-zinc-50/50 dark:bg-zinc-900/30 backdrop-blur-md border-t border-zinc-200 dark:border-white/5 space-y-4">
-              <div className="flex flex-wrap gap-2.5 justify-center">
+            <div className="p-4 sm:p-5 bg-white dark:bg-[#18181c] border-t border-zinc-200/80 dark:border-white/[0.06] space-y-3">
+              <div className="flex flex-wrap gap-2 justify-center">
                 {currentNode.options.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => handleOptionClick(option)}
                     disabled={isTyping}
-                    className="px-5 py-3 rounded-2xl border border-brand-primary/20 bg-white dark:bg-zinc-900 text-brand-primary text-xs font-bold hover:bg-brand-primary hover:text-white transition-all active:scale-95 disabled:opacity-50 border-none shadow-sm cursor-pointer outline-none"
+                    className="px-3.5 py-2 rounded-xl border border-brand-primary/25 bg-zinc-50 dark:bg-[#1e1e24] text-brand-primary text-xs font-semibold hover:bg-brand-primary hover:text-white transition-all active:scale-95 disabled:opacity-50 shadow-xs cursor-pointer outline-none"
                   >
                     {option.text}
                   </button>
