@@ -32,7 +32,8 @@ import {
   BookOpen,
   FileText,
   Calculator,
-  Award
+  Award,
+  ArrowRight
 } from 'lucide-react';
 import NexusServer from '../services/nexusServer';
 import { UserProfile, QuizQuestion } from '../types';
@@ -708,7 +709,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
 
   // Inspector & Sub-tabs
   const [showDetailedStats, setShowDetailedStats] = useState<string | null>(null);
-  const [reportSubTab, setReportSubTab] = useState<'tracker' | 'intelligence' | 'pending'>('tracker');
+  const [reportSubTab, setReportSubTab] = useState<'tracker' | 'pending'>('tracker');
 
   // Verto Directory & User Tracker State
   const [userSearchText, setUserSearchText] = useState('');
@@ -1232,6 +1233,82 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
     return maxVal > 0 ? maxVal : 49846;
   }, [data?.summary?.totalViews, data?.summary?.rawHits]);
 
+  // Derived study telemetry rows for global learning intelligence
+  const studyTelemetryRows = useMemo(() => {
+    const study = data?.cumulativeStudyStats;
+    const totalPdfSeconds = study?.totalPdfTime ?? 4441468;
+    const totalQuizSeconds = study?.totalQuizTime ?? 16028;
+    const pdfHours = (totalPdfSeconds / 3600).toFixed(1);
+    const quizHours = (totalQuizSeconds / 3600).toFixed(1);
+
+    return [
+      {
+        icon: <BookOpen className="w-4 h-4 text-blue-500" />,
+        domain: 'PDF & Courseware Study',
+        description: 'Document focus hours and learning material reading time',
+        value: `${pdfHours} hrs`,
+        badge: `${(study?.totalFilesAccessed ?? 1126).toLocaleString()} docs opened`,
+        accent: 'text-blue-500 dark:text-blue-400'
+      },
+      {
+        icon: <Clock className="w-4 h-4 text-orange-500" />,
+        domain: 'Exam & Quiz Simulations',
+        description: 'Time invested in timed mock exams and PYQ sessions',
+        value: `${quizHours} hrs`,
+        badge: `${(study?.totalQuestionsAttempted ?? 1914).toLocaleString()} questions answered`,
+        accent: 'text-orange-500 dark:text-orange-400'
+      },
+      {
+        icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+        domain: 'Practice Questions Attempted',
+        description: 'Verified test answers across academic subjects',
+        value: (study?.totalQuestionsAttempted ?? 1914).toLocaleString(),
+        badge: 'Across active test runs',
+        accent: 'text-emerald-500 dark:text-emerald-400'
+      },
+      {
+        icon: <FileText className="w-4 h-4 text-purple-500" />,
+        domain: 'Curriculum Files & Notes Accessed',
+        description: 'Syllabus, notes, assignments & solved papers accessed',
+        value: (study?.totalFilesAccessed ?? 1126).toLocaleString(),
+        badge: 'Library & campus docs',
+        accent: 'text-purple-500 dark:text-purple-400'
+      },
+      {
+        icon: <Calculator className="w-4 h-4 text-rose-500" />,
+        domain: 'GPA / CGPA Target Simulations',
+        description: 'Grade planning, credit checks, and semester score forecasts',
+        value: (study?.totalCgpaCalculations ?? 781).toLocaleString(),
+        badge: 'Grade projections',
+        accent: 'text-rose-500 dark:text-rose-400'
+      },
+      {
+        icon: <Calendar className="w-4 h-4 text-indigo-500" />,
+        domain: 'Attendance & Timetable Updates',
+        description: 'Lecture tracking, duty leave, and bunk limit logs',
+        value: (study?.totalAttendanceUpdates ?? 319).toLocaleString(),
+        badge: 'Bunk & log alerts',
+        accent: 'text-indigo-500 dark:text-indigo-400'
+      },
+      {
+        icon: <Award className="w-4 h-4 text-teal-500" />,
+        domain: 'AI ATS Resume Optimizations',
+        description: 'Campus placement screening & format audits performed',
+        value: (study?.totalResumesAnalyzed ?? 17).toLocaleString(),
+        badge: 'ATS audits',
+        accent: 'text-teal-500 dark:text-teal-400'
+      },
+      {
+        icon: <Activity className="w-4 h-4 text-amber-500" />,
+        domain: 'Active Students Tracked',
+        description: 'Distinct student accounts with live analytics telemetry',
+        value: (study?.activeStudentsTracked ?? (allProfiles.length || 164)).toLocaleString(),
+        badge: `${(study?.totalActivities ?? 799).toLocaleString()} logged events`,
+        accent: 'text-amber-500 dark:text-amber-400'
+      }
+    ];
+  }, [data?.cumulativeStudyStats, allProfiles.length]);
+
   return (
     <div className="max-w-6xl mx-auto space-y-7 pb-32 pt-3 px-3 sm:px-6 text-zinc-900 dark:text-zinc-100 animate-fade-in">
       {/* Top Command Header */}
@@ -1423,44 +1500,80 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
               </div>
             </div>
 
-            {/* System Events Activity Table */}
+            {/* Platform Study & Engagement Telemetry Stream */}
             <div className="bg-white dark:bg-[#121214] border border-zinc-200/40 dark:border-white/[0.04] rounded-[28px] shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-zinc-100 dark:border-white/[0.05] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-emerald-500" />
-                  <h3 className="text-sm font-bold tracking-tight">System Events & Activity</h3>
+              <div className="p-4 sm:p-5 border-b border-zinc-100 dark:border-white/[0.05] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center justify-center shrink-0">
+                    <Activity className="w-4 h-4 text-orange-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white">Platform Study & Activity Telemetry</h3>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Live Telemetry Stream
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 font-medium">
+                      Real-time aggregated learning focus, exam simulations, and student activity across all {registeredVertosCount.toLocaleString()} Vertos
+                    </p>
+                  </div>
                 </div>
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Telemetry Stream
-                </span>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-mono text-zinc-400 bg-zinc-100/80 dark:bg-white/[0.04] px-3.5 py-1.5 rounded-2xl border border-zinc-200/30 dark:border-white/[0.05]">
+                    Total Cumulative Focus: <span className="font-bold text-orange-600 dark:text-orange-400">{((((data?.cumulativeStudyStats?.totalPdfTime || 4441468) + (data?.cumulativeStudyStats?.totalQuizTime || 16028)) / 3600)).toFixed(1)} hrs</span>
+                  </span>
+                  <button
+                    onClick={() => { setActiveTab('reports'); setReportSubTab('tracker'); }}
+                    className="px-3 py-1.5 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/20 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>Verto Directory</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
 
-              <div className="max-h-72 overflow-y-auto">
+              <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="sticky top-0 bg-zinc-50/90 dark:bg-[#151518]/90 backdrop-blur-md border-b border-zinc-200/40 dark:border-white/[0.05] text-zinc-400 font-semibold">
+                  <thead className="bg-zinc-50/90 dark:bg-[#151518]/90 backdrop-blur-md border-b border-zinc-200/40 dark:border-white/[0.05] text-zinc-400 font-semibold">
                     <tr>
-                      <th className="px-6 py-3">Event Signature</th>
-                      <th className="px-6 py-3">Trigger Count</th>
-                      <th className="px-6 py-3 text-right">Last Logged</th>
+                      <th className="px-5 py-3">Telemetry Metric & Domain</th>
+                      <th className="px-5 py-3 text-right">Cumulative Total</th>
+                      <th className="px-5 py-3">Global Activity Context</th>
+                      <th className="px-5 py-3 text-right">Stream Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100/80 dark:divide-white/[0.03]">
-                    {(data?.eventStats || [
-                      { event_name: 'file_opened', count: 484, last_triggered: new Date().toISOString() },
-                      { event_name: 'cgpa_calculated', count: 79, last_triggered: new Date().toISOString() },
-                      { event_name: 'apk_download', count: 50, last_triggered: new Date().toISOString() }
-                    ]).map((ev: any, idx: number) => (
+                    {studyTelemetryRows.map((row, idx) => (
                       <tr key={idx} className="hover:bg-zinc-50/60 dark:hover:bg-white/[0.02] transition-colors">
-                        <td className="px-6 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">
-                          {ev.event_name.replace(/_/g, ' ')}
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-xl bg-zinc-100 dark:bg-white/[0.05] flex items-center justify-center shrink-0">
+                              {row.icon}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-zinc-900 dark:text-zinc-100">{row.domain}</p>
+                              <p className="text-[11px] text-zinc-400">{row.description}</p>
+                            </div>
+                          </div>
                         </td>
-                        <td className="px-6 py-3.5">
-                          <span className="font-bold text-orange-600 dark:text-orange-400">{ev.count.toLocaleString()}</span>
+                        <td className="px-5 py-3.5 text-right">
+                          <span className={`font-bold font-mono text-sm ${row.accent}`}>
+                            {row.value}
+                          </span>
                         </td>
-                        <td className="px-6 py-3.5 text-right font-mono text-[11px] text-zinc-400">
-                          {new Date(ev.last_triggered || Date.now()).toLocaleDateString()} at{' '}
-                          {new Date(ev.last_triggered || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <td className="px-5 py-3.5">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 dark:bg-white/[0.04] text-zinc-600 dark:text-zinc-300 border border-zinc-200/40 dark:border-white/[0.05]">
+                            {row.badge}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Live
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -1492,16 +1605,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 <span>Verto Directory & Tracker ({allProfiles.length})</span>
               </button>
               <button
-                onClick={() => setReportSubTab('intelligence')}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${reportSubTab === 'intelligence'
-                  ? 'bg-white dark:bg-[#1f1f23] text-zinc-900 dark:text-white shadow-xs'
-                  : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
-                  }`}
-              >
-                <Activity className="w-3.5 h-3.5 text-orange-500" />
-                <span>Study & Engagement Stats</span>
-              </button>
-              <button
                 onClick={() => setReportSubTab('pending')}
                 className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${reportSubTab === 'pending'
                   ? 'bg-white dark:bg-[#1f1f23] text-zinc-900 dark:text-white shadow-xs'
@@ -1516,142 +1619,6 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                 )}
               </button>
             </div>
-
-            {/* TAB 1: Standalone Platform Study & Engagement Intelligence Dashboard */}
-            {reportSubTab === 'intelligence' && (
-              <div className="bg-white dark:bg-[#121214] border border-zinc-200/50 dark:border-white/[0.06] rounded-[28px] p-5 sm:p-7 shadow-xs space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-zinc-100 dark:border-white/[0.05]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center justify-center font-bold shrink-0">
-                      <Activity className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                        <span>Platform Study & Activity Intelligence</span>
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Live Real-time Sync
-                        </span>
-                      </h3>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                        Comprehensive learning focus hours, exam simulation runs, and file interactions aggregated across all students.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-mono text-zinc-400 bg-zinc-100/80 dark:bg-white/[0.04] px-3.5 py-1.5 rounded-2xl border border-zinc-200/30 dark:border-white/[0.05]">
-                      Total Cumulative Focus: <span className="font-bold text-orange-600 dark:text-orange-400">{((((data?.cumulativeStudyStats?.totalPdfTime || 4441468) + (data?.cumulativeStudyStats?.totalQuizTime || 16028)) / 3600)).toFixed(1)} hrs</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* 8-Metric Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">PDF Study Time</span>
-                      <BookOpen className="w-4 h-4 text-blue-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
-                      {((data?.cumulativeStudyStats?.totalPdfTime ?? 4441468) / 3600).toFixed(1)} <span className="text-xs font-normal text-zinc-400">hrs</span>
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">
-                      {(data?.cumulativeStudyStats?.totalFilesAccessed ?? 1126).toLocaleString()} documents accessed
-                    </p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Quiz Focus</span>
-                      <Clock className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
-                      {((data?.cumulativeStudyStats?.totalQuizTime ?? 16028) / 3600).toFixed(1)} <span className="text-xs font-normal text-zinc-400">hrs</span>
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">
-                      {(data?.cumulativeStudyStats?.totalQuestionsAttempted ?? 1914).toLocaleString()} questions answered
-                    </p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Questions Solved</span>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                      {(data?.cumulativeStudyStats?.totalQuestionsAttempted ?? 1914).toLocaleString()}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">Across active test sessions</p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Course Files Opened</span>
-                      <FileText className="w-4 h-4 text-purple-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {(data?.cumulativeStudyStats?.totalFilesAccessed ?? 1126).toLocaleString()}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">Syllabus, notes & PYQs read</p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">GPA Simulations</span>
-                      <Calculator className="w-4 h-4 text-rose-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-400">
-                      {(data?.cumulativeStudyStats?.totalCgpaCalculations ?? 781).toLocaleString()}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">Target grade calculations</p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Attendance Updates</span>
-                      <Calendar className="w-4 h-4 text-indigo-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                      {(data?.cumulativeStudyStats?.totalAttendanceUpdates ?? 319).toLocaleString()}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">Bunk limits & logs tracked</p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Resumes Analyzed</span>
-                      <Award className="w-4 h-4 text-teal-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-teal-600 dark:text-teal-400">
-                      {(data?.cumulativeStudyStats?.totalResumesAnalyzed ?? 17).toLocaleString()}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">AI ATS placement audits</p>
-                  </div>
-
-                  <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/40 dark:border-white/[0.05] space-y-1.5">
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Active Tracked</span>
-                      <Activity className="w-4 h-4 text-amber-500" />
-                    </div>
-                    <p className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400">
-                      {(data?.cumulativeStudyStats?.activeStudentsTracked ?? allProfiles.length).toLocaleString()}
-                    </p>
-                    <p className="text-[11px] text-zinc-400 truncate">{(data?.cumulativeStudyStats?.totalActivities ?? 799).toLocaleString()} logged events</p>
-                  </div>
-                </div>
-
-                <div className="pt-2 flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-100 dark:border-white/[0.05]">
-                  <span>Viewing platform-wide telemetry</span>
-                  <button
-                    onClick={() => setReportSubTab('tracker')}
-                    className="text-orange-500 hover:text-orange-600 font-semibold cursor-pointer"
-                  >
-                    View & inspect individual students in Verto Directory →
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* TAB 2: Issue Reports */}
             {reportSubTab === 'pending' && (
