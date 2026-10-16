@@ -1042,6 +1042,26 @@ class NexusServer {
     return Object.entries(groups).map(([date, count]) => ({ date, count })).reverse();
   }
 
+  static async getAdminHeaders(): Promise<Record<string, string>> {
+    const headers: Record<string, string> = {};
+    const client = getSupabase();
+    if (client) {
+      try {
+        const { data: { session } } = await client.auth.getSession();
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    const adminPinHash = sessionStorage.getItem('admin_passcode_hash') || (import.meta as any).env?.VITE_ADMIN_PASSCODE_HASH || '';
+    if (adminPinHash) {
+      headers['x-admin-passcode-hash'] = adminPinHash;
+    }
+    return headers;
+  }
+
   static async getDetailedStats(): Promise<{ 
     pageStats: any[], 
     eventStats: any[],
@@ -1059,7 +1079,10 @@ class NexusServer {
     }
   }> {
     try {
-      const response = await fetch('/api/gateway?action=admin-detailed-stats');
+      const headers = await NexusServer.getAdminHeaders();
+      const response = await fetch('/api/gateway?action=admin-detailed-stats', {
+        headers
+      });
       if (response.ok) {
         return await response.json();
       }
@@ -1262,7 +1285,8 @@ class NexusServer {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
       if (subject) params.set('subject', subject);
-      const res = await fetch(`/api/gateway?action=admin-search-questions&${params.toString()}`);
+      const headers = await NexusServer.getAdminHeaders();
+      const res = await fetch(`/api/gateway?action=admin-search-questions&${params.toString()}`, { headers });
       if (res.ok) {
         return await res.json();
       }
@@ -2784,7 +2808,8 @@ class NexusServer {
 
   static async fetchQuestionReports() {
     try {
-      const response = await fetch('/api/gateway?action=admin-reports');
+      const headers = await NexusServer.getAdminHeaders();
+      const response = await fetch('/api/gateway?action=admin-reports', { headers });
       if (response.ok) {
         return await response.json();
       }
@@ -2836,9 +2861,10 @@ class NexusServer {
 
   static async updateReportStatus(reportId: string, status: string) {
     try {
+      const headers = await NexusServer.getAdminHeaders();
       const response = await fetch('/api/gateway?action=admin-resolve-report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ reportId, status })
       });
       if (response.ok) return;
@@ -2860,7 +2886,8 @@ class NexusServer {
 
   static async fetchFeedback() {
     try {
-      const response = await fetch('/api/gateway?action=admin-feedback');
+      const headers = await NexusServer.getAdminHeaders();
+      const response = await fetch('/api/gateway?action=admin-feedback', { headers });
       if (response.ok) {
         const feedbackData = await response.json();
         return feedbackData || [];
@@ -3159,18 +3186,7 @@ class NexusServer {
     if (!client) return [];
 
     try {
-      const { data: { session } } = await client.auth.getSession();
-      const adminPinHash = sessionStorage.getItem('admin_passcode_hash') || import.meta.env.VITE_ADMIN_PASSCODE_HASH || '';
-      const isVerified = sessionStorage.getItem('admin_stats_verified') === 'true';
-
-      const headers: Record<string, string> = {};
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-      if (isVerified && adminPinHash) {
-        headers['x-admin-passcode-hash'] = adminPinHash;
-      }
-
+      const headers = await NexusServer.getAdminHeaders();
       const response = await fetch('/api/gateway?action=admin-profiles', {
         method: 'GET',
         headers

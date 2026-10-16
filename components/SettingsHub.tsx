@@ -508,11 +508,6 @@ export function SettingsHub({
           {/* Render Detail Content */}
           {activeTab ? (
             <div className="w-full flex-1 pb-20 md:pb-12 pt-4 md:pt-6 px-4 sm:px-6 md:px-8 max-w-3xl mx-auto">
-              {activeTab !== 'profile' && (
-                <h2 className="hidden md:block text-xl font-bold text-zinc-900 dark:text-white mb-5 tracking-tight">
-                  {activeItemLabel}
-                </h2>
-              )}
               {renderContent()}
             </div>
           ) : (

@@ -1,17 +1,15 @@
-
 import React, { useState, useMemo } from 'react';
 import { useUniversity } from '../hooks/useUniversity';
 import { ModuleType } from '../types';
+import { HelpCircle, Search, Mail, ChevronDown } from 'lucide-react';
 
 const HelpSection: React.FC = () => {
   const { universityInfo: university, fullBrandName, shortBrandName, studentTerm } = useUniversity();
   const [searchQuery, setSearchQuery] = useState('');
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
 
-  const enabledModules = university?.features.enabledModules || [];
-
   const faqs = useMemo(() => {
-    const allFaqs = [
+    return [
       {
         id: 'market',
         category: `${university?.shortName || shortBrandName} Market & Roommates`,
@@ -21,7 +19,6 @@ const HelpSection: React.FC = () => {
           { q: "Is the marketplace safe?", a: `${university?.shortName || shortBrandName} Market is exclusively for verified students. However, always meet in public campus areas for exchanges. You can report suspicious listings via the feedback modal.` }
         ]
       },
-
       {
         id: 'academics',
         category: 'Tools & Academics',
@@ -59,10 +56,7 @@ const HelpSection: React.FC = () => {
         ]
       }
     ];
-
-    // Filter by enabled modules
-    return allFaqs.filter(cat => !cat.module || enabledModules.includes(cat.module));
-  }, [university, fullBrandName, studentTerm, enabledModules]);
+  }, [university, shortBrandName, fullBrandName, studentTerm]);
 
   const toggleItem = (key: string) => {
     setOpenItems(prev => {
@@ -89,61 +83,77 @@ const HelpSection: React.FC = () => {
   const totalResults = filteredFaqs.reduce((acc, cat) => acc + cat.questions.length, 0);
 
   return (
-    <div className="w-full pb-12 space-y-6 animate-fade-in">      <div className="relative group">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 group-focus-within:text-brand-primary transition-colors">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-4 h-4"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+    <div className="w-full space-y-6 animate-fade-in pb-16 text-left">
+      {/* Dedicated Clean Premium Header */}
+      <header className="pb-5 border-b border-zinc-200/60 dark:border-white/[0.06]">
+        <div className="flex items-center gap-1.5 mb-1">
+          <HelpCircle className="w-3.5 h-3.5 text-brand-primary" />
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            Support & FAQ
+          </p>
         </div>
+        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          Help & <span className="text-brand-primary">Knowledge Base</span>
+        </h1>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal mt-0.5">
+          Frequently asked questions, tool guidelines, and support contacts for {shortBrandName}.
+        </p>
+      </header>
+
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
         <input
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Search FAQs..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#030303] text-[13px] font-bold text-zinc-800 dark:text-white outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-600 placeholder:font-bold"
+          placeholder="Search questions, calculators, tools..."
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] focus:border-brand-primary/60 outline-none text-xs sm:text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all shadow-xs"
         />
         {searchQuery && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-medium text-brand-primary">
-            {totalResults} result{totalResults !== 1 ? 's' : ''}
+          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-brand-primary">
+            {totalResults} {totalResults === 1 ? 'result' : 'results'}
           </span>
         )}
       </div>
 
+      {/* FAQ Categories */}
       {filteredFaqs.length === 0 ? (
-        <div className="text-center py-10 border-2 border-dashed border-zinc-100 dark:border-white/5 rounded-2xl opacity-40">
-          <p className="text-[11px] font-medium">No matching questions found</p>
+        <div className="text-center py-12 text-zinc-400 text-xs">
+          No matching questions found for "{searchQuery}"
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
+        <div className="space-y-6">
           {filteredFaqs.map((cat, idx) => (
-            <div key={idx} className="p-6 md:p-8 rounded-[32px] bg-zinc-50 dark:bg-[#111111] space-y-4">
-              <h3 className="text-[11px] font-black text-brand-primary uppercase tracking-[0.2em] border-b border-zinc-100 dark:border-white/5 pb-2">{cat.category}</h3>
-              <div className="space-y-2">
+            <div key={idx} className="space-y-2">
+              <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5 pb-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-primary inline-block" />
+                <span>{cat.category}</span>
+              </h3>
+
+              <div className="divide-y divide-zinc-100 dark:divide-white/[0.04] rounded-2xl bg-white dark:bg-[#141417] border border-zinc-200/80 dark:border-white/[0.08] overflow-hidden px-4">
                 {cat.questions.map((item, qIdx) => {
                   const key = `${idx}-${qIdx}`;
                   const isOpen = openItems.has(key) || !!searchQuery.trim();
                   return (
-                    <div key={qIdx} className="rounded-xl overflow-hidden bg-zinc-50 dark:bg-white/[0.03]">
+                    <div key={qIdx} className="py-3">
                       <button
                         onClick={() => toggleItem(key)}
-                        className="w-full flex items-start justify-between gap-3 text-left p-3 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors border-none group/q cursor-pointer"
+                        className="w-full flex items-start justify-between gap-3 text-left transition-colors border-none bg-transparent cursor-pointer group"
                       >
-                        <h4 className="font-bold text-zinc-800 dark:text-white text-[12px] flex items-start leading-snug">
-                          <span className="text-brand-primary mr-1.5 flex-shrink-0">Q.</span>
+                        <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-brand-primary text-xs flex items-start leading-snug">
                           {item.q}
                         </h4>
-                        <svg
-                          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-                          className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-zinc-400 dark:text-zinc-600 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                        >
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
+                        <ChevronDown
+                          className={`w-4 h-4 shrink-0 text-zinc-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                        />
                       </button>
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
-                      >
-                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium px-4 pb-3 pt-1 border-l-2 border-zinc-100 dark:border-white/10 ml-3.5">
+
+                      {isOpen && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal pt-2 pr-4 pl-1">
                           {item.a}
                         </p>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
@@ -153,21 +163,17 @@ const HelpSection: React.FC = () => {
         </div>
       )}
 
-      {/* Support Action */}
-      <div className="mt-8 p-6 bg-zinc-900 dark:bg-[#030303] border border-zinc-800 dark:border-white/5 rounded-2xl text-center relative overflow-hidden group">
-        <h3 className="text-white text-[15px] font-black mb-2 relative z-10 tracking-tight">Need further assistance?</h3>
-        <p className="text-zinc-400 mb-5 relative z-10 text-[11px] font-medium">Reach out to our support team for any other queries.</p>
+      {/* Contact Support Callout */}
+      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200/60 dark:border-white/[0.05] flex items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <h4 className="text-xs font-semibold text-zinc-900 dark:text-white">Still have questions?</h4>
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Our engineering and student support team is here to help.</p>
+        </div>
         <a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=anunayarvind@gmail.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center space-x-2 bg-white text-black px-6 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wider hover:bg-brand-primary hover:text-white active:scale-95 transition-all relative z-10"
+          href="mailto:anunayarvind@gmail.com"
+          className="px-3.5 py-1.5 rounded-xl bg-brand-primary hover:opacity-90 text-white text-xs font-semibold shrink-0 text-decoration-none transition-all active:scale-95"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-            <polyline points="22,6 12,13 2,6" />
-          </svg>
-          <span>Email Support</span>
+          Email Us
         </a>
       </div>
     </div>
@@ -175,4 +181,3 @@ const HelpSection: React.FC = () => {
 };
 
 export default HelpSection;
-

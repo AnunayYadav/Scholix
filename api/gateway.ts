@@ -146,7 +146,7 @@ export default async function handler(req: any, res: any) {
       let isAuthorized = false;
 
       // 1. Secret Passcode Hash Verification (Only against configured environment variable)
-      if (expectedHash && adminPinHash && adminPinHash === expectedHash) {
+      if (expectedHash && adminPinHash && adminPinHash.trim().toLowerCase() === expectedHash.trim().toLowerCase()) {
         isAuthorized = true;
       }
 
@@ -275,7 +275,8 @@ export default async function handler(req: any, res: any) {
         topPagesRes,
         eventsRes,
         dailyMetricsRes,
-        studyAnalyticsRes
+        studyAnalyticsRes,
+        allPagesRes
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('system_metrics').select('metric_key, count, unique_visitors').eq('metric_type', 'site'),
@@ -283,10 +284,11 @@ export default async function handler(req: any, res: any) {
         supabase.from('feedback').select('*', { count: 'exact', head: true }),
         supabase.from('questions').select('*', { count: 'exact', head: true }),
         supabase.from('exam_papers').select('*', { count: 'exact', head: true }),
-        supabase.from('system_metrics').select('metric_key, count, unique_visitors, last_triggered').eq('metric_type', 'page').order('count', { ascending: false }).limit(20),
+        supabase.from('system_metrics').select('metric_key, count, unique_visitors, last_triggered').eq('metric_type', 'page').order('count', { ascending: false }).limit(25),
         supabase.from('system_metrics').select('metric_key, count, last_triggered').eq('metric_type', 'event').order('count', { ascending: false }).limit(20),
         supabase.from('system_metrics').select('metric_key, count, unique_visitors').eq('metric_type', 'daily').order('metric_key', { ascending: false }).limit(30),
-        supabase.from('study_analytics').select('pdf_study_time, quiz_study_time, questions_attempted, files_accessed, cgpa_calculations, attendance_updates, resumes_analyzed, recent_activities')
+        supabase.from('study_analytics').select('pdf_study_time, quiz_study_time, questions_attempted, files_accessed, cgpa_calculations, attendance_updates, resumes_analyzed, recent_activities'),
+        supabase.from('system_metrics').select('count').eq('metric_type', 'page')
       ]);
 
       const siteMetrics = siteMetricsRes.data || [];
@@ -308,7 +310,9 @@ export default async function handler(req: any, res: any) {
         last_triggered: p.last_triggered
       }));
 
-      const totalViews = pageStats.reduce((sum: number, p: any) => sum + (Number(p.views) || 0), 0) || rawHits;
+      const allPagesTotalViews = (allPagesRes.data || []).reduce((acc: number, curr: any) => acc + (Number(curr.count) || 0), 0);
+      const topPagesViews = pageStats.reduce((sum: number, p: any) => sum + (Number(p.views) || 0), 0);
+      const totalViews = Math.max(rawHits, allPagesTotalViews, topPagesViews);
 
       const eventStats = (eventsRes.data || []).map((e: any) => ({
         event_name: e.metric_key,

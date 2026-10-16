@@ -96,10 +96,21 @@ const AboutUs: React.FC<AboutUsProps> = ({ userProfile }) => {
 
   return (
     <div className="w-full space-y-6 animate-fade-in pb-12">
-      {/* Hero Header Removed (Managed by SettingsHub) */}
-      <div className="flex flex-col items-center justify-center gap-4 mb-6 text-center">
-        <p className="text-zinc-500 dark:text-zinc-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.4em]">The New Era of Scholix</p>
-      </div>
+      {/* Dedicated Clean Premium Header */}
+      <header className="pb-5 border-b border-zinc-200/60 dark:border-white/[0.06] text-left">
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary inline-block animate-pulse" />
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            About Scholix
+          </p>
+        </div>
+        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          Platform & <span className="text-brand-primary">University Mission</span>
+        </h1>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal mt-0.5">
+          Empowering university students with unified academic tools, intelligence, and community resources.
+        </p>
+      </header>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-6 md:p-8 rounded-[32px] bg-zinc-50 dark:bg-[#111111] space-y-4 transition-all">
