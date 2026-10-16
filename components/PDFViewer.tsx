@@ -82,6 +82,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const [progressPercent, setProgressPercent] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
 
+    // Reading Progress & Auto-Resume State
+    const targetFileId = fileId || file?.id;
+    const [hasRestoredPage, setHasRestoredPage] = useState(false);
+    const lastSavedProgress = useRef(0);
+    const lastSavedPage = useRef(1);
+
     // Search State
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -554,6 +560,112 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
             pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, [numPages]);
+
+    // 1. Fetch initial progress and last read page from Supabase / localStorage
+    useEffect(() => {
+        if (!targetFileId) return;
+
+        let active = true;
+        const loadInitialProgress = async () => {
+            // Local storage first for instantaneous recall
+            try {
+                const localCached = localStorage.getItem(`scholix_doc_progress_${targetFileId}`);
+                if (localCached && active) {
+                    const parsed = JSON.parse(localCached);
+                    if (parsed.last_read_page) {
+                        lastSavedPage.current = parsed.last_read_page;
+                        lastSavedProgress.current = parsed.progress_percentage || 0;
+                        setProgressPercent(parsed.progress_percentage || 0);
+                    }
+                }
+            } catch {}
+
+            if (userProfile?.id) {
+                try {
+                    const data = await NexusServer.fetchDocumentProgress(targetFileId);
+                    if (data && active) {
+                        setProgressPercent(data.progress_percentage || 0);
+                        lastSavedProgress.current = data.progress_percentage || 0;
+                        if (data.last_read_page) {
+                            lastSavedPage.current = data.last_read_page;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error loading initial document progress:", e);
+                }
+            }
+        };
+
+        loadInitialProgress();
+        return () => {
+            active = false;
+        };
+    }, [targetFileId, userProfile?.id]);
+
+    // 2. Restore reading scroll position once pdfDoc is loaded
+    useEffect(() => {
+        if (pdfDoc && !hasRestoredPage && targetFileId) {
+            const restorePage = async () => {
+                try {
+                    let pageToRestore = lastSavedPage.current;
+                    if (!pageToRestore || pageToRestore <= 1) {
+                        if (userProfile?.id) {
+                            const data = await NexusServer.fetchDocumentProgress(targetFileId);
+                            if (data && data.last_read_page && data.last_read_page > 1) {
+                                pageToRestore = data.last_read_page;
+                            }
+                        }
+                    }
+
+                    if (pageToRestore > 1) {
+                        setTimeout(() => {
+                            jumpToPage(pageToRestore);
+                            showToast(`Resumed from Page ${pageToRestore}`, 'info');
+                        }, 500);
+                    }
+                    setHasRestoredPage(true);
+                } catch (e) {
+                    console.error("Error restoring page position:", e);
+                    setHasRestoredPage(true);
+                }
+            };
+            restorePage();
+        }
+    }, [pdfDoc, targetFileId, userProfile?.id, hasRestoredPage, jumpToPage]);
+
+    // 3. Debounced tracking of page scroll to save reading progress
+    useEffect(() => {
+        if (!targetFileId || numPages <= 0) return;
+
+        const calculatedProgress = Math.round((currentPage / numPages) * 100);
+
+        const delayDbSave = setTimeout(async () => {
+            if (calculatedProgress !== lastSavedProgress.current || currentPage !== lastSavedPage.current) {
+                lastSavedProgress.current = calculatedProgress;
+                lastSavedPage.current = currentPage;
+
+                // Save locally
+                try {
+                    localStorage.setItem(`scholix_doc_progress_${targetFileId}`, JSON.stringify({
+                        progress_percentage: calculatedProgress,
+                        last_read_page: currentPage,
+                        updated_at: new Date().toISOString()
+                    }));
+                } catch {}
+
+                // Save to cloud database for authenticated student
+                if (userProfile?.id) {
+                    try {
+                        await NexusServer.updateDocumentProgress(targetFileId, calculatedProgress, currentPage);
+                    } catch (e) {
+                        console.error("Failed to save document reading progress:", e);
+                    }
+                }
+            }
+        }, 1500);
+
+        return () => clearTimeout(delayDbSave);
+    }, [currentPage, numPages, targetFileId, userProfile?.id]);
 
     // In-document Search Engine
     const performSearch = useCallback(async () => {
