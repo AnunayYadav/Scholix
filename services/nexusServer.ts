@@ -1161,9 +1161,19 @@ class NexusServer {
         activeStudentsTracked: studyRows.length
       });
 
+      const dailyMetrics = metrics.filter(m => m.metric_type === 'daily');
+      const dailyTrend = dailyMetrics
+        .sort((a, b) => (a.metric_key || '').localeCompare(b.metric_key || ''))
+        .map(d => ({
+          date: d.metric_key,
+          views: Number(d.count) || 0,
+          visitors: Number(d.unique_visitors) || 0
+        }));
+
       return {
         pageStats,
         eventStats,
+        dailyTrend,
         cumulativeStudyStats,
         summary: {
           registered: reg.count || 0,

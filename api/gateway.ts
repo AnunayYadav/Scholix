@@ -289,7 +289,7 @@ export default async function handler(req: any, res: any) {
         supabase.from('exam_papers').select('*', { count: 'exact', head: true }),
         supabase.from('system_metrics').select('metric_key, count, unique_visitors, last_triggered').eq('metric_type', 'page').order('count', { ascending: false }).limit(25),
         supabase.from('system_metrics').select('metric_key, count, last_triggered').eq('metric_type', 'event').order('count', { ascending: false }).limit(20),
-        supabase.from('system_metrics').select('metric_key, count, unique_visitors').eq('metric_type', 'daily').order('metric_key', { ascending: false }).limit(30),
+        supabase.from('system_metrics').select('metric_key, count, unique_visitors').eq('metric_type', 'daily').order('metric_key', { ascending: false }).limit(365),
         supabase.from('study_analytics').select('pdf_study_time, quiz_study_time, questions_attempted, files_accessed, cgpa_calculations, attendance_updates, resumes_analyzed, recent_activities'),
         supabase.from('system_metrics').select('count').eq('metric_type', 'page')
       ]);
