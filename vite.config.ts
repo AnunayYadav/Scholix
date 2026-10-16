@@ -14,9 +14,17 @@ function apiDevPlugin(): Plugin {
           return next();
         }
 
-        const urlPath = req.url.split('?')[0];
+        const parsedUrl = new URL(req.url, 'http://localhost');
+        const urlPath = parsedUrl.pathname;
         const apiName = urlPath.replace('/api/', '');
         const handlerFile = path.resolve(__dirname, `api/${apiName}.ts`);
+
+        // Populate req.query object for Vercel handler compatibility
+        const query: Record<string, string> = {};
+        parsedUrl.searchParams.forEach((value, key) => {
+          query[key] = value;
+        });
+        req.query = query;
 
         try {
           if (!fs.existsSync(handlerFile)) {

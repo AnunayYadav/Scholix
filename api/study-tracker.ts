@@ -1,6 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 
+// Robust environment variable loader for serverless API handlers
+function getEnv(key: string): string {
+  if (process.env[key]) return process.env[key] as string;
+  try {
+    const envPath = path.resolve(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const match = content.match(new RegExp(`^${key}=(.*)$`, 'm'));
+      if (match) return match[1].trim().replace(/^["']|["']$/g, '');
+    }
+  } catch (e) {}
+  return '';
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -13,8 +28,8 @@ export default async function handler(req: any, res: any) {
   }
   const token = authHeader.split(' ')[1];
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = getEnv('SUPABASE_URL') || getEnv('VITE_SUPABASE_URL');
+  const supabaseServiceKey = getEnv('SUPABASE_SERVICE_ROLE_KEY') || getEnv('VITE_SUPABASE_ANON_KEY');
 
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Study Tracker API: Configuration missing');
@@ -114,14 +129,26 @@ export default async function handler(req: any, res: any) {
       const targetId = targetUserId || userId;
 
       if (targetId !== userId) {
-        // Check if requester is admin
-        const { data: requesterProfile, error: reqErr } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', userId)
-          .maybeSingle();
-        
-        if (reqErr || !requesterProfile?.is_admin) {
+        // Check if requester is admin via passcode hash or Supabase profile
+        const adminPinHash = req.headers['x-admin-passcode-hash'];
+        const expectedHash = getEnv('ADMIN_PASSCODE_HASH') || getEnv('VITE_ADMIN_PASSCODE_HASH');
+        let isAdmin = false;
+
+        if (expectedHash && adminPinHash && adminPinHash === expectedHash) {
+          isAdmin = true;
+        } else {
+          const { data: requesterProfile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', userId)
+            .maybeSingle();
+
+          if (requesterProfile?.is_admin) {
+            isAdmin = true;
+          }
+        }
+
+        if (!isAdmin) {
           return res.status(403).json({ error: 'Forbidden: Admin privileges required' });
         }
       }

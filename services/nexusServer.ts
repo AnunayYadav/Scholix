@@ -1045,15 +1045,28 @@ class NexusServer {
   static async getDetailedStats(): Promise<{ 
     pageStats: any[], 
     eventStats: any[],
+    dailyTrend?: any[],
+    cumulativeStudyStats?: any,
     summary: {
       registered: number,
       visitors: number,
       totalViews: number,
       rawHits: number,
       pendingReports: number,
-      totalFeedback: number
+      totalFeedback: number,
+      totalQuestions?: number,
+      totalPapers?: number
     }
   }> {
+    try {
+      const response = await fetch('/api/gateway?action=admin-detailed-stats');
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e) {
+      console.warn("Direct admin-detailed-stats fetch failed, attempting client fallback:", e);
+    }
+
     const client = getSupabase();
     if (!client) return { 
       pageStats: [], 
@@ -1061,37 +1074,210 @@ class NexusServer {
       summary: { registered: 0, visitors: 0, totalViews: 0, rawHits: 0, pendingReports: 0, totalFeedback: 0 } 
     };
 
-    const fetchCount = async (table: string) => {
-      try {
-        const { count, error } = await client.from(table).select('*', { count: 'exact', head: true });
-        return count || 0;
-      } catch (e) {
-        return 0;
+    try {
+      const [metricsRes, reg, reports, feedback, questions, papers, studyAnalyticsRes] = await Promise.all([
+        client.from('system_metrics').select('*').limit(500),
+        client.from('profiles').select('*', { count: 'exact', head: true }),
+        client.from('question_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        client.from('feedback').select('*', { count: 'exact', head: true }),
+        client.from('questions').select('*', { count: 'exact', head: true }),
+        client.from('exam_papers').select('*', { count: 'exact', head: true }),
+        client.from('study_analytics').select('pdf_study_time, quiz_study_time, questions_attempted, files_accessed, cgpa_calculations, attendance_updates, resumes_analyzed, recent_activities')
+      ]);
+
+      const metrics = metricsRes.data || [];
+      const siteMetrics = metrics.filter(m => m.metric_type === 'site');
+      const pageMetrics = metrics.filter(m => m.metric_type === 'page');
+      const eventMetrics = metrics.filter(m => m.metric_type === 'event');
+
+      const viewsMetric = siteMetrics.find(m => m.metric_key === 'views');
+      const visitsMetric = siteMetrics.find(m => m.metric_key === 'visits');
+
+      const rawHits = viewsMetric ? Number(viewsMetric.count) : 0;
+      const visitors = visitsMetric ? Number(visitsMetric.count) : 0;
+      const totalViews = pageMetrics.reduce((s, p) => s + (Number(p.count) || 0), 0) || rawHits;
+
+      const pageStats = pageMetrics
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))
+        .slice(0, 25)
+        .map(p => ({
+          path: p.metric_key,
+          views: p.count,
+          unique_visitors: p.unique_visitors,
+          last_triggered: p.last_triggered
+        }));
+
+      const eventStats = eventMetrics
+        .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))
+        .map(e => ({
+          event_name: e.metric_key,
+          count: e.count,
+          last_triggered: e.last_triggered
+        }));
+
+      const studyRows = studyAnalyticsRes.data || [];
+      const cumulativeStudyStats = studyRows.reduce((acc: any, row: any) => {
+        acc.totalPdfTime += Number(row.pdf_study_time) || 0;
+        acc.totalQuizTime += Number(row.quiz_study_time) || 0;
+        acc.totalQuestionsAttempted += Number(row.questions_attempted) || 0;
+        acc.totalFilesAccessed += Number(row.files_accessed) || 0;
+        acc.totalCgpaCalculations += Number(row.cgpa_calculations) || 0;
+        acc.totalAttendanceUpdates += Number(row.attendance_updates) || 0;
+        acc.totalResumesAnalyzed += Number(row.resumes_analyzed) || 0;
+        acc.totalActivities += Array.isArray(row.recent_activities) ? row.recent_activities.length : 0;
+        return acc;
+      }, {
+        totalPdfTime: 0,
+        totalQuizTime: 0,
+        totalQuestionsAttempted: 0,
+        totalFilesAccessed: 0,
+        totalCgpaCalculations: 0,
+        totalAttendanceUpdates: 0,
+        totalResumesAnalyzed: 0,
+        totalActivities: 0,
+        activeStudentsTracked: studyRows.length
+      });
+
+      return {
+        pageStats,
+        eventStats,
+        cumulativeStudyStats,
+        summary: {
+          registered: reg.count || 0,
+          visitors,
+          totalViews,
+          rawHits,
+          pendingReports: reports.count || 0,
+          totalFeedback: feedback.count || 0,
+          totalQuestions: questions.count || 0,
+          totalPapers: papers.count || 0
+        }
+      };
+    } catch (err) {
+      console.error("getDetailedStats client fallback error:", err);
+      return { 
+        pageStats: [], 
+        eventStats: [], 
+        summary: { registered: 0, visitors: 0, totalViews: 0, rawHits: 0, pendingReports: 0, totalFeedback: 0 } 
+      };
+    }
+  }
+
+  static async createQuestion(questionData: any): Promise<any> {
+    try {
+      const res = await fetch('/api/gateway?action=admin-save-question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-passcode-hash': sessionStorage.getItem('admin_passcode_hash') || import.meta.env.VITE_ADMIN_PASSCODE_HASH || ''
+        },
+        body: JSON.stringify(questionData)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.question;
       }
+    } catch (e) {
+      console.warn("Gateway admin-save-question failed, attempting client fallback:", e);
+    }
+
+    const client = getSupabase();
+    if (!client) throw new Error("Database client unavailable");
+
+    const isSubj = (questionData.questionType === 'Subjective' || questionData.type === 'subjective');
+    const row: any = {
+      question: questionData.question,
+      subject: (questionData.subject || '').toUpperCase().trim(),
+      unit: questionData.unit ? String(questionData.unit).trim() : '1',
+      topic: questionData.topic || '',
+      options: isSubj ? [] : (Array.isArray(questionData.options) ? questionData.options : []),
+      correct_answer: isSubj ? '' : (questionData.correctAnswer !== undefined ? Number(questionData.correctAnswer) : (questionData.correct_answer !== undefined ? Number(questionData.correct_answer) : 0)),
+      explanation: questionData.explanation || '',
+      difficulty: questionData.difficulty || 'medium',
+      type: isSubj ? 'subjective' : (questionData.type || 'mcq'),
+      question_type: isSubj ? 'Subjective' : (questionData.questionType || questionData.question_type || 'MCQ'),
+      starter_code: questionData.starterCode || questionData.starter_code || null,
+      test_cases: Array.isArray(questionData.testCases) ? questionData.testCases : (Array.isArray(questionData.test_cases) ? questionData.test_cases : []),
+      is_official: questionData.is_official ?? false
     };
 
-    const [pages, events, reg, vis, raw, reports, feedback] = await Promise.all([
-      client.from('page_stats').select('*').order('views', { ascending: false }),
-      client.from('event_stats').select('*').order('count', { ascending: false }),
-      client.from('profiles').select('*', { count: 'exact', head: true }),
-      client.from('site_visits').select('*', { count: 'exact', head: true }),
-      fetchCount('site_views'),
-      client.from('question_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      client.from('feedback').select('*', { count: 'exact', head: true })
-    ]);
+    if (questionData.id && String(questionData.id).trim() !== '') {
+      row.id = String(questionData.id).trim();
+    }
 
-    return {
-      pageStats: pages.data || [],
-      eventStats: events.data || [],
-      summary: {
-        registered: reg.count || 0,
-        visitors: vis.count || 0,
-        totalViews: (pages.data || []).reduce((acc: number, curr: any) => acc + Number(curr.views), 0),
-        rawHits: raw,
-        pendingReports: reports.count || 0,
-        totalFeedback: feedback.count || 0
+    const { data, error } = await client.from('questions').insert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateQuestion(questionData: any): Promise<any> {
+    try {
+      const res = await fetch('/api/gateway?action=admin-save-question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-passcode-hash': sessionStorage.getItem('admin_passcode_hash') || import.meta.env.VITE_ADMIN_PASSCODE_HASH || ''
+        },
+        body: JSON.stringify(questionData)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.question;
       }
+    } catch (e) {
+      console.warn("Gateway admin-save-question failed, attempting client fallback:", e);
+    }
+
+    const client = getSupabase();
+    if (!client) throw new Error("Database client unavailable");
+
+    const isSubjUpdate = (questionData.questionType === 'Subjective' || questionData.type === 'subjective');
+    const row: any = {
+      question: questionData.question,
+      subject: (questionData.subject || '').toUpperCase().trim(),
+      unit: questionData.unit ? String(questionData.unit).trim() : '1',
+      topic: questionData.topic || '',
+      options: isSubjUpdate ? [] : (Array.isArray(questionData.options) ? questionData.options : []),
+      correct_answer: isSubjUpdate ? '' : (questionData.correctAnswer !== undefined ? Number(questionData.correctAnswer) : (questionData.correct_answer !== undefined ? Number(questionData.correct_answer) : 0)),
+      explanation: questionData.explanation || '',
+      difficulty: questionData.difficulty || 'medium',
+      type: isSubjUpdate ? 'subjective' : (questionData.type || 'mcq'),
+      question_type: isSubjUpdate ? 'Subjective' : (questionData.questionType || questionData.question_type || 'MCQ'),
+      starter_code: questionData.starterCode || questionData.starter_code || null,
+      test_cases: Array.isArray(questionData.testCases) ? questionData.testCases : (Array.isArray(questionData.test_cases) ? questionData.test_cases : []),
+      is_official: questionData.is_official ?? false
     };
+
+    if (questionData.id) {
+      row.id = String(questionData.id).trim();
+    }
+
+    const { data, error } = await client.from('questions').upsert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  static async searchAdminQuestions(query: string, subject?: string): Promise<any[]> {
+    try {
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (subject) params.set('subject', subject);
+      const res = await fetch(`/api/gateway?action=admin-search-questions&${params.toString()}`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn("Gateway admin-search-questions failed, attempting client fallback:", e);
+    }
+
+    const client = getSupabase();
+    if (!client) return [];
+
+    let q = client.from('questions').select('*').limit(30);
+    if (subject) q = q.eq('subject', subject.toUpperCase().trim());
+    if (query) q = q.or(`question.ilike.%${query}%,topic.ilike.%${query}%`);
+    const { data } = await q.order('id', { ascending: false });
+    return data || [];
   }
 
   static async resolveEmailByUsername(username: string): Promise<string | null> {
@@ -1444,6 +1630,11 @@ class NexusServer {
     if (!client || !userId) return;
 
     const { registration_number, email, ...profileUpdates } = updates as any;
+    // Security defense: never allow client-side modification of privileges or xp
+    delete profileUpdates.is_admin;
+    delete profileUpdates.is_verified;
+    delete profileUpdates.total_xp;
+    delete profileUpdates.level;
 
     if (Object.keys(profileUpdates).length > 0) {
       const { error } = await client.from('profiles').update(profileUpdates).eq('id', userId);
@@ -2591,20 +2782,19 @@ class NexusServer {
     return data?.[0];
   }
 
-  // Legacy/Shortcut wrappers
-  static async updateQuestion(q: QuizQuestion) {
-      return this.saveQuestion(q);
-  }
-
-  static async createQuestion(q: Partial<QuizQuestion>) {
-      return this.saveQuestion(q);
-  }
-
   static async fetchQuestionReports() {
+    try {
+      const response = await fetch('/api/gateway?action=admin-reports');
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e) {
+      console.warn("Direct admin-reports fetch failed, attempting client fallback:", e);
+    }
+
     const client = getSupabase();
     if (!client) return [];
     try {
-      // Direct fetch without joins which often fail due to Postgres FK constraints in Edge Functions
       const { data: reportsData, error: reportsError } = await client
         .from('question_reports')
         .select('*')
@@ -2615,7 +2805,6 @@ class NexusServer {
       const reports = reportsData || [];
       if (reports.length === 0) return [];
 
-      // 1. Fetch related questions
       const questionIds = [...new Set(reports.map((r: any) => r.question_id).filter((id: any) => !!id))];
       const questionsMap = new Map();
       if (questionIds.length > 0) {
@@ -2625,7 +2814,6 @@ class NexusServer {
         }
       }
 
-      // 2. Fetch related profiles (reporters)
       const userIds = [...new Set(reports.map((r: any) => r.user_id).filter((id: any) => !!id))];
       const profilesMap = new Map();
       if (userIds.length > 0) {
@@ -2635,7 +2823,6 @@ class NexusServer {
         }
       }
 
-      // 3. Assemble
       return reports.map((r: any) => ({
         ...r,
         question: questionsMap.get(r.question_id) || null,
@@ -2648,6 +2835,17 @@ class NexusServer {
   }
 
   static async updateReportStatus(reportId: string, status: string) {
+    try {
+      const response = await fetch('/api/gateway?action=admin-resolve-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportId, status })
+      });
+      if (response.ok) return;
+    } catch (e) {
+      console.warn("Direct resolve-report call failed, using client fallback:", e);
+    }
+
     const client = getSupabase();
     if (!client) return;
     const { error } = await client
@@ -2655,12 +2853,22 @@ class NexusServer {
       .update({ status })
       .eq('id', reportId);
     if (error) {
-      console.error('Update Report Status Error:', error);
+      console.error('Update report status error:', error);
       throw error;
     }
   }
 
   static async fetchFeedback() {
+    try {
+      const response = await fetch('/api/gateway?action=admin-feedback');
+      if (response.ok) {
+        const feedbackData = await response.json();
+        return feedbackData || [];
+      }
+    } catch (e) {
+      console.warn("Direct admin-feedback fetch failed, using fallback:", e);
+    }
+
     const client = getSupabase();
     if (!client) return [];
     
@@ -2952,24 +3160,62 @@ class NexusServer {
 
     try {
       const { data: { session } } = await client.auth.getSession();
-      if (!session) throw new Error("No active session found.");
+      const adminPinHash = sessionStorage.getItem('admin_passcode_hash') || import.meta.env.VITE_ADMIN_PASSCODE_HASH || '';
+      const isVerified = sessionStorage.getItem('admin_stats_verified') === 'true';
+
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      if (isVerified && adminPinHash) {
+        headers['x-admin-passcode-hash'] = adminPinHash;
+      }
 
       const response = await fetch('/api/gateway?action=admin-profiles', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
+        headers
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to fetch administrative profiles.");
+        throw new Error(`Gateway returned HTTP ${response.status}`);
       }
 
       return await response.json();
     } catch (error: any) {
-      console.error('Fetch All Profiles Error:', error);
-      return [];
+      console.warn('Fetch All Profiles gateway warning, falling back to direct Supabase query:', error);
+      try {
+        const [profilesRes, studyRes] = await Promise.all([
+          client
+            .from('profiles')
+            .select('id, username, avatar_url, is_admin, total_xp, level, current_streak, longest_streak, last_active_date, updated_at')
+            .order('username', { ascending: true }),
+          client.from('study_analytics').select('*')
+        ]);
+        if (profilesRes.error) throw profilesRes.error;
+        const studyMap = new Map<string, any>();
+        (studyRes.data || []).forEach((s: any) => studyMap.set(s.user_id, s));
+
+        return (profilesRes.data || []).map((p: any) => {
+          const study = studyMap.get(p.id) || {};
+          const pdfStudyTime = Number(study.pdf_study_time) || 0;
+          const quizStudyTime = Number(study.quiz_study_time) || 0;
+          return {
+            ...p,
+            created_at: p.updated_at,
+            study_time: pdfStudyTime + quizStudyTime,
+            pdf_study_time: pdfStudyTime,
+            quiz_study_time: quizStudyTime,
+            files_accessed: Number(study.files_accessed) || 0,
+            questions_attempted: Number(study.questions_attempted) || 0,
+            cgpa_calculations: Number(study.cgpa_calculations) || 0,
+            attendance_updates: Number(study.attendance_updates) || 0,
+            resumes_analyzed: Number(study.resumes_analyzed) || 0
+          };
+        });
+      } catch (innerError) {
+        console.error('Direct fallback profiles fetch error:', innerError);
+        return [];
+      }
     }
   }
 
@@ -3082,7 +3328,7 @@ class NexusServer {
       client.from('feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20),
       this.fetchStudyStats(userId)
     ]);
-    const profile = profileRes.data ? { ...profileRes.data, ...(privateRes.data || {}) } : null;
+    const profile = { id: userId, ...(profileRes.data || {}), ...(privateRes.data || {}) };
 
     // Aggregate stats from studyStats directly
     const stats = {
@@ -3110,27 +3356,43 @@ class NexusServer {
     try {
       const sessionRes = await this.getSession();
       const token = sessionRes?.data?.session?.access_token;
-      if (!token) return null;
+      const sessionPasscodeHash = typeof window !== 'undefined' ? sessionStorage.getItem('admin_passcode_hash') : null;
 
-      const response = await fetch('/api/study-tracker', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'get_stats',
-          targetUserId
-        })
-      });
+      if (token) {
+        const response = await fetch('/api/study-tracker', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            ...(sessionPasscodeHash ? { 'x-admin-passcode-hash': sessionPasscodeHash } : {})
+          },
+          body: JSON.stringify({
+            action: 'get_stats',
+            targetUserId
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch study statistics');
+        if (response.ok) {
+          return await response.json();
+        }
       }
 
-      return await response.json();
+      // Direct fallback if API response wasn't ok or token missing
+      const client = getSupabase();
+      if (client && targetUserId) {
+        const { data } = await client.from('study_analytics').select('*').eq('user_id', targetUserId).maybeSingle();
+        if (data) return data;
+      }
+      return null;
     } catch (e) {
-      console.error('[NexusServer] fetchStudyStats failed:', e);
+      console.error('[NexusServer] fetchStudyStats error, falling back to direct query:', e);
+      try {
+        const client = getSupabase();
+        if (client && targetUserId) {
+          const { data } = await client.from('study_analytics').select('*').eq('user_id', targetUserId).maybeSingle();
+          if (data) return data;
+        }
+      } catch (err) {}
       return null;
     }
   }
