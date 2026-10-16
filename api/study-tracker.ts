@@ -49,7 +49,7 @@ export default async function handler(req: any, res: any) {
 
     const userId = user.id;
 
-    const { action, pdfStudyTime, quizStudyTime, questionsAttempted, resumesAnalyzed, correctQuestions, wrongQuestions, targetUserId } = req.body || {};
+    const { action, pdfStudyTime, quizStudyTime, questionsAttempted, resumesAnalyzed, correctQuestions, wrongQuestions, filesAccessed, targetUserId } = req.body || {};
 
     if (action === 'increment') {
       const pdfInc = Number(pdfStudyTime) || 0;
@@ -58,8 +58,9 @@ export default async function handler(req: any, res: any) {
       const resumesInc = Number(resumesAnalyzed) || 0;
       const correctInc = Number(correctQuestions) || 0;
       const wrongInc = Number(wrongQuestions) || 0;
+      const filesInc = Number(filesAccessed) || 0;
 
-      if (pdfInc === 0 && quizInc === 0 && questionsInc === 0 && resumesInc === 0 && correctInc === 0 && wrongInc === 0) {
+      if (pdfInc === 0 && quizInc === 0 && questionsInc === 0 && resumesInc === 0 && correctInc === 0 && wrongInc === 0 && filesInc === 0) {
         return res.status(200).json({ success: true, message: 'No increments provided.' });
       }
 
@@ -94,6 +95,7 @@ export default async function handler(req: any, res: any) {
             resumes_analyzed: Math.max(0, resumesInc),
             correct_questions: Math.max(0, correctInc),
             wrong_questions: Math.max(0, wrongInc),
+            files_accessed: Math.max(0, filesInc),
             username: username,
             email: email
           })
@@ -113,6 +115,7 @@ export default async function handler(req: any, res: any) {
             resumes_analyzed: Math.max(0, (existing.resumes_analyzed || 0) + resumesInc),
             correct_questions: Math.max(0, (existing.correct_questions || 0) + correctInc),
             wrong_questions: Math.max(0, (existing.wrong_questions || 0) + wrongInc),
+            files_accessed: Math.max(0, (existing.files_accessed || 0) + filesInc),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId)

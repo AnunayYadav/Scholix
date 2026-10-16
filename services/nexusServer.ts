@@ -3424,6 +3424,35 @@ class NexusServer {
     }
   }
 
+  static async recordFileAccess(fileDetails: {
+    fileId?: string;
+    fileName: string;
+    subject?: string;
+    category?: string;
+    url?: string;
+    fileType?: string;
+  }, userId?: string | null): Promise<any> {
+    try {
+      const sessionRes = await this.getSession();
+      const uid = userId || sessionRes?.data?.session?.user?.id || null;
+      const cleanDetails = {
+        fileId: fileDetails.fileId || null,
+        fileName: fileDetails.fileName,
+        subject: fileDetails.subject || null,
+        category: fileDetails.category || null,
+        url: fileDetails.url || null,
+        fileType: fileDetails.fileType || (fileDetails.fileName?.split('.').pop() || 'pdf').toLowerCase(),
+        accessedAt: new Date().toISOString()
+      };
+
+      // saveRecord saves in recent_activities and increments files_accessed in study_analytics
+      return await this.saveRecord(uid, 'file_access', fileDetails.fileName, cleanDetails);
+    } catch (e) {
+      console.warn('[NexusServer] recordFileAccess warning:', e);
+      return null;
+    }
+  }
+
   static async incrementStudyStats(params: {
     pdfStudyTime?: number;
     quizStudyTime?: number;
@@ -3431,6 +3460,7 @@ class NexusServer {
     resumesAnalyzed?: number;
     correctQuestions?: number;
     wrongQuestions?: number;
+    filesAccessed?: number;
   }) {
     try {
       const sessionRes = await this.getSession();
@@ -3450,7 +3480,8 @@ class NexusServer {
           questionsAttempted: params.questionsAttempted || 0,
           resumesAnalyzed: params.resumesAnalyzed || 0,
           correctQuestions: params.correctQuestions || 0,
-          wrongQuestions: params.wrongQuestions || 0
+          wrongQuestions: params.wrongQuestions || 0,
+          filesAccessed: params.filesAccessed || 0
         })
       });
 

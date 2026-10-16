@@ -2174,55 +2174,134 @@ const AdminStats: React.FC<AdminStatsProps> = ({ userProfile }) => {
                             </tr>
 
                             {/* Expanded User Details Drawer */}
-                            {selectedUserActivity?.profile?.id === u.id && (
-                              <tr>
-                                <td colSpan={6} className="p-4 sm:p-5 bg-zinc-50/70 dark:bg-white/[0.01] border-y border-zinc-200/40 dark:border-white/[0.05]">
-                                  <div className="space-y-4">
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                      <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
-                                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Tests Completed</p>
-                                        <p className="text-base font-bold text-orange-600 dark:text-orange-400">
-                                          {selectedUserActivity.historyStats?.quizzesCompleted || 0}
-                                        </p>
-                                      </div>
-                                      <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
-                                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Study Focus Time</p>
-                                        <p className="text-base font-bold text-blue-600 dark:text-blue-400">
-                                          {((selectedUserActivity.historyStats?.studyTime || 0) / 3600).toFixed(1)} hrs
-                                        </p>
-                                      </div>
-                                      <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
-                                        <p className="text-[10px] text-zinc-400 uppercase font-bold">PDFs Opened</p>
-                                        <p className="text-base font-bold text-purple-600 dark:text-purple-400">
-                                          {selectedUserActivity.historyStats?.filesAccessed || 0}
-                                        </p>
-                                      </div>
-                                      <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
-                                        <p className="text-[10px] text-zinc-400 uppercase font-bold">GPA Simulations</p>
-                                        <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                                          {selectedUserActivity.historyStats?.cgpaCalculations || 0}
-                                        </p>
-                                      </div>
-                                    </div>
+                            {selectedUserActivity?.profile?.id === u.id && (() => {
+                              const accessedFilesList = (selectedUserActivity.historyStats?.history || [])
+                                .filter((act: any) => act?.type === 'file_access');
+                              const displayPdfsCount = Math.max(
+                                selectedUserActivity.historyStats?.filesAccessed || 0,
+                                accessedFilesList.length
+                              );
 
-                                    <div>
-                                      <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Recent Quiz Attempts</p>
-                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                        {(selectedUserActivity.attempts || []).slice(0, 3).map((att: any, i: number) => (
-                                          <div key={i} className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05] text-xs">
-                                            <p className="font-semibold text-zinc-800 dark:text-zinc-200">{att.subject}</p>
-                                            <div className="flex justify-between items-center text-[11px] text-zinc-400 mt-1">
-                                              <span>Score: {Math.round((att.score / Math.max(att.total_questions, 1)) * 100)}%</span>
-                                              <span className="text-emerald-500 font-semibold">+{att.xp_gained} XP</span>
+                              return (
+                                <tr>
+                                  <td colSpan={6} className="p-4 sm:p-5 bg-zinc-50/70 dark:bg-white/[0.01] border-y border-zinc-200/40 dark:border-white/[0.05]">
+                                    <div className="space-y-4">
+                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                        <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
+                                          <p className="text-[10px] text-zinc-400 uppercase font-bold">Tests Completed</p>
+                                          <p className="text-base font-bold text-orange-600 dark:text-orange-400">
+                                            {selectedUserActivity.historyStats?.quizzesCompleted || 0}
+                                          </p>
+                                        </div>
+                                        <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
+                                          <p className="text-[10px] text-zinc-400 uppercase font-bold">Study Focus Time</p>
+                                          <p className="text-base font-bold text-blue-600 dark:text-blue-400">
+                                            {((selectedUserActivity.historyStats?.studyTime || 0) / 3600).toFixed(1)} hrs
+                                          </p>
+                                        </div>
+                                        <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
+                                          <p className="text-[10px] text-zinc-400 uppercase font-bold">PDFs Opened</p>
+                                          <p className="text-base font-bold text-purple-600 dark:text-purple-400">
+                                            {displayPdfsCount}
+                                          </p>
+                                        </div>
+                                        <div className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05]">
+                                          <p className="text-[10px] text-zinc-400 uppercase font-bold">GPA Simulations</p>
+                                          <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+                                            {selectedUserActivity.historyStats?.cgpaCalculations || 0}
+                                          </p>
+                                        </div>
+                                      </div>
+
+                                      {/* Recent Quiz Attempts */}
+                                      <div>
+                                        <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Recent Quiz Attempts</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                          {(selectedUserActivity.attempts || []).slice(0, 3).map((att: any, i: number) => (
+                                            <div key={i} className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05] text-xs">
+                                              <p className="font-semibold text-zinc-800 dark:text-zinc-200">{att.subject}</p>
+                                              <div className="flex justify-between items-center text-[11px] text-zinc-400 mt-1">
+                                                <span>Score: {Math.round((att.score / Math.max(att.total_questions, 1)) * 100)}%</span>
+                                                <span className="text-emerald-500 font-semibold">+{att.xp_gained} XP</span>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          ))}
+                                          {(selectedUserActivity.attempts || []).length === 0 && (
+                                            <div className="col-span-full py-2.5 px-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05] text-xs text-zinc-400 italic">
+                                              No quiz attempts recorded yet.
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Accessed Documents & PDFs */}
+                                      <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                                            <BookOpen className="w-3.5 h-3.5 text-purple-500" />
+                                            <span>Accessed Documents & PDFs</span>
+                                          </p>
+                                          <span className="text-[10px] font-medium text-zinc-400">
+                                            {accessedFilesList.length} recorded
+                                          </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                          {accessedFilesList.slice(0, 6).map((fileRecord: any, i: number) => {
+                                            const details = fileRecord.content || {};
+                                            const title = details.fileName || fileRecord.label || 'Document.pdf';
+                                            const subject = details.subject || details.category || null;
+                                            const dateStr = fileRecord.created_at || details.accessedAt;
+                                            const formattedDate = dateStr
+                                              ? new Date(dateStr).toLocaleDateString(undefined, {
+                                                  month: 'short',
+                                                  day: 'numeric',
+                                                  hour: '2-digit',
+                                                  minute: '2-digit'
+                                                })
+                                              : 'Recent';
+
+                                            return (
+                                              <div key={i} className="p-3 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05] text-xs flex items-start gap-2.5">
+                                                <div className="w-7 h-7 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
+                                                  <FileText className="w-3.5 h-3.5" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                  <p className="font-semibold text-zinc-800 dark:text-zinc-200 truncate" title={title}>
+                                                    {title}
+                                                  </p>
+                                                  <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-1">
+                                                    {subject ? (
+                                                      <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-300 font-medium truncate max-w-[110px]">
+                                                        {subject}
+                                                      </span>
+                                                    ) : (
+                                                      <span className="text-zinc-500">Document</span>
+                                                    )}
+                                                    <span className="shrink-0">{formattedDate}</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+
+                                          {accessedFilesList.length === 0 && (
+                                            <div className="col-span-full py-3 px-4 rounded-2xl bg-white dark:bg-[#151518] border border-zinc-200/40 dark:border-white/[0.05] text-xs text-zinc-400 flex items-center gap-2">
+                                              <FileText className="w-4 h-4 text-zinc-400 opacity-60 shrink-0" />
+                                              <span>
+                                                {(selectedUserActivity.historyStats?.studyTime || 0) > 0
+                                                  ? `Reading session active (${((selectedUserActivity.historyStats?.studyTime || 0) / 3600).toFixed(1)} hrs recorded). Specific document titles will be listed as new documents are opened.`
+                                                  : 'No documents or PDFs opened yet.'}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
+                                  </td>
+                                </tr>
+                              );
+                            })()}
                           </React.Fragment>
                         );
                       })}

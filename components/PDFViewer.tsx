@@ -131,6 +131,31 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         return () => observer.disconnect();
     }, [numPages, pdfDoc, isDocx, isImage]);
 
+    // Record Document Access Event & File Details
+    const hasRecordedAccessRef = useRef<boolean>(false);
+    useEffect(() => {
+        if (hasRecordedAccessRef.current) return;
+        hasRecordedAccessRef.current = true;
+
+        const targetFileName = fileName || file?.name || 'Document.pdf';
+        const targetFileId = fileId || file?.id || undefined;
+        const targetSubject = (file as any)?.subject || (file as any)?.course || undefined;
+        const targetCategory = (file as any)?.category || (file as any)?.type || undefined;
+        const targetUrl = url || file?.url || (file as any)?.drive_view_url || undefined;
+        const targetExt = (targetFileName.split('.').pop() || 'pdf').toLowerCase();
+
+        NexusServer.recordFileAccess({
+            fileId: targetFileId,
+            fileName: targetFileName,
+            subject: targetSubject,
+            category: targetCategory,
+            url: targetUrl,
+            fileType: targetExt
+        }, userProfile?.id).catch(err => {
+            console.warn("Failed to record document access event:", err);
+        });
+    }, [fileId, fileName, file, url, userProfile?.id]);
+
     // Study Time Heartbeat Telemetry (30s)
     const lastTrackTimeRef = useRef<number>(Date.now());
     useEffect(() => {
